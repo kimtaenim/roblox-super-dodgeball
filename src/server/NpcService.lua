@@ -95,7 +95,7 @@ local function makeDescription()
 	return description, shirt
 end
 
--- 머리 위에 이름표를 단다. 글자 색은 윗옷 색과 같다.
+-- 머리 위에 이름표를 단다. 글자 색은 윗옷 색과 같고, 아웃되면 "(아웃)"이 붙는다.
 local function addNameTag(model, text, color)
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NameTag"
@@ -114,6 +114,12 @@ local function addNameTag(model, text, color)
 	label.TextStrokeTransparency = 0.3
 	label.Text = text
 	label.Parent = tag
+
+	-- 아웃되면 이름 옆에 "(아웃)"을 붙인다 (색은 그대로)
+	model:GetAttributeChangedSignal("Status"):Connect(function()
+		local out = model:GetAttribute("Status") == "Sitting"
+		label.Text = if out then text .. " (아웃)" else text
+	end)
 end
 
 -- NPC 머리 위에 말풍선을 잠깐 띄운다 (도플갱어 호텔 Npc.say와 같은 모양).
@@ -201,7 +207,14 @@ function NpcService.spawn(count, tutorial)
 
 		local p = Participants.addNpc(name, model)
 		p.inRound = true
-		brains[p] = { nextThinkAt = 0, throwAt = nil, target = nil, wanderAt = 0, triedCatch = {} }
+		brains[p] = {
+			nextThinkAt = 0,
+			throwAt = nil,
+			target = nil,
+			wanderAt = 0,
+			triedCatch = {},
+			chatAt = os.clock() + randomBetween(N.ChatIntervalMin, N.ChatIntervalMax),
+		}
 	end
 end
 
@@ -283,6 +296,7 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 		local lead = targetRoot.AssemblyLinearVelocity * N.LeadFactor
 		local miss = Vector3.new(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)) * N.AimError
 		BallService.throw(p, targetRoot.Position + lead + miss, randomBetween(N.HoldMin, N.HoldMax))
+		onReaction(p, "throw")
 		brain.throwAt = nil
 		brain.target = nil
 	end
@@ -343,6 +357,16 @@ local function tryCatch(p, brain)
 	end
 end
 
+-- 가끔 혼잣말을 한다 (살아 있을 때와 앉아 있을 때 하는 말이 다르다).
+local function chat(p, brain, now)
+	if now < brain.chatAt or not p.character then
+		return
+	end
+	brain.chatAt = now + randomBetween(N.ChatIntervalMin, N.ChatIntervalMax)
+	local lines = if p.state.status == "Sitting" then N.Lines.sittingChat else N.Lines.chat
+	say(p.character, pick(lines))
+end
+
 -- 매 프레임 모든 NPC를 움직인다.
 local function update()
 	if not active then
@@ -351,6 +375,7 @@ local function update()
 	local now = os.clock()
 	for p, brain in brains do
 		tryCatch(p, brain)
+		chat(p, brain, now)
 		if now >= brain.nextThinkAt then
 			brain.nextThinkAt = now + N.ThinkInterval
 			think(p, brain, now)
