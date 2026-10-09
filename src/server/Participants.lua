@@ -104,10 +104,15 @@ function Participants.getHumanoid(p)
 	return p.character and p.character:FindFirstChildOfClass("Humanoid")
 end
 
--- 오른손을 찾는다 (R15는 RightHand, R6는 Right Arm).
+-- 공을 드는 오른손을 찾는다 (NPC 인형 손 → R15 RightHand → R6 Right Arm 순서).
 function Participants.getHand(p)
 	local character = p.character
-	return character and (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
+	if not character then
+		return nil
+	end
+	local doll = character:FindFirstChild("Doll")
+	local dollHand = doll and doll:FindFirstChild("DollRightHand")
+	return dollHand or character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
 end
 
 -- 몸이 멀쩡히 있는지 알려준다 (Humanoid 체력이 0보다 크다).

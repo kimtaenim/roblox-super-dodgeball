@@ -13,6 +13,19 @@ local G = Config.Gauge
 local PlayerStateService = {}
 
 local notifyRemote = Remotes.get("Notify")
+local reactionHandler = nil -- 사건이 생기면 부를 함수 (NPC 말풍선용)
+
+-- 사건(아웃·캐치·부활 등)이 생기면 부를 함수를 정한다.
+function PlayerStateService.setReactionHandler(handler)
+	reactionHandler = handler
+end
+
+-- 참가자에게 사건이 생겼다고 알린다. kind는 "out", "kill", "catch", "revive", "ability".
+function PlayerStateService.react(p, kind)
+	if reactionHandler and p then
+		reactionHandler(p, kind)
+	end
+end
 
 -- 사람 참가자 화면에 알림 글자를 띄운다 (NPC는 화면이 없어서 건너뛴다).
 function PlayerStateService.notify(p, text)
@@ -93,6 +106,7 @@ local function reviveKillsOf(p)
 		if revived.state.status == "Sitting" and revived.state.killedBy == p then
 			standUp(revived)
 			PlayerStateService.notify(revived, "부활! " .. p.name .. " 아웃돼서 다시 일어났어요")
+			PlayerStateService.react(revived, "revive")
 		end
 	end
 	p.state.kills = {}
@@ -122,7 +136,11 @@ function PlayerStateService.knockOut(victim, by, how)
 		PlayerStateService.addGauge(by, G.KillBonus)
 		PlayerStateService.notify(by, victim.name .. " 아웃! (+" .. G.KillBonus .. ")")
 		PlayerStateService.sync(by)
+		if how ~= "catch" then
+			PlayerStateService.react(by, "kill")
+		end
 	end
+	PlayerStateService.react(victim, "out")
 
 	local byName = by and by.name or "?"
 	if how == "catch" then
@@ -149,6 +167,7 @@ function PlayerStateService.catch(catcher, thrower)
 	end
 	PlayerStateService.addGauge(catcher, G.CatchBonus)
 	PlayerStateService.notify(catcher, "캐치 성공! (+" .. G.CatchBonus .. ")")
+	PlayerStateService.react(catcher, "catch")
 	if thrower and thrower ~= catcher then
 		PlayerStateService.knockOut(thrower, catcher, "catch")
 	end

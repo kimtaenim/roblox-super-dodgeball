@@ -38,6 +38,7 @@ function AbilityService.use(p)
 	ability.activate(p, state, services)
 	PlayerStateService.sync(p)
 	PlayerStateService.notify(p, ability.name .. "!")
+	PlayerStateService.react(p, "ability")
 	return true
 end
 

@@ -22,13 +22,21 @@ return {
 
 		local saved = {} -- 원래 투명도를 기억해 둔다
 		for _, part in character:GetDescendants() do
-			local isBody = part:IsA("BasePart") and part.Name ~= "HumanoidRootPart"
+			-- 원래 안 보이던 부품(NPC의 숨은 R15 몸 등)은 건드리지 않는다
+			local isBody = part:IsA("BasePart") and part.Transparency < 1
 			if isBody or part:IsA("Decal") then
 				saved[part] = part.Transparency
 				part.Transparency = C.Transparency
 			end
 		end
-		-- 이름표도 숨긴다
+		-- 이름표도 숨긴다 (NPC 이름표는 BillboardGui)
+		local tags = {}
+		for _, gui in character:GetDescendants() do
+			if gui:IsA("BillboardGui") and gui.Enabled then
+				gui.Enabled = false
+				table.insert(tags, gui)
+			end
+		end
 		local humanoid = services.Participants.getHumanoid(who)
 		local oldNameDisplay = humanoid and humanoid.DisplayDistanceType
 		if humanoid then
@@ -43,6 +51,9 @@ return {
 			end
 			if humanoid and humanoid.Parent then
 				humanoid.DisplayDistanceType = oldNameDisplay
+			end
+			for _, gui in tags do
+				gui.Enabled = true
 			end
 		end)
 	end,
