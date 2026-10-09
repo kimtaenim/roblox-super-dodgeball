@@ -4,13 +4,13 @@ $Port = 34874
 $PlaceFile = 'SuperDodgeball.rbxlx'
 
 Set-Location $PSScriptRoot
-$Host.UI.RawUI.WindowTitle = '슈퍼 피구 시작 (Marthadaram)'
+$Host.UI.RawUI.WindowTitle = '슈퍼 피구 시작 (oompaloompa0730)'
 
 function Step($text) { Write-Host ''; Write-Host $text -ForegroundColor Cyan }
 function Problem($text) { Write-Host "  [!] $text" -ForegroundColor Red }
 
 Write-Host '============================================'
-Write-Host '  슈퍼 피구 - 개발 시작 (Marthadaram)'
+Write-Host '  슈퍼 피구 - 개발 시작 (oompaloompa0730)'
 Write-Host '============================================'
 Write-Host "  폴더: $PSScriptRoot"
 
@@ -60,8 +60,8 @@ Write-Host ''
 Write-Host '============================================' -ForegroundColor Yellow
 Write-Host '  꼭 확인해 주세요!' -ForegroundColor Yellow
 Write-Host ''
-Write-Host '  1. Studio 오른쪽 위 계정 이름이 "Marthadaram" 인지 확인하세요.'
-Write-Host '     다른 계정이면 로그아웃 후 Marthadaram 으로 다시 로그인하세요.'
+Write-Host '  1. Studio 오른쪽 위 계정 이름이 "oompaloompa0730" 인지 확인하세요.'
+Write-Host '     다른 계정이면 로그아웃 후 oompaloompa0730 으로 다시 로그인하세요.'
 Write-Host ''
 Write-Host "  2. Studio [플러그인] 탭 - Rojo 창에서 포트를 $Port 로 바꾸고"
 Write-Host '     [Connect] 를 누르세요. (34872 는 Stealth Animals, 34873 은 도플갱어 호텔 용이에요!)'
