@@ -81,7 +81,7 @@ local function pick(list)
 	return list[math.random(1, #list)]
 end
 
--- NPC 생김새(피부색·옷 색)를 정한다.
+-- NPC 생김새(피부색·옷 색)를 정한다. 윗옷 색도 같이 돌려준다 (이름표 색).
 local function makeDescription()
 	local description = Instance.new("HumanoidDescription")
 	local skin = pick(N.SkinColors)
@@ -92,11 +92,11 @@ local function makeDescription()
 	description.TorsoColor = shirt
 	description.LeftLegColor = N.PantsColor
 	description.RightLegColor = N.PantsColor
-	return description
+	return description, shirt
 end
 
--- 머리 위에 이름표를 단다. 아웃되면 회색으로 바뀐다.
-local function addNameTag(model, text)
+-- 머리 위에 이름표를 단다. 글자 색은 윗옷 색과 같다.
+local function addNameTag(model, text, color)
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NameTag"
 	tag.Size = UDim2.fromOffset(N.NameTagWidth, N.NameTagTextSize * 2)
@@ -110,16 +110,10 @@ local function addNameTag(model, text)
 	label.BackgroundTransparency = 1
 	label.Font = Enum.Font.GothamBold
 	label.TextSize = N.NameTagTextSize
-	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextColor3 = color
 	label.TextStrokeTransparency = 0.3
 	label.Text = text
 	label.Parent = tag
-
-	model:GetAttributeChangedSignal("Status"):Connect(function()
-		local out = model:GetAttribute("Status") == "Sitting"
-		label.TextColor3 = if out then N.OutNameColor else Color3.new(1, 1, 1)
-		label.Text = if out then text .. " (아웃)" else text
-	end)
 end
 
 -- NPC 머리 위에 말풍선을 잠깐 띄운다 (도플갱어 호텔 Npc.say와 같은 모양).
@@ -185,8 +179,9 @@ function NpcService.spawn(count, tutorial)
 	catchChance = if tutorial then Config.Tutorial.CatchChance else N.CatchChance
 	for index = 1, count do
 		local name = npcName(index)
+		local description, shirt = makeDescription()
 		local ok, model = pcall(function()
-			return Players:CreateHumanoidModelFromDescription(makeDescription(), Enum.HumanoidRigType.R15)
+			return Players:CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15)
 		end)
 		if not ok then
 			warn("NPC를 만들지 못했어요: " .. tostring(model))
@@ -197,7 +192,7 @@ function NpcService.spawn(count, tutorial)
 		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 이름표로 보여준다
 		humanoid.BreakJointsOnDeath = false
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- NPC는 죽지 않는다
-		addNameTag(model, name)
+		addNameTag(model, name, shirt)
 
 		model.Parent = folder
 		model.HumanoidRootPart:SetNetworkOwner(nil) -- NPC 움직임은 서버가 계산한다
@@ -311,7 +306,11 @@ end
 local function think(p, brain, now)
 	local root = Participants.getRoot(p)
 	local humanoid = Participants.getHumanoid(p)
-	if not root or not humanoid or p.state.status ~= "Alive" then
+	if not root or not humanoid then
+		return
+	end
+	if p.state.status ~= "Alive" then
+		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
 		return
 	end
 	if p.state.gauge >= Config.Gauge.Max then
