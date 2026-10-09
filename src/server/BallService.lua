@@ -215,7 +215,7 @@ function BallService.forget(p)
 	end
 end
 
--- 홀드 시간을 공 속도로 바꾼다 (0.3초 이하 = 최소, 1초 이상 = 최대 80).
+-- 홀드 시간을 공 속도로 바꾼다 (0.3초 이하 = 최소, 1초 이상 = 최대 속도).
 local function holdToSpeed(holdSeconds)
 	local hold = math.clamp(holdSeconds, T.MinHold, T.MaxHold)
 	return T.MaxSpeed * hold / T.MaxHold
