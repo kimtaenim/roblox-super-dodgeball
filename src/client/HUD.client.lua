@@ -91,6 +91,8 @@ local function updateTop(phaseName, remaining)
 	elseif phaseName == "Countdown" then
 		topLabel.Text = "준비!"
 		bigLabel.Text = tostring(math.max(1, math.ceil(remaining)))
+	elseif phaseName == "Demo" then
+		topLabel.Text = "잘 봐요!"
 	elseif phaseName == "Playing" then
 		local alive = gameState:GetAttribute("AliveCount") or 0
 		topLabel.Text = "남은 시간 " .. formatTime(remaining) .. "   살아남은 사람 " .. alive .. "명"
@@ -168,6 +170,8 @@ local function updateTutorial(phaseName)
 	local gauge = player:GetAttribute("Gauge") or 0
 	if phaseName == "Countdown" then
 		tutorialLabel.Text = "연습 판이에요! 친구 2명과 피구를 배워 봐요"
+	elseif phaseName == "Demo" then
+		tutorialLabel.Text = "날아오는 공을 잡으면, 던진 사람이 아웃돼요"
 	elseif phaseName ~= "Playing" then
 		tutorialLabel.Text = ""
 	elseif player:GetAttribute("Status") == "Sitting" then

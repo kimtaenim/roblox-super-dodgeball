@@ -120,7 +120,6 @@ end
 -- 카운트다운 : NPC를 채우고, 모두 초기화하고, 능력과 공을 나눈다.
 local function runCountdown()
 	setPhase("Countdown", R.CountdownSeconds)
-	CourtService.setRadius(C.StartRadius, false)
 
 	-- 이번 판에 들어갈 사람 수를 세고, 모두 처음 온 사람이면 튜토리얼 판이 된다
 	local humans, allNew = 0, true
@@ -133,6 +132,7 @@ local function runCountdown()
 	end
 	local tutorial = humans > 0 and allNew
 	gameState:SetAttribute("Tutorial", tutorial)
+	CourtService.setRadius(if tutorial then Config.Tutorial.CourtRadius else C.StartRadius, false)
 	local target = if tutorial then Config.Tutorial.TargetTotal else Config.Npc.TargetTotal
 	local npcCount = math.max(target - humans, R.MinParticipants - humans, 0)
 	NpcService.spawn(npcCount, tutorial)
@@ -153,10 +153,25 @@ local function runCountdown()
 	task.wait(R.CountdownSeconds)
 end
 
+-- 튜토리얼 캐치 시범 : NPC 둘이 "공을 잡히면 던진 사람이 아웃"을 보여준다.
+local function runDemo()
+	setPhase("Demo", 0)
+	local viewers = {}
+	for _, p in Participants.all() do
+		if p.inRound and not p.isNpc then
+			table.insert(viewers, p)
+		end
+	end
+	NpcService.playCatchDemo(viewers)
+end
+
 -- 플레이 : 한 명만 남거나 시간이 끝날 때까지. 90초마다 코트가 줄어든다.
 local function runPlaying()
-	setPhase("Playing", R.PlaySeconds)
 	setRoundActive(true)
+	if gameState:GetAttribute("Tutorial") then
+		runDemo() -- 판정이 켜져 있어야 캐치가 되므로 판을 켠 뒤에 한다
+	end
+	setPhase("Playing", R.PlaySeconds)
 	local startTime = os.clock()
 	local nextShrink = startTime + C.ShrinkInterval
 	while true do

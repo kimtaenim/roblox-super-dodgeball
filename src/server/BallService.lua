@@ -532,6 +532,18 @@ function BallService.nearestFreeBall(position)
 	return best
 end
 
+-- 가장 가까운 주울 수 있는 공을 손에 쥐여 준다 (튜토리얼 캐치 시범용). 쥐었으면 true.
+function BallService.giveNearestBall(p)
+	local root = Participants.getRoot(p)
+	if root and not holding[p] then
+		local ball = BallService.nearestFreeBall(root.Position)
+		if ball then
+			attachToHand(p, ball)
+		end
+	end
+	return holding[p] ~= nil
+end
+
 -- 날아가는 공 목록을 돌려준다 (NPC가 캐치할지 고를 때 쓴다).
 function BallService.liveBalls()
 	local result = {}

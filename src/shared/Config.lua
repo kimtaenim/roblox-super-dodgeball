@@ -22,10 +22,10 @@ Config.Round = {
 -- 코트 (설계서 4장)
 Config.Court = {
 	Center = Vector3.new(0, 0, 0), -- 코트 한가운데 (바닥 높이)
-	StartRadius = 70, -- 처음 코트 반지름 (스터드)
+	StartRadius = 42, -- 처음 코트 반지름 (스터드, 6명 기준)
 	ShrinkInterval = 90, -- 이 시간마다 코트가 줄어든다 (초)
-	ShrinkStep = 14, -- 한 번에 줄어드는 반지름
-	MinRadius = 28, -- 이보다 작아지지는 않는다
+	ShrinkStep = 8, -- 한 번에 줄어드는 반지름
+	MinRadius = 18, -- 이보다 작아지지는 않는다
 	ShrinkTweenSeconds = 2, -- 줄어드는 모습이 보이는 시간
 	Thickness = 1, -- 코트 바닥 두께
 	RaiseHeight = 0.1, -- 바닥판 위로 살짝 띄우는 높이 (겹쳐서 깜빡이지 않게)
@@ -169,6 +169,16 @@ Config.Tutorial = {
 	TargetTotal = 3, -- 튜토리얼 판 참가자 수 (나 + NPC 2명)
 	AimDelayScale = 2, -- NPC가 공을 들고 던지기까지 이 배수만큼 더 기다린다
 	CatchChance = 0, -- 튜토리얼 NPC는 캐치를 안 한다 (맞히는 재미를 먼저)
+	CourtRadius = 30, -- 튜토리얼 판 코트 반지름 (3명이라 더 작게)
+	-- 캐치 시범 : 판이 시작되면 NPC 둘이 "공을 잡히면 던진 사람이 아웃"을 보여준다
+	DemoGap = 14, -- 시범하는 NPC 둘 사이 거리
+	DemoViewDistance = 16, -- 구경하는 사람이 시범 한가운데에서 떨어져 서는 거리
+	DemoViewSpacing = 3, -- 구경하는 사람이 여럿이면 옆으로 벌려 서는 간격
+	DemoReadySeconds = 1.5, -- 자리 잡고 공을 쥐기까지 기다리는 시간
+	DemoAimSeconds = 1.5, -- 공을 쥐고 던지기까지 기다리는 시간
+	DemoHold = 0.5, -- 시범 던지기 홀드 시간 (천천히 날아가게)
+	DemoCatchTimeout = 3, -- 이 시간 안에 캐치가 안 되면 시범을 그냥 끝낸다
+	DemoAfterSeconds = 3, -- 캐치 뒤 설명을 읽을 시간
 }
 
 -- NPC·분신 애니메이션 (로블록스 기본 R15 애니메이션)

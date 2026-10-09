@@ -122,11 +122,11 @@ local function addNameTag(model, text)
 	end)
 end
 
--- NPC 머리 위에 말풍선을 잠깐 띄운다. 누가 방금 말했으면 조용히 넘어간다.
-local function say(model, text)
+-- NPC 머리 위에 말풍선을 잠깐 띄운다. 누가 방금 말했으면 조용히 넘어간다 (force면 꼭 말한다).
+local function say(model, text, force)
 	local head = model:FindFirstChild("Head")
 	local now = os.clock()
-	if not head or now < nextSpeechAt then
+	if not head or (now < nextSpeechAt and not force) then
 		return
 	end
 	nextSpeechAt = now + N.SpeechGap
@@ -324,8 +324,8 @@ end
 local function think(p, brain, now)
 	local root = Participants.getRoot(p)
 	local humanoid = Participants.getHumanoid(p)
-	if not root or not humanoid then
-		return
+	if not root or not humanoid or brain.demo then
+		return -- 시범 중인 NPC는 시범 순서대로만 움직인다
 	end
 	if p.state.status ~= "Alive" then
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
@@ -378,8 +378,10 @@ local function update()
 	end
 	local now = os.clock()
 	for p, brain in brains do
-		tryCatch(p, brain)
-		chat(p, brain, now)
+		if not brain.demo then
+			tryCatch(p, brain)
+			chat(p, brain, now)
+		end
 		if now >= brain.nextThinkAt then
 			brain.nextThinkAt = now + N.ThinkInterval
 			think(p, brain, now)
@@ -390,6 +392,88 @@ local function update()
 			CourtService.placeInside(p.character)
 		end
 	end
+end
+
+-- 이름 뒤에 받침에 맞는 조사를 붙인다 (예: 빨강 + 이/가 → "빨강이", 보라 → "보라가").
+local function withJosa(name, withFinal, withoutFinal)
+	local code = utf8.codepoint(name, utf8.offset(name, -1))
+	local isHangul = code >= 0xAC00 and code <= 0xD7A3
+	local hasFinal = isHangul and (code - 0xAC00) % 28 ~= 0
+	return name .. (if hasFinal then withFinal else withoutFinal)
+end
+
+-- 캐릭터를 코트 한가운데 기준 offset 자리에 세우고 lookAt 쪽을 보게 한다.
+local function standAt(p, offset, lookAt)
+	local up = Vector3.new(0, Config.Court.SpawnHeight, 0)
+	local center = Config.Court.Center
+	if p.character then
+		p.character:PivotTo(CFrame.lookAt(center + offset + up, center + lookAt + up))
+	end
+	local humanoid = Participants.getHumanoid(p)
+	local root = Participants.getRoot(p)
+	if humanoid and root then
+		humanoid:MoveTo(root.Position) -- 걷던 것을 멈춘다
+	end
+end
+
+-- 튜토리얼 캐치 시범 : NPC 하나가 던지고 다른 NPC가 잡으면, 던진 NPC가 아웃된다.
+-- viewers는 구경하는 사람 참가자 목록. 시범이 끝날 때까지 기다렸다가 돌아온다.
+function NpcService.playCatchDemo(viewers)
+	local T = Config.Tutorial
+	local npcs = {}
+	for p in brains do
+		table.insert(npcs, p)
+	end
+	if #npcs < 2 then
+		return
+	end
+	local thrower, catcher = npcs[1], npcs[2]
+	brains[thrower].demo = true
+	brains[catcher].demo = true
+
+	-- 자리 잡기 : NPC 둘은 마주 보고, 사람은 앞에서 구경한다
+	local half = T.DemoGap / 2
+	standAt(thrower, Vector3.new(-half, 0, 0), Vector3.new(half, 0, 0))
+	standAt(catcher, Vector3.new(half, 0, 0), Vector3.new(-half, 0, 0))
+	for i, viewer in viewers do
+		local side = (i - (#viewers + 1) / 2) * T.DemoViewSpacing
+		standAt(viewer, Vector3.new(side, 0, -T.DemoViewDistance), Vector3.zero)
+	end
+	PlayerStateService.notifyAll("잘 봐요! " .. withJosa(thrower.name, "이", "가") .. " " .. catcher.name .. "에게 공을 던져요")
+	task.wait(T.DemoReadySeconds)
+
+	-- 던지기
+	if BallService.giveNearestBall(thrower) then
+		task.wait(T.DemoAimSeconds)
+		local catcherRoot = Participants.getRoot(catcher)
+		if catcherRoot then
+			say(thrower.character, "받아라!", true)
+			BallService.throw(thrower, catcherRoot.Position, T.DemoHold)
+		end
+
+		-- 공이 가까이 오면 꼭 잡는다
+		local deadline = os.clock() + T.DemoCatchTimeout
+		while os.clock() < deadline and thrower.state.status == "Alive" do
+			local root = Participants.getRoot(catcher)
+			for _, info in BallService.liveBalls() do
+				local near = root and (info.ball.Position - root.Position).Magnitude <= N.CatchReactDistance
+				if info.thrower == thrower and near then
+					BallService.pressCatch(catcher)
+				end
+			end
+			task.wait()
+		end
+	end
+
+	-- 설명
+	if thrower.state.status == "Sitting" then
+		say(catcher.character, "잡았다!", true)
+		PlayerStateService.notifyAll(withJosa(catcher.name, "이", "가") .. " 잡았어요! 공을 잡히면 던진 " .. withJosa(thrower.name, "이", "가") .. " 아웃!")
+		task.wait(T.DemoAfterSeconds)
+		PlayerStateService.notifyAll(withJosa(catcher.name, "을", "를") .. " 맞히면 " .. withJosa(thrower.name, "이", "가") .. " 다시 일어나요. 시작!")
+	end
+	brains[thrower].demo = false
+	brains[catcher].demo = false
 end
 
 -- NPC 폴더를 만들고 매 프레임 움직임과 말풍선을 연결한다.
