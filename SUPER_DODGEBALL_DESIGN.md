@@ -40,7 +40,7 @@ BallState = {
 
 ### 1.4 판정 순서 (한 틱)
 
-① 공이 Alive 캐릭터에 닿음 → 그 캐릭터가 0.15초 안에 캐치 키를 눌렀으면 캐치, 아니면 피격.
+① 공이 Alive 캐릭터에 닿음 → 그 캐릭터가 닿기 전 0.5초 안에 캐치 버튼을 눌렀으면 캐치, 아니면 피격 (자동 캐치 없음).
 ② 피격 : 피해자 Sitting, thrower.kills에 피해자 추가, 피해자.killedBy = thrower.
 ③ 캐치 : 캐처 Alive, thrower → Sitting 처리(②와 같은 절차, killedBy = 캐처).
 ④ 누군가 Sitting이 될 때마다 그 사람의 kills 전원 부활 → 부활자들의 killedBy = nil.
