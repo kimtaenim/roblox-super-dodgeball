@@ -8,11 +8,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Abilities = require(ReplicatedStorage.Shared.Abilities)
 
 local player = Players.LocalPlayer
 local gameState = ReplicatedStorage:WaitForChild("GameState")
 
-local FULL_COLOR = Color3.fromRGB(255, 210, 60) -- 능력 칸이 깜빡일 때 색
 local ABILITY_COLOR = Color3.fromRGB(80, 200, 255) -- 능력 칸 색
 local POWER_COLOR = Color3.fromRGB(255, 120, 60) -- 파워 막대 색
 local DARK = Color3.fromRGB(20, 20, 30) -- 배경 색
@@ -71,10 +71,39 @@ warningLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
 local tutorialLabel = makeLabel(gui, UDim2.new(0.5, 0, 1, -150), UDim2.new(0.9, 0, 0, 36), 26)
 tutorialLabel.TextColor3 = Color3.fromRGB(255, 230, 120)
 
-local abilityBack, abilityFill = makeBar(gui, UDim2.new(0.5, 0, 1, -60), UDim2.new(0, 320, 0, 26), ABILITY_COLOR)
-abilityFill.Size = UDim2.fromScale(1, 1)
-local abilityLabel = makeLabel(abilityBack, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
-abilityLabel.ZIndex = 2
+-- 능력 칸 : 화면 아래에 가로로 늘어선 버튼. 누르면(또는 숫자 키) 그 능력을 쓴다.
+local H = Config.Hud
+local slotRow = Instance.new("Frame")
+slotRow.AnchorPoint = Vector2.new(0.5, 1)
+slotRow.Position = UDim2.new(0.5, 0, 1, -H.AbilitySlotGap * 2)
+slotRow.Size = UDim2.new(1, 0, 0, H.AbilitySlotHeight)
+slotRow.BackgroundTransparency = 1
+slotRow.Parent = gui
+local rowLayout = Instance.new("UIListLayout")
+rowLayout.FillDirection = Enum.FillDirection.Horizontal
+rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+rowLayout.Padding = UDim.new(0, H.AbilitySlotGap)
+rowLayout.Parent = slotRow
+
+local abilityRemote = Remotes.get("UseAbility")
+local slotButtons = {}
+for slot = 1, Config.AbilityBox.MaxSlots do
+	local button = Instance.new("TextButton")
+	button.LayoutOrder = slot
+	button.Size = UDim2.fromOffset(H.AbilitySlotWidth, H.AbilitySlotHeight)
+	button.BackgroundColor3 = ABILITY_COLOR
+	button.BackgroundTransparency = 0.15
+	button.Font = Enum.Font.GothamBold
+	button.TextScaled = true
+	button.TextColor3 = DARK
+	button.Visible = false
+	button.Parent = slotRow
+	Instance.new("UICorner").Parent = button
+	button.Activated:Connect(function()
+		abilityRemote:FireServer(slot)
+	end)
+	slotButtons[slot] = button
+end
 local powerBack, powerFill = makeBar(gui, UDim2.new(0.5, 0, 1, -100), UDim2.new(0, 200, 0, 14), POWER_COLOR)
 
 local messageHideAt = 0 -- 알림 글자를 지울 시각
@@ -123,16 +152,25 @@ local function updateStatus(phaseName)
 	end
 end
 
--- 능력 칸 : 상자에서 주운 능력이 있으면 깜빡이며 보여준다.
-local function updateAbility(now)
-	local abilityName = player:GetAttribute("AbilityName")
-	abilityBack.Visible = abilityName ~= nil
-	if not abilityName then
-		return
+-- 내가 갖고 있는 능력 id 목록을 읽는다 (서버가 "teleport,shield"처럼 적어 둔다).
+local function myAbilityIds()
+	local text = player:GetAttribute("Abilities") or ""
+	if text == "" then
+		return {}
 	end
-	local blink = (math.sin(now * Config.Hud.FlashSpeed) + 1) / 2
-	abilityFill.BackgroundColor3 = ABILITY_COLOR:Lerp(FULL_COLOR, blink)
-	abilityLabel.Text = abilityName .. "! (Q)"
+	return string.split(text, ",")
+end
+
+-- 능력 칸 : 갖고 있는 능력마다 "번호 이름" 버튼을 보여준다.
+local function updateAbilities()
+	local ids = myAbilityIds()
+	for slot, button in slotButtons do
+		local ability = Abilities.get(ids[slot])
+		button.Visible = ability ~= nil
+		if ability then
+			button.Text = slot .. " " .. ability.name
+		end
+	end
 end
 
 -- 투명 중에는 내 화면에서만 내 몸을 반쯤 보이게 한다 (다른 사람 화면에는 거의 안 보인다).
@@ -184,10 +222,10 @@ local function updateTutorial(phaseName)
 		tutorialLabel.Text = ""
 	elseif player:GetAttribute("Status") == "Sitting" then
 		tutorialLabel.Text = "공이 날아올 때 F(오른쪽 클릭)를 누르면 잡고 다시 일어나요"
-	elseif player:GetAttribute("AbilityName") then
-		tutorialLabel.Text = "능력이 생겼어요! Q를 눌러 써 봐요"
 	elseif player:GetAttribute("HoldingBall") then
 		tutorialLabel.Text = "친구를 마우스로 가리키고, 왼쪽 클릭을 꾹 눌렀다 떼면 던져요"
+	elseif #myAbilityIds() > 0 then
+		tutorialLabel.Text = "빨간 공 가까이 가면 저절로 주워요. 아래 능력 칸(숫자 키)도 눌러 봐요"
 	else
 		tutorialLabel.Text = "빨간 공 가까이 걸어가면 저절로 주워요"
 	end
@@ -208,7 +246,7 @@ RunService.RenderStepped:Connect(function()
 
 	updateTop(phaseName, remaining)
 	updateStatus(phaseName)
-	updateAbility(now)
+	updateAbilities()
 	updateSelfVisibility()
 	updatePower(now)
 	updateWarning(serverNow)

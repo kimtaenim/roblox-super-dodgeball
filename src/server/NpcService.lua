@@ -329,12 +329,12 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 	end
 end
 
--- 빈손일 때 : 능력이 없고 상자가 공보다 가까우면 상자로, 아니면 가까운 공으로 간다. 둘 다 없으면 돌아다닌다.
+-- 빈손일 때 : 능력 칸에 빈자리가 있고 상자가 공보다 가까우면 상자로, 아니면 가까운 공으로 간다. 둘 다 없으면 돌아다닌다.
 local function thinkEmptyHanded(p, brain, root, humanoid, now)
 	brain.throwAt = nil
 	brain.target = nil
 	local ball = BallService.nearestFreeBall(root.Position)
-	local box = p.state.ability == nil and AbilityBoxService.nearestBox(root.Position)
+	local box = #p.state.abilities < Config.AbilityBox.MaxSlots and AbilityBoxService.nearestBox(root.Position)
 	local boxIsCloser = box and (not ball or (box.Position - root.Position).Magnitude < (ball.Position - root.Position).Magnitude)
 	if boxIsCloser then
 		walkTo(humanoid, box.Position)
@@ -358,14 +358,18 @@ local function think(p, brain, now)
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
 		return
 	end
-	-- 능력이 있으면 잠깐 뒤에 쓴다 (판 시작에 모두 한꺼번에 쓰지 않게)
-	if not p.state.ability then
+	-- 능력이 있으면 잠깐 뒤에 하나 쓴다 (판 시작에 모두 한꺼번에 쓰지 않게)
+	if #p.state.abilities == 0 then
 		brain.abilityAt = nil
 	elseif not brain.abilityAt then
 		brain.abilityAt = now + randomBetween(N.AbilityDelayMin, N.AbilityDelayMax)
 	elseif now >= brain.abilityAt then
 		brain.abilityAt = nil
-		AbilityService.use(p)
+		for slot = 1, #p.state.abilities do
+			if AbilityService.use(p, slot) then
+				break -- 지금 쓸 수 있는 것 하나만 쓴다
+			end
+		end
 	end
 	if BallService.isHolding(p) then
 		thinkWithBall(p, brain, root, humanoid, now)

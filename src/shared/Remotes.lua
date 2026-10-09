@@ -12,7 +12,7 @@ local Remotes = {}
 Remotes.Names = {
 	Throw = "Throw", -- 클라이언트 → 서버 : 공 던지기 (조준점, 홀드 시간)
 	Catch = "Catch", -- 클라이언트 → 서버 : 캐치 버튼 눌림
-	UseAbility = "UseAbility", -- 클라이언트 → 서버 : 능력 버튼 눌림
+	UseAbility = "UseAbility", -- 클라이언트 → 서버 : 능력 버튼 눌림 (몇 번째 칸인지)
 	Notify = "Notify", -- 서버 → 클라이언트 : 화면에 띄울 알림 글자
 }
 

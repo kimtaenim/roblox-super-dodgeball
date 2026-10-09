@@ -79,8 +79,10 @@ Config.Catch = {
 	Cooldown = 1.0, -- 캐치 버튼은 이 시간에 한 번만
 }
 
--- 능력 상자 (설계서 2.1장) : 판 도중 코트에 떨어지고, 주우면 능력 하나를 갖는다
+-- 능력 상자 (설계서 2.1장) : 판 시작 때 능력 몇 개를 갖고, 판 도중 상자를 주우면 하나 더 생긴다
 Config.AbilityBox = {
+	StartCount = 3, -- 판 시작 때 갖고 시작하는 능력 수
+	MaxSlots = 5, -- 한 번에 가질 수 있는 능력 수 (꽉 차면 상자를 못 줍는다)
 	FirstDelay = 5, -- 판이 시작되고 첫 상자가 떨어지기까지 (초)
 	Interval = 8, -- 상자가 떨어지는 간격 (초)
 	MaxOnCourt = 3, -- 코트에 동시에 있을 수 있는 상자 수
@@ -212,7 +214,9 @@ Config.Animation = {
 -- 화면 표시
 Config.Hud = {
 	MessageSeconds = 2.5, -- 알림 글자가 떠 있는 시간
-	FlashSpeed = 6, -- 능력을 갖고 있을 때 능력 칸이 깜빡이는 빠르기
+	AbilitySlotWidth = 110, -- 능력 칸 하나 너비 (픽셀)
+	AbilitySlotHeight = 40, -- 능력 칸 높이 (픽셀)
+	AbilitySlotGap = 8, -- 능력 칸 사이 간격 (픽셀)
 }
 
 return Config

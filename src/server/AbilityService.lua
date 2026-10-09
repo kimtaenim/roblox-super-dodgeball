@@ -18,17 +18,17 @@ function AbilityService.setActive(on)
 	active = on
 end
 
--- 참가자가 갖고 있는 능력을 쓴다. 쓰면 true (능력은 한 번 쓰면 없어진다).
-function AbilityService.use(p)
+-- 참가자가 slot번째 능력을 쓴다. 쓰면 true (쓴 능력은 목록에서 빠진다).
+function AbilityService.use(p, slot)
 	if not active or not p.inRound then
 		return false
 	end
 	local state = p.state
-	local ability = Abilities.get(state.ability)
+	local ability = Abilities.get(state.abilities[slot])
 	if not ability or not ability.canUse(p, state) then
 		return false
 	end
-	state.ability = nil
+	table.remove(state.abilities, slot)
 	ability.activate(p, state, services)
 	PlayerStateService.sync(p)
 	PlayerStateService.notify(p, ability.name .. "!")
@@ -52,10 +52,10 @@ end
 -- 서비스 모음을 받아 두고 능력 버튼 신호를 연결한다.
 function AbilityService.start(serviceTable)
 	services = serviceTable
-	Remotes.get("UseAbility").OnServerEvent:Connect(function(player)
+	Remotes.get("UseAbility").OnServerEvent:Connect(function(player, slot)
 		local p = Participants.fromPlayer(player)
-		if p then
-			AbilityService.use(p)
+		if p and typeof(slot) == "number" and slot == math.floor(slot) then
+			AbilityService.use(p, slot)
 		end
 	end)
 end

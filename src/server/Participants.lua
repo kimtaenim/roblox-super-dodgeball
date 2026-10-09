@@ -22,7 +22,7 @@ function Participants.newState()
 		killedBy = nil, -- 나를 아웃시킨 참가자
 		kills = {}, -- 내가 아웃시킨 참가자 목록 (부활 연쇄용)
 		totalKills = 0, -- 이번 판에 아웃시킨 총 횟수 (순위용)
-		ability = nil, -- 상자에서 주운 능력 id (한 번 쓰면 없어진다)
+		abilities = {}, -- 갖고 있는 능력 id 목록 (쓰면 목록에서 빠진다)
 		shieldUntil = 0, -- 방패가 끝나는 시각
 		superCatchUntil = 0, -- 슈퍼캐치가 끝나는 시각
 		slowUntil = 0, -- 느려짐이 끝나는 시각

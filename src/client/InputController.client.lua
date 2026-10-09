@@ -1,7 +1,7 @@
 -- 키보드·마우스·터치 입력을 받아 서버에 보낸다. 판정은 서버가 한다 (설계서 3장).
 --   던지기 : 마우스 왼쪽 꾹 누르기 (모바일 : 던지기 버튼)
 --   캐치   : F 또는 마우스 오른쪽 (모바일 : 캐치 버튼)
---   능력   : Q (모바일 : 능력 버튼)
+--   능력   : 1·2·3·4·5 = 그 칸 능력, Q = 첫 번째 칸 (모바일 : 능력 버튼 = 첫 번째 칸, 화면의 능력 칸을 눌러도 된다)
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -74,10 +74,19 @@ local function onCatch(_actionName, inputState, _input)
 	return Enum.ContextActionResult.Pass
 end
 
--- 능력 : 누르는 순간 서버에 알린다.
-local function onAbility(_actionName, inputState, _input)
+-- 숫자 키 → 몇 번째 능력 칸인지
+local SLOT_KEYS = {
+	[Enum.KeyCode.One] = 1,
+	[Enum.KeyCode.Two] = 2,
+	[Enum.KeyCode.Three] = 3,
+	[Enum.KeyCode.Four] = 4,
+	[Enum.KeyCode.Five] = 5,
+}
+
+-- 능력 : 누르는 순간 몇 번째 칸을 쓸지 서버에 알린다 (Q와 모바일 버튼은 첫 번째 칸).
+local function onAbility(_actionName, inputState, input)
 	if inputState == Enum.UserInputState.Begin then
-		abilityRemote:FireServer()
+		abilityRemote:FireServer(SLOT_KEYS[input.KeyCode] or 1)
 	end
 	return Enum.ContextActionResult.Sink
 end
@@ -86,6 +95,16 @@ end
 ContextActionService:BindAction("Throw", onThrow, true, Enum.UserInputType.MouseButton1)
 ContextActionService:BindAction("Catch", onCatch, true, Enum.KeyCode.F, Enum.UserInputType.MouseButton2)
 ContextActionService:BindAction("Ability", onAbility, true, Enum.KeyCode.Q)
+ContextActionService:BindAction(
+	"AbilitySlot",
+	onAbility,
+	false,
+	Enum.KeyCode.One,
+	Enum.KeyCode.Two,
+	Enum.KeyCode.Three,
+	Enum.KeyCode.Four,
+	Enum.KeyCode.Five
+)
 ContextActionService:SetTitle("Throw", "던지기")
 ContextActionService:SetTitle("Catch", "캐치")
 ContextActionService:SetTitle("Ability", "능력")

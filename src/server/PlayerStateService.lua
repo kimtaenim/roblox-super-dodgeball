@@ -5,7 +5,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
-local Abilities = require(ReplicatedStorage.Shared.Abilities)
 local Participants = require(script.Parent.Participants)
 
 local PlayerStateService = {}
@@ -40,9 +39,8 @@ end
 -- 상태를 화면(HUD)에서 볼 수 있게 속성으로 적어 둔다.
 function PlayerStateService.sync(p)
 	local state = p.state
-	local ability = Abilities.get(state.ability)
 	Participants.setAttribute(p, "Status", state.status)
-	Participants.setAttribute(p, "AbilityName", ability and ability.name or nil)
+	Participants.setAttribute(p, "Abilities", table.concat(state.abilities, ",")) -- 예: "teleport,shield"
 	Participants.setAttribute(p, "Kills", state.totalKills)
 	Participants.setAttribute(p, "InRound", p.inRound)
 end
@@ -160,10 +158,10 @@ function PlayerStateService.catch(catcher, thrower)
 	PlayerStateService.sync(catcher)
 end
 
--- 새 판을 위해 상태를 처음으로 되돌리고, 시작 능력 하나를 준다.
-function PlayerStateService.resetForRound(p, abilityId)
+-- 새 판을 위해 상태를 처음으로 되돌리고, 시작 능력 목록을 준다.
+function PlayerStateService.resetForRound(p, abilityIds)
 	p.state = Participants.newState()
-	p.state.ability = abilityId
+	p.state.abilities = abilityIds
 	p.inRound = true
 	standUp(p)
 end
