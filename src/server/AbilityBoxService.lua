@@ -1,4 +1,5 @@
 -- 능력 상자 : 판 도중 코트에 상자가 떨어지고, 주우면 능력 하나를 갖는다 (설계서 2.1장).
+-- 판을 시작할 때도 모두 능력 하나를 갖고 시작한다 (randomId로 고른다).
 -- 능력은 한 번에 하나만 가질 수 있고, Q(모바일은 능력 버튼)로 쓰면 없어진다.
 
 local RunService = game:GetService("RunService")
@@ -64,9 +65,14 @@ local function canPickUp(p)
 	return p.inRound and p.state.status == "Alive" and p.state.ability == nil
 end
 
+-- 능력 하나를 무작위로 고른다 (슈퍼강속구·유도탄은 덜 나온다).
+function AbilityBoxService.randomId()
+	return Abilities.randomId(X.Weights)
+end
+
 -- 상자를 주운 참가자에게 아무 능력이나 하나 준다.
 local function giveAbility(p)
-	p.state.ability = Abilities.randomId(X.Weights)
+	p.state.ability = AbilityBoxService.randomId()
 	local ability = Abilities.get(p.state.ability)
 	PlayerStateService.notify(p, "능력 상자! " .. ability.name .. " (Q로 써요)")
 	PlayerStateService.sync(p)

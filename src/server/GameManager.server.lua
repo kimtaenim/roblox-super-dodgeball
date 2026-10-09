@@ -141,7 +141,7 @@ local function runCountdown()
 
 	local total = 0
 	for _, p in Participants.all() do
-		PlayerStateService.resetForRound(p)
+		PlayerStateService.resetForRound(p, AbilityBoxService.randomId()) -- 능력 하나를 갖고 시작
 		if p.character then
 			CourtService.placeInside(p.character)
 		end

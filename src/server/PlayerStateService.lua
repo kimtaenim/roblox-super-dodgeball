@@ -160,9 +160,10 @@ function PlayerStateService.catch(catcher, thrower)
 	PlayerStateService.sync(catcher)
 end
 
--- 새 판을 위해 상태를 처음으로 되돌린다 (능력은 판 도중 상자에서 줍는다).
-function PlayerStateService.resetForRound(p)
+-- 새 판을 위해 상태를 처음으로 되돌리고, 시작 능력 하나를 준다.
+function PlayerStateService.resetForRound(p, abilityId)
 	p.state = Participants.newState()
+	p.state.ability = abilityId
 	p.inRound = true
 	standUp(p)
 end

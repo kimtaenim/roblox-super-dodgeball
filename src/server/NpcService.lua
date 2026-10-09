@@ -358,8 +358,14 @@ local function think(p, brain, now)
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
 		return
 	end
-	if p.state.ability then
-		AbilityService.use(p) -- 상자에서 주운 능력은 바로 쓴다
+	-- 능력이 있으면 잠깐 뒤에 쓴다 (판 시작에 모두 한꺼번에 쓰지 않게)
+	if not p.state.ability then
+		brain.abilityAt = nil
+	elseif not brain.abilityAt then
+		brain.abilityAt = now + randomBetween(N.AbilityDelayMin, N.AbilityDelayMax)
+	elseif now >= brain.abilityAt then
+		brain.abilityAt = nil
+		AbilityService.use(p)
 	end
 	if BallService.isHolding(p) then
 		thinkWithBall(p, brain, root, humanoid, now)
