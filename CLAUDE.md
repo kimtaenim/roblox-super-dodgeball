@@ -19,5 +19,6 @@
 - 설계서에 없는 기능을 제안할 때는 코드로 만들지 말고 질문만 한다.
 
 ## 실행
-- `rojo serve` 후 Studio에서 Rojo 플러그인 Connect.
-- Studio 실행 배치파일은 Flick Flock 레포와 같은 방식으로 둔다.
+- `start.bat` 더블클릭 → git pull, rokit install, rojo serve(포트 34874), Studio 열기까지 한 번에.
+- Studio Rojo 플러그인에서 포트를 34874로 바꾸고 Connect. (34872 Stealth Animals, 34873 도플갱어 호텔)
+- 배치파일은 roblox-doppelganger-hotel 레포와 같은 방식. `make_shortcut.bat`은 바탕화면 바로가기를 한 번 만든다.
