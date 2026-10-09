@@ -125,10 +125,19 @@ Config.Npc = {
 		Color3.fromRGB(198, 134, 66),
 		Color3.fromRGB(141, 85, 36),
 	},
-	ShirtSaturation = 0.6, -- 윗옷 색의 진하기
-	ShirtBrightness = 0.85, -- 윗옷 색의 밝기
+	-- 윗옷 색. NPC 이름이 이 색 이름이 된다 (이름표 글자도 이 색)
+	Shirts = {
+		{ name = "빨강", color = Color3.fromRGB(230, 50, 50) },
+		{ name = "주황", color = Color3.fromRGB(255, 140, 30) },
+		{ name = "노랑", color = Color3.fromRGB(255, 220, 40) },
+		{ name = "초록", color = Color3.fromRGB(60, 190, 70) },
+		{ name = "파랑", color = Color3.fromRGB(40, 100, 230) },
+		{ name = "보라", color = Color3.fromRGB(150, 70, 210) },
+		{ name = "분홍", color = Color3.fromRGB(255, 120, 190) },
+		{ name = "하늘", color = Color3.fromRGB(100, 200, 255) },
+	},
 	PantsColor = Color3.fromRGB(50, 60, 90), -- 바지 색
-	NameTagHeight = 2, -- 이름표가 머리 위로 뜨는 높이 (글자 색은 윗옷 색)
+	NameTagHeight = 2, -- 이름표가 머리 위로 뜨는 높이
 	NameTagWidth = 160, -- 이름표 너비 (픽셀)
 	NameTagTextSize = 18, -- 이름표 글자 크기
 	SpeechHeight = 3.6, -- 말풍선이 머리 위로 뜨는 높이
@@ -138,10 +147,6 @@ Config.Npc = {
 	SpeechMaxDistance = 80, -- 이보다 멀면 말풍선이 안 보인다
 	ChatIntervalMin = 20, -- 혼잣말 사이 최소 시간 (초)
 	ChatIntervalMax = 40, -- 혼잣말 사이 최대 시간 (초)
-	Names = {
-		"민준", "서연", "도윤", "하은", "지호", "수아", "예준", "지우",
-		"시우", "하린", "주원", "채원", "건우", "유나", "우진", "다은",
-	},
 	-- 사건마다 NPC가 하는 말
 	Lines = {
 		out = { "으악!", "아야!", "잡혔다…", "다음엔 안 맞아!" },

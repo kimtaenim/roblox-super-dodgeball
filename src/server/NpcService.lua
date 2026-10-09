@@ -82,21 +82,20 @@ local function pick(list)
 	return list[math.random(1, #list)]
 end
 
--- NPC 생김새(피부색·옷 색)를 정한다. 윗옷 색도 같이 돌려준다 (이름표 색).
-local function makeDescription()
+-- NPC 생김새를 정한다 : 피부색은 아무거나, 윗옷은 정해진 색.
+local function makeDescription(shirt)
 	local description = Instance.new("HumanoidDescription")
 	local skin = pick(N.SkinColors)
-	local shirt = Color3.fromHSV(math.random(), N.ShirtSaturation, N.ShirtBrightness)
 	description.HeadColor = skin
 	description.LeftArmColor = skin
 	description.RightArmColor = skin
 	description.TorsoColor = shirt
 	description.LeftLegColor = N.PantsColor
 	description.RightLegColor = N.PantsColor
-	return description, shirt
+	return description
 end
 
--- 머리 위에 이름표를 단다. 글자 색은 윗옷 색과 같고, 아웃되면 "(아웃)"이 붙는다.
+-- 머리 위에 이름표(윗옷 색 이름)를 단다. 글자도 그 색이고, 아웃되면 "(아웃)"이 붙는다.
 local function addNameTag(model, text, color)
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NameTag"
@@ -171,26 +170,28 @@ local function onReaction(p, kind)
 	end
 end
 
--- n번째 NPC 이름을 정한다 (이름이 모자라면 숫자를 붙인다).
-local function npcName(index)
-	local count = #N.Names
-	local name = N.Names[(index - 1) % count + 1]
-	local round = math.floor((index - 1) / count)
-	if round > 0 then
-		name ..= tostring(round + 1)
+-- 윗옷 색 목록을 섞어서 돌려준다 (판마다 다른 색이 나오게).
+local function shuffledShirts()
+	local shirts = table.clone(N.Shirts)
+	for i = #shirts, 2, -1 do
+		local j = math.random(1, i)
+		shirts[i], shirts[j] = shirts[j], shirts[i]
 	end
-	return name
+	return shirts
 end
 
 -- NPC를 count명 만들어 코트 안에 세운다. tutorial이면 천천히 던지고 캐치를 안 한다.
 function NpcService.spawn(count, tutorial)
 	aimDelayScale = if tutorial then Config.Tutorial.AimDelayScale else 1
 	catchChance = if tutorial then Config.Tutorial.CatchChance else N.CatchChance
+	local shirts = shuffledShirts()
 	for index = 1, count do
-		local name = npcName(index)
-		local description, shirt = makeDescription()
+		-- 이름은 윗옷 색 이름 (색이 모자라면 "빨강2"처럼 숫자를 붙인다)
+		local shirt = shirts[(index - 1) % #shirts + 1]
+		local round = math.floor((index - 1) / #shirts)
+		local name = if round > 0 then shirt.name .. tostring(round + 1) else shirt.name
 		local ok, model = pcall(function()
-			return Players:CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15)
+			return Players:CreateHumanoidModelFromDescription(makeDescription(shirt.color), Enum.HumanoidRigType.R15)
 		end)
 		if not ok then
 			warn("NPC를 만들지 못했어요: " .. tostring(model))
@@ -201,7 +202,7 @@ function NpcService.spawn(count, tutorial)
 		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 이름표로 보여준다
 		humanoid.BreakJointsOnDeath = false
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- NPC는 죽지 않는다
-		addNameTag(model, name, shirt)
+		addNameTag(model, name, shirt.color)
 
 		model.Parent = folder
 		model.HumanoidRootPart:SetNetworkOwner(nil) -- NPC 움직임은 서버가 계산한다
