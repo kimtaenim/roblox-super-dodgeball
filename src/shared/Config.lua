@@ -126,15 +126,16 @@ Config.Npc = {
 		Color3.fromRGB(141, 85, 36),
 	},
 	-- 윗옷 색. NPC 이름이 이 색 이름이 된다 (이름표 글자도 이 색)
+	-- 이름은 쉬운 색 이름, 실제 색은 눈이 편한 부드러운 색 (괄호 안이 실제 색)
 	Shirts = {
-		{ name = "빨강", color = Color3.fromRGB(230, 50, 50) },
-		{ name = "주황", color = Color3.fromRGB(255, 140, 30) },
-		{ name = "노랑", color = Color3.fromRGB(255, 220, 40) },
-		{ name = "초록", color = Color3.fromRGB(60, 190, 70) },
-		{ name = "파랑", color = Color3.fromRGB(40, 100, 230) },
-		{ name = "보라", color = Color3.fromRGB(150, 70, 210) },
-		{ name = "분홍", color = Color3.fromRGB(255, 120, 190) },
-		{ name = "하늘", color = Color3.fromRGB(100, 200, 255) },
+		{ name = "빨강", color = Color3.fromRGB(240, 95, 70) }, -- 다홍
+		{ name = "청록", color = Color3.fromRGB(40, 180, 170) }, -- 터콰즈
+		{ name = "민트", color = Color3.fromRGB(130, 220, 180) }, -- 민트
+		{ name = "하늘", color = Color3.fromRGB(120, 190, 240) }, -- 하늘
+		{ name = "분홍", color = Color3.fromRGB(250, 130, 130) }, -- 코랄핑크
+		{ name = "노랑", color = Color3.fromRGB(240, 200, 90) }, -- 머스터드
+		{ name = "주황", color = Color3.fromRGB(250, 160, 90) }, -- 살구
+		{ name = "보라", color = Color3.fromRGB(170, 140, 220) }, -- 라벤더
 	},
 	PantsColor = Color3.fromRGB(50, 60, 90), -- 바지 색
 	NameTagHeight = 2, -- 이름표가 머리 위로 뜨는 높이
