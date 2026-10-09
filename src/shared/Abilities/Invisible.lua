@@ -7,6 +7,7 @@ local C = Config.Abilities.Invisible
 return {
 	id = "invisible",
 	name = "투명",
+	duration = C.Seconds, -- 효과가 이어지는 시간 (이 동안은 다른 능력을 못 쓴다)
 
 	-- 살아 있을 때만 쓸 수 있다.
 	canUse = function(_who, state)

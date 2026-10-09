@@ -25,6 +25,7 @@ function Participants.newState()
 		abilities = {}, -- 갖고 있는 능력 id 목록 (쓰면 목록에서 빠진다)
 		shieldUntil = 0, -- 방패가 끝나는 시각
 		superCatchUntil = 0, -- 슈퍼캐치가 끝나는 시각
+		abilityBusyUntil = 0, -- 지금 쓰는 능력의 효과가 끝나는 시각 (그 전엔 다른 능력 못 씀)
 		slowUntil = 0, -- 느려짐이 끝나는 시각
 		invisibleUntil = 0, -- 투명이 끝나는 시각
 		lastCatchPress = -math.huge, -- 캐치 버튼을 마지막으로 누른 시각

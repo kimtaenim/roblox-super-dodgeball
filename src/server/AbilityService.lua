@@ -18,7 +18,13 @@ function AbilityService.setActive(on)
 	active = on
 end
 
+-- 능력 효과가 아직 이어지고 있는지 알려준다 (효과 시간이 남았거나, 다음 던지기에 붙은 능력이 있으면).
+local function isBusy(state)
+	return state.abilityBusyUntil > os.clock() or next(state.nextThrow) ~= nil
+end
+
 -- 참가자가 slot번째 능력을 쓴다. 쓰면 true (쓴 능력은 목록에서 빠진다).
+-- 능력은 한 번에 하나만 : 앞서 쓴 능력의 효과가 끝나야 다음 능력을 쓸 수 있다.
 function AbilityService.use(p, slot)
 	if not active or not p.inRound then
 		return false
@@ -28,7 +34,12 @@ function AbilityService.use(p, slot)
 	if not ability or not ability.canUse(p, state) then
 		return false
 	end
+	if isBusy(state) then
+		PlayerStateService.notify(p, "앞의 능력이 끝나면 쓸 수 있어요")
+		return false
+	end
 	table.remove(state.abilities, slot)
+	state.abilityBusyUntil = os.clock() + (ability.duration or 0)
 	ability.activate(p, state, services)
 	PlayerStateService.sync(p)
 	PlayerStateService.notify(p, ability.name .. "!")

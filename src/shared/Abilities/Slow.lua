@@ -7,6 +7,7 @@ local C = Config.Abilities.Slow
 return {
 	id = "slow",
 	name = "시간 느림",
+	duration = C.Seconds, -- 효과가 이어지는 시간 (이 동안은 다른 능력을 못 쓴다)
 
 	-- 살아 있을 때만 쓸 수 있다.
 	canUse = function(_who, state)

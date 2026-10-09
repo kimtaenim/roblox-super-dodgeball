@@ -31,6 +31,7 @@ end
 return {
 	id = "superwings",
 	name = "슈퍼날개",
+	duration = C.Seconds, -- 효과가 이어지는 시간 (이 동안은 다른 능력을 못 쓴다)
 
 	-- 살아 있을 때만 쓸 수 있다.
 	canUse = function(_who, state)
