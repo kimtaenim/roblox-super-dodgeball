@@ -50,7 +50,7 @@ Config.Ball = {
 	PickupRadius = 4, -- 이 거리 안의 죽은 공은 자동으로 줍는다
 	PickupCooldown = 0.5, -- 던진 직후 이 시간 동안은 다시 줍지 않는다
 	HitPadding = 0.6, -- 맞았는지 볼 때 공 둘레에 더하는 여유
-	GravityScale = 0.3, -- 날아가는 공이 받는 중력 비율
+	GravityScale = 0.15, -- 날아가는 공이 받는 중력 비율 (작을수록 멀리 날아간다)
 	MaxLiveSeconds = 5, -- 이보다 오래 날면 죽은 공이 된다
 	RespawnDelay = 3, -- 코트 밖 죽은 공이 중앙으로 돌아오기까지 시간
 	RespawnHeight = 3, -- 리스폰할 때 바닥에서 띄우는 높이
@@ -65,12 +65,12 @@ Config.Ball = {
 Config.Throw = {
 	MinHold = 0.3, -- 최소 파워가 되는 홀드 시간 (초)
 	MaxHold = 1.0, -- 최대 파워가 되는 홀드 시간 (초)
-	MaxSpeed = 80, -- 최대 속도 (스터드/초)
+	MaxSpeed = 100, -- 최대 속도 (스터드/초)
 	HandHeight = 1.5, -- 공이 출발하는 높이 (몸 중심에서 위로)
 	ForwardOffset = 3, -- 공이 출발하는 거리 (몸 중심에서 앞으로)
 	AimDistance = 1000, -- 마우스가 하늘을 가리킬 때 조준점 거리
-	TouchAimDistance = 30, -- 모바일 던지기 버튼 : 보는 방향으로 이만큼 앞을 조준
-	AssistMaxDistance = 60, -- 이 거리 안의 조준점은 떨어지는 만큼 위로 보정
+	TouchAimDistance = 45, -- 모바일 던지기 버튼 : 보는 방향으로 이만큼 앞을 조준
+	AssistMaxDistance = 90, -- 이 거리 안의 조준점은 떨어지는 만큼 위로 보정 (코트 끝에서 끝까지)
 }
 
 -- 캐치 (설계서 1.4장)
@@ -125,7 +125,7 @@ Config.Npc = {
 	ThinkInterval = 0.25, -- NPC가 다음 행동을 고르는 간격
 	AimDelayMin = 0.6, -- 공을 들고 던지기까지 최소 시간
 	AimDelayMax = 1.6, -- 공을 들고 던지기까지 최대 시간
-	ThrowRange = 35, -- 이 거리 안의 상대를 노린다
+	ThrowRange = 50, -- 이 거리 안의 상대를 노린다
 	AimError = 4, -- 조준이 빗나가는 정도 (스터드)
 	LeadFactor = 0.3, -- 움직이는 상대 앞쪽을 노리는 정도
 	HoldMin = 0.5, -- 던지기 홀드 시간 최소
