@@ -157,6 +157,7 @@ local function attachToHand(p, ball)
 	state.holder = p
 	state.outsideSince = nil
 	holding[p] = ball
+	Participants.setAttribute(p, "HoldingBall", true) -- 튜토리얼 안내용
 
 	ball.CanCollide = false
 	ball.Massless = true
@@ -177,6 +178,7 @@ local function detachFromHand(p)
 	end
 	holding[p] = nil
 	balls[ball].holder = nil
+	Participants.setAttribute(p, "HoldingBall", nil)
 
 	local weld = ball:FindFirstChild("HandWeld")
 	if weld then

@@ -122,14 +122,20 @@ local function runCountdown()
 	setPhase("Countdown", R.CountdownSeconds)
 	CourtService.setRadius(C.StartRadius, false)
 
-	local humans = 0
+	-- 이번 판에 들어갈 사람 수를 세고, 모두 처음 온 사람이면 튜토리얼 판이 된다
+	local humans, allNew = 0, true
 	for _, player in Players:GetPlayers() do
-		if Participants.fromPlayer(player) then
+		local p = Participants.fromPlayer(player)
+		if p then
 			humans += 1
+			allNew = allNew and p.roundsPlayed == 0
 		end
 	end
-	local npcCount = math.max(Config.Npc.TargetTotal - humans, R.MinParticipants - humans, 0)
-	NpcService.spawn(npcCount)
+	local tutorial = humans > 0 and allNew
+	gameState:SetAttribute("Tutorial", tutorial)
+	local target = if tutorial then Config.Tutorial.TargetTotal else Config.Npc.TargetTotal
+	local npcCount = math.max(target - humans, R.MinParticipants - humans, 0)
+	NpcService.spawn(npcCount, tutorial)
 
 	local total = 0
 	for _, p in Participants.all() do
@@ -197,12 +203,16 @@ local function cleanupRound()
 	AbilityService.cleanup()
 	NpcService.despawnAll()
 	for _, p in Participants.all() do
+		if p.inRound and not p.isNpc then
+			p.roundsPlayed += 1 -- 한 판을 끝까지 했으니 다음 판부터는 튜토리얼이 아니다
+		end
 		PlayerStateService.resetForLobby(p)
 	end
 	CourtService.setRadius(C.StartRadius, true)
 	BallService.setBallCount(B.MinCount)
 	BallService.resetAll()
 	gameState:SetAttribute("Winner", "")
+	gameState:SetAttribute("Tutorial", false)
 end
 
 -- 시작 : 서비스를 켜고 플레이어 이벤트를 연결한다.

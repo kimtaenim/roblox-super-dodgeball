@@ -102,7 +102,7 @@ Config.Abilities = {
 
 -- NPC (설계서 9장)
 Config.Npc = {
-	TargetTotal = 16, -- 한 판 참가자가 이 수가 되도록 NPC를 채운다
+	TargetTotal = 6, -- 한 판 참가자가 이 수가 되도록 NPC를 채운다 (너무 많으면 정신없다)
 	ThinkInterval = 0.25, -- NPC가 다음 행동을 고르는 간격
 	AimDelayMin = 0.6, -- 공을 들고 던지기까지 최소 시간
 	AimDelayMax = 1.6, -- 공을 들고 던지기까지 최대 시간
@@ -117,12 +117,22 @@ Config.Npc = {
 	WanderInterval = 2, -- 돌아다닐 곳을 새로 고르는 간격
 	MoveMargin = 4, -- 코트 끝에서 이만큼 안쪽으로만 다닌다
 	FallLimitY = -50, -- 이보다 아래로 떨어지면 코트에 다시 세운다
-	-- 인형 모습 (도플갱어 호텔의 동물 인형을 보이지 않는 R15 몸에 붙인다)
-	NameTagHeight = 2.6, -- 이름표가 인형 머리 위로 뜨는 높이
+	-- 생김새 : 평범한 사람 (피부색과 옷 색만 NPC마다 다르다)
+	SkinColors = {
+		Color3.fromRGB(255, 224, 189),
+		Color3.fromRGB(241, 194, 125),
+		Color3.fromRGB(224, 172, 105),
+		Color3.fromRGB(198, 134, 66),
+		Color3.fromRGB(141, 85, 36),
+	},
+	ShirtSaturation = 0.6, -- 윗옷 색의 진하기
+	ShirtBrightness = 0.85, -- 윗옷 색의 밝기
+	PantsColor = Color3.fromRGB(50, 60, 90), -- 바지 색
+	NameTagHeight = 2, -- 이름표가 머리 위로 뜨는 높이
 	NameTagWidth = 160, -- 이름표 너비 (픽셀)
 	NameTagTextSize = 18, -- 이름표 글자 크기
 	OutNameColor = Color3.fromRGB(150, 150, 150), -- 아웃된 NPC 이름표 색
-	SpeechHeight = 4.4, -- 말풍선이 인형 머리 위로 뜨는 높이
+	SpeechHeight = 3.6, -- 말풍선이 머리 위로 뜨는 높이
 	SpeechSeconds = 2, -- 말풍선이 떠 있는 시간
 	SpeechChance = 0.7, -- 사건이 생겼을 때 말할 확률 (너무 시끄럽지 않게)
 	SpeechMaxDistance = 80, -- 이보다 멀면 말풍선이 안 보인다
@@ -138,6 +148,13 @@ Config.Npc = {
 		revive = { "살았다!", "다시 간다!", "고마워!" },
 		ability = { "받아라!", "능력 발동!", "이번엔 내 차례!" },
 	},
+}
+
+-- 튜토리얼 : 처음 온 사람의 첫 판은 NPC 몇 명과만 천천히 한다
+Config.Tutorial = {
+	TargetTotal = 3, -- 튜토리얼 판 참가자 수 (나 + NPC 2명)
+	AimDelayScale = 2, -- NPC가 공을 들고 던지기까지 이 배수만큼 더 기다린다
+	CatchChance = 0, -- 튜토리얼 NPC는 캐치를 안 한다 (맞히는 재미를 먼저)
 }
 
 -- NPC·분신 애니메이션 (로블록스 기본 R15 애니메이션)

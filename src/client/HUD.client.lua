@@ -67,6 +67,8 @@ local messageLabel = makeLabel(gui, UDim2.new(0.5, 0, 0.35, 0), UDim2.new(0.9, 0
 local bigLabel = makeLabel(gui, UDim2.new(0.5, 0, 0.45, 0), UDim2.new(0.9, 0, 0, 90), 72)
 local warningLabel = makeLabel(gui, UDim2.new(0.5, 0, 0.55, 0), UDim2.new(0.9, 0, 0, 40), 30)
 warningLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
+local tutorialLabel = makeLabel(gui, UDim2.new(0.5, 0, 1, -150), UDim2.new(0.9, 0, 0, 36), 26)
+tutorialLabel.TextColor3 = Color3.fromRGB(255, 230, 120)
 
 local gaugeBack, gaugeFill = makeBar(gui, UDim2.new(0.5, 0, 1, -60), UDim2.new(0, 320, 0, 26), GAUGE_COLOR)
 local abilityLabel = makeLabel(gaugeBack, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
@@ -157,6 +159,28 @@ local function updateWarning(serverNow)
 	end
 end
 
+-- 튜토리얼 안내 : 지금 내 상황에 맞는 다음 할 일을 한 줄로 알려준다.
+local function updateTutorial(phaseName)
+	if not gameState:GetAttribute("Tutorial") or not player:GetAttribute("InRound") then
+		tutorialLabel.Text = ""
+		return
+	end
+	local gauge = player:GetAttribute("Gauge") or 0
+	if phaseName == "Countdown" then
+		tutorialLabel.Text = "연습 판이에요! 친구 2명과 피구를 배워 봐요"
+	elseif phaseName ~= "Playing" then
+		tutorialLabel.Text = ""
+	elseif player:GetAttribute("Status") == "Sitting" then
+		tutorialLabel.Text = "공이 날아올 때 F(오른쪽 클릭)를 누르면 잡고 다시 일어나요"
+	elseif gauge >= Config.Gauge.Max then
+		tutorialLabel.Text = "게이지가 꽉 찼어요! Q를 눌러 능력을 써 봐요"
+	elseif player:GetAttribute("HoldingBall") then
+		tutorialLabel.Text = "친구를 마우스로 가리키고, 왼쪽 클릭을 꾹 눌렀다 떼면 던져요"
+	else
+		tutorialLabel.Text = "빨간 공 가까이 걸어가면 저절로 주워요"
+	end
+end
+
 -- 서버가 보낸 알림 글자를 잠깐 띄운다.
 Remotes.get("Notify").OnClientEvent:Connect(function(text)
 	messageLabel.Text = text
@@ -175,6 +199,7 @@ RunService.RenderStepped:Connect(function()
 	updateGauge(now)
 	updatePower(now)
 	updateWarning(serverNow)
+	updateTutorial(phaseName)
 	if now >= messageHideAt then
 		messageLabel.Text = ""
 	end

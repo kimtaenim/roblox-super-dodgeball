@@ -7,6 +7,7 @@
 --   isNpc     = NPC면 true
 --   character = 지금 몸(Model)
 --   inRound   = 이번 판에 참가 중이면 true
+--   roundsPlayed = 끝까지 해 본 판 수 (0이면 첫 판 → 튜토리얼)
 --   state     = 설계서 1.3장 PlayerState
 
 local Participants = {}
@@ -45,6 +46,7 @@ function Participants.addPlayer(player)
 		isNpc = false,
 		character = player.Character,
 		inRound = false,
+		roundsPlayed = 0,
 		state = Participants.newState(),
 	})
 	byPlayer[player] = p
@@ -104,15 +106,10 @@ function Participants.getHumanoid(p)
 	return p.character and p.character:FindFirstChildOfClass("Humanoid")
 end
 
--- 공을 드는 오른손을 찾는다 (NPC 인형 손 → R15 RightHand → R6 Right Arm 순서).
+-- 오른손을 찾는다 (R15는 RightHand, R6는 Right Arm).
 function Participants.getHand(p)
 	local character = p.character
-	if not character then
-		return nil
-	end
-	local doll = character:FindFirstChild("Doll")
-	local dollHand = doll and doll:FindFirstChild("DollRightHand")
-	return dollHand or character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+	return character and (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
 end
 
 -- 몸이 멀쩡히 있는지 알려준다 (Humanoid 체력이 0보다 크다).

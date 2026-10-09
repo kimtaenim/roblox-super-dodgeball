@@ -1,5 +1,5 @@
 -- NPC를 만들고, 움직이고, 공을 던지고 잡게 한다 (설계서 9장).
--- 생김새는 도플갱어 호텔의 동물 인형(shared/Animals.lua)이다.
+-- 생김새는 평범한 사람(로블록스 R15 몸)이고, 피부색과 옷 색만 NPC마다 다르다.
 -- NPC도 사람과 똑같은 참가자라서 규칙은 다른 서비스가 똑같이 적용한다.
 
 local Players = game:GetService("Players")
@@ -7,7 +7,6 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Animals = require(ReplicatedStorage.Shared.Animals)
 local Participants = require(script.Parent.Participants)
 local BallService = require(script.Parent.BallService)
 local CourtService = require(script.Parent.CourtService)
@@ -22,6 +21,8 @@ local NpcService = {}
 local folder -- NPC 몸을 넣어 두는 폴더
 local brains = {} -- NPC 참가자 → 생각 기록
 local active = false -- 판이 진행 중일 때만 움직인다
+local aimDelayScale = 1 -- 공을 들고 던지기까지 기다리는 시간 배수 (튜토리얼은 더 느리다)
+local catchChance = N.CatchChance -- 날아오는 공을 잡을 확률 (튜토리얼은 0)
 
 -- 두 숫자 사이의 아무 숫자를 고른다.
 local function randomBetween(low, high)
@@ -75,90 +76,34 @@ function NpcService.setupAnimation(model)
 	play(idle)
 end
 
--- 인형 팔에 붙는 부품 이름
-local ARM_PARTS = { Sleeve = true, Cuff = true, Hand = true, Watch = true }
-
 -- 목록에서 아무거나 하나 고른다.
 local function pick(list)
 	return list[math.random(1, #list)]
 end
 
--- 인형 부품이 어느 몸 부위(R15 뼈)에 붙을지 정한다. 오른쪽 손은 공을 드는 손으로 이름을 바꾼다.
-local function boneFor(part, feet)
-	if part:FindFirstAncestor("HeadGroup") then
-		return "Head"
-	end
-	local side = if feet:PointToObjectSpace(part.Position).X >= 0 then "Right" else "Left"
-	local name = part.Name
-	if name == "Hand" and side == "Right" then
-		part.Name = "DollRightHand"
-	end
-	if name == "Leg" then
-		return side .. "UpperLeg"
-	elseif name == "Shoe" then
-		return side .. "Foot"
-	elseif ARM_PARTS[name] then
-		return side .. "UpperArm"
-	elseif name == "Tail" or name == "TailTip" then
-		return "LowerTorso"
-	end
-	return "UpperTorso"
+-- NPC 생김새(피부색·옷 색)를 정한다.
+local function makeDescription()
+	local description = Instance.new("HumanoidDescription")
+	local skin = pick(N.SkinColors)
+	local shirt = Color3.fromHSV(math.random(), N.ShirtSaturation, N.ShirtBrightness)
+	description.HeadColor = skin
+	description.LeftArmColor = skin
+	description.RightArmColor = skin
+	description.TorsoColor = shirt
+	description.LeftLegColor = N.PantsColor
+	description.RightLegColor = N.PantsColor
+	return description
 end
 
--- 보이지 않는 R15 몸에 도플갱어 호텔 동물 인형을 입힌다. 인형은 뼈를 따라 움직인다.
-local function dress(model, data)
-	local humanoid = model:FindFirstChildOfClass("Humanoid")
-	local root = model:FindFirstChild("HumanoidRootPart")
-
-	-- R15 몸은 숨긴다 (공 판정은 이 몸으로 한다)
-	for _, child in model:GetChildren() do
-		if child:IsA("BasePart") then
-			child.Transparency = 1
-		end
-	end
-	local face = model.Head:FindFirstChildOfClass("Decal")
-	if face then
-		face:Destroy()
-	end
-
-	-- 인형을 발밑에 맞춰 세운다
-	local doll = Animals.build(data, nil)
-	doll.Name = "Doll"
-	local feet = root.CFrame * CFrame.new(0, -(humanoid.HipHeight + root.Size.Y / 2), 0)
-	doll:PivotTo(feet)
-	if doll.PrimaryPart then
-		doll.PrimaryPart:Destroy() -- 발밑 기준 부품은 이제 필요 없다
-	end
-
-	-- 인형 부품마다 맞는 뼈에 붙인다
-	for _, part in doll:GetDescendants() do
-		if part:IsA("BasePart") then
-			local bone = model:FindFirstChild(boneFor(part, feet))
-			part.Anchored = false
-			part.CanCollide = false
-			part.CanQuery = false -- 공 판정은 숨은 R15 몸으로만 한다
-			part.CanTouch = false
-			part.Massless = true
-			local weld = Instance.new("WeldConstraint")
-			weld.Part0 = bone
-			weld.Part1 = part
-			weld.Parent = part
-		end
-	end
-	doll.Parent = model
-	return doll
-end
-
--- 인형 머리 위에 이름표를 단다. 아웃되면 회색으로 바뀐다.
-local function addNameTag(model, doll, text)
-	local head = doll.HeadGroup.PrimaryPart
+-- 머리 위에 이름표를 단다. 아웃되면 회색으로 바뀐다.
+local function addNameTag(model, text)
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NameTag"
 	tag.Size = UDim2.fromOffset(N.NameTagWidth, N.NameTagTextSize * 2)
 	tag.StudsOffset = Vector3.new(0, N.NameTagHeight, 0)
 	tag.AlwaysOnTop = true
 	tag.MaxDistance = N.SpeechMaxDistance
-	tag.Parent = head
+	tag.Parent = model.Head
 
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.fromScale(1, 1)
@@ -179,8 +124,7 @@ end
 
 -- NPC 머리 위에 말풍선을 잠깐 띄운다 (도플갱어 호텔 Npc.say와 같은 모양).
 local function say(model, text)
-	local doll = model:FindFirstChild("Doll")
-	local head = doll and doll.HeadGroup.PrimaryPart
+	local head = model:FindFirstChild("Head")
 	if not head then
 		return
 	end
@@ -224,45 +168,43 @@ local function onReaction(p, kind)
 	end
 end
 
--- n번째 NPC의 이름과 인형 정보를 정한다 (예: "고양이 민준").
-local function makeDollData(index)
-	local animal = pick(Animals.List)
-	local kind = Animals.Types[animal]
-	local kidName = N.Names[(index - 1) % #N.Names + 1]
-	return {
-		id = math.random(1, 1000000), -- 넥타이·모자 같은 소품이 이 숫자로 정해진다
-		name = kind.name .. " " .. kidName,
-		animal = animal,
-		fur = pick(kind.furs),
-		cloth = pick(Animals.Clothes),
-	}
+-- n번째 NPC 이름을 정한다 (이름이 모자라면 숫자를 붙인다).
+local function npcName(index)
+	local count = #N.Names
+	local name = N.Names[(index - 1) % count + 1]
+	local round = math.floor((index - 1) / count)
+	if round > 0 then
+		name ..= tostring(round + 1)
+	end
+	return name
 end
 
--- NPC를 count명 만들어 코트 안에 세운다.
-function NpcService.spawn(count)
+-- NPC를 count명 만들어 코트 안에 세운다. tutorial이면 천천히 던지고 캐치를 안 한다.
+function NpcService.spawn(count, tutorial)
+	aimDelayScale = if tutorial then Config.Tutorial.AimDelayScale else 1
+	catchChance = if tutorial then Config.Tutorial.CatchChance else N.CatchChance
 	for index = 1, count do
-		local data = makeDollData(index)
+		local name = npcName(index)
 		local ok, model = pcall(function()
-			return Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
+			return Players:CreateHumanoidModelFromDescription(makeDescription(), Enum.HumanoidRigType.R15)
 		end)
 		if not ok then
 			warn("NPC를 만들지 못했어요: " .. tostring(model))
 			continue
 		end
-		model.Name = data.name
+		model.Name = name
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
-		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 인형 이름표로 보여준다
+		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 이름표로 보여준다
 		humanoid.BreakJointsOnDeath = false
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- NPC는 죽지 않는다
-		local doll = dress(model, data)
-		addNameTag(model, doll, data.name)
+		addNameTag(model, name)
 
 		model.Parent = folder
 		model.HumanoidRootPart:SetNetworkOwner(nil) -- NPC 움직임은 서버가 계산한다
 		CourtService.placeInside(model)
 		NpcService.setupAnimation(model)
 
-		local p = Participants.addNpc(data.name, model)
+		local p = Participants.addNpc(name, model)
 		p.inRound = true
 		brains[p] = { nextThinkAt = 0, throwAt = nil, target = nil, wanderAt = 0, triedCatch = {} }
 	end
@@ -328,7 +270,7 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 	if not isGoodTarget(brain.target) then
 		brain.target = chooseTarget(p, root)
 	end
-	brain.throwAt = brain.throwAt or now + randomBetween(N.AimDelayMin, N.AimDelayMax)
+	brain.throwAt = brain.throwAt or now + randomBetween(N.AimDelayMin, N.AimDelayMax) * aimDelayScale
 	local target = brain.target
 	if not target then
 		return
@@ -395,7 +337,7 @@ local function tryCatch(p, brain)
 		local alreadyTried = brain.triedCatch[ball] == info.thrownAt
 		if info.thrower ~= p and coming and not alreadyTried and toMe.Magnitude <= N.CatchReactDistance then
 			brain.triedCatch[ball] = info.thrownAt
-			if math.random() < N.CatchChance then
+			if math.random() < catchChance then
 				BallService.pressCatch(p)
 			end
 		end
