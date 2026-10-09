@@ -20,4 +20,4 @@
 
 ## 실행
 - `rojo serve` 후 Studio에서 Rojo 플러그인 Connect.
-- Studio 실행 배치파일은 Flick Flock 레포와 같은 방식으로 둔다.
+- 바탕화면 배치파일 `SuperDodgeball.bat` : git pull → (첫 실행만) rojo build → rojo serve → Studio 열기. 레포는 배치파일 옆에 클론된다.
