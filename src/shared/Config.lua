@@ -133,7 +133,7 @@ Config.Npc = {
 		{ name = "민트", color = Color3.fromRGB(130, 220, 180) }, -- 민트
 		{ name = "하늘", color = Color3.fromRGB(120, 190, 240) }, -- 하늘
 		{ name = "분홍", color = Color3.fromRGB(250, 130, 130) }, -- 코랄핑크
-		{ name = "노랑", color = Color3.fromRGB(240, 200, 90) }, -- 머스터드
+		{ name = "노랑", color = Color3.fromRGB(255, 240, 100) }, -- 레몬옐로우
 		{ name = "주황", color = Color3.fromRGB(250, 160, 90) }, -- 살구
 		{ name = "보라", color = Color3.fromRGB(170, 140, 220) }, -- 라벤더
 	},
