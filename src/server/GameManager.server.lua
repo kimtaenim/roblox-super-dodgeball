@@ -16,6 +16,7 @@ local PlayerStateService = require(script.Parent.PlayerStateService)
 local CourtService = require(script.Parent.CourtService)
 local BallService = require(script.Parent.BallService)
 local AbilityService = require(script.Parent.AbilityService)
+local AbilityBoxService = require(script.Parent.AbilityBoxService)
 local NpcService = require(script.Parent.NpcService)
 
 local R = Config.Round
@@ -46,6 +47,7 @@ local function setRoundActive(on)
 	BallService.setRoundActive(on)
 	CourtService.setRoundActive(on)
 	AbilityService.setActive(on)
+	AbilityBoxService.setActive(on)
 	NpcService.setActive(on)
 end
 
@@ -139,7 +141,7 @@ local function runCountdown()
 
 	local total = 0
 	for _, p in Participants.all() do
-		PlayerStateService.resetForRound(p, AbilityService.randomId())
+		PlayerStateService.resetForRound(p)
 		if p.character then
 			CourtService.placeInside(p.character)
 		end
@@ -234,6 +236,7 @@ end
 CourtService.start()
 BallService.start()
 AbilityService.start(services)
+AbilityBoxService.start()
 NpcService.start()
 CourtService.setRadius(C.StartRadius, false)
 BallService.setBallCount(B.MinCount)
@@ -244,8 +247,8 @@ for _, player in Players:GetPlayers() do
 	task.spawn(onPlayerAdded, player)
 end
 
-RunService.Heartbeat:Connect(function(dt)
-	PlayerStateService.tick(dt, phase == "Playing")
+RunService.Heartbeat:Connect(function()
+	PlayerStateService.tick()
 end)
 
 -- 게임은 이 순서를 계속 되풀이한다

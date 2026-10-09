@@ -1,4 +1,4 @@
--- 분신술 : 내 모습의 분신 3개가 5초 동안 돌아다닌다. 공에 맞으면 펑 터진다.
+-- 분신술 : 내 모습의 분신 3개가 5초 동안 돌아다닌다. 공에 맞으면 펑 터진다. NPC도 분신을 진짜로 알고 노린다.
 -- (터지는 판정은 BallService가 한다. 분신은 참가자가 아니라서 아웃되지 않는다)
 
 local Config = require(script.Parent.Parent.Config)
@@ -46,6 +46,7 @@ return {
 					child:Destroy()
 				end
 			end
+			decoy:SetAttribute("DecoyOf", who.name) -- 누구 분신인지 (NPC가 자기 분신은 안 노리게)
 			decoy.Parent = services.Balls.getDecoyFolder()
 			local root = decoy:FindFirstChild("HumanoidRootPart")
 			if root then

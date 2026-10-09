@@ -72,6 +72,10 @@ local function makeDead(ball)
 	state.thrower = nil
 	state.flags = {}
 	setLift(ball, 0)
+	local fire = ball:FindFirstChild("SuperFire")
+	if fire then
+		fire:Destroy()
+	end
 	if state.temporary then
 		balls[ball] = nil
 		ball:Destroy()
@@ -242,7 +246,7 @@ local function launch(ball, p, start, velocity, flags, lift)
 	setLift(ball, lift)
 end
 
--- 참가자가 조준점을 향해 공을 던진다. 능력(강속구·유도탄·공 두 개)도 여기서 붙는다.
+-- 참가자가 조준점을 향해 공을 던진다. 능력(슈퍼강속구·유도탄·공 두 개)도 여기서 붙는다.
 function BallService.throw(p, aimPoint, holdSeconds)
 	if p.state.status ~= "Alive" or not holding[p] then
 		return false
@@ -271,14 +275,20 @@ function BallService.throw(p, aimPoint, holdSeconds)
 	local lift = 1 - B.GravityScale
 	local flags = { homing = nextThrow.homing }
 	if nextThrow.fast then
-		speed *= A.Fastball.SpeedMultiplier
-		lift = 1 -- 강속구는 중력을 받지 않는다
+		speed *= A.SuperFastball.SpeedMultiplier
+		lift = 1 -- 슈퍼강속구는 중력을 받지 않는다
 		flags.fast = true
 	end
 	local direction = aimDirection(start, aimPoint, speed, 1 - lift)
 
 	local ball = detachFromHand(p)
 	launch(ball, p, start, direction * speed, flags, lift)
+	if flags.fast then
+		local fire = Instance.new("Fire") -- 슈퍼강속구 불꽃 (죽은 공이 되면 꺼진다)
+		fire.Name = "SuperFire"
+		fire.Size = A.SuperFastball.FireSize
+		fire.Parent = ball
+	end
 
 	-- 공 두 개 : 옆으로 벌어진 복제 공을 하나 더 던진다
 	if nextThrow.double then
@@ -354,8 +364,9 @@ local function judgeContact(ball, state, part)
 	local now = os.clock()
 	local thrower = state.thrower
 
-	-- ① 닿기 전 0.5초 안에 캐치 버튼을 눌렀으면 캐치 (Alive·Sitting 모두)
-	if now - p.state.lastCatchPress <= Config.Catch.Window then
+	-- ① 닿기 전 0.5초 안에 캐치 버튼을 눌렀거나 슈퍼캐치 중이면 캐치 (Alive·Sitting 모두)
+	local superCatch = p.state.superCatchUntil > now and p.state.status == "Alive"
+	if superCatch or now - p.state.lastCatchPress <= Config.Catch.Window then
 		p.state.lastCatchPress = -math.huge
 		PlayerStateService.catch(p, thrower)
 		if thrower and thrower.state.status == "Sitting" then
@@ -553,20 +564,6 @@ function BallService.liveBalls()
 		end
 	end
 	return result
-end
-
--- 자석 : 주변의 죽은 공을 참가자 쪽으로 끌어온다.
-function BallService.pullFreeBalls(p, radius, speed, up)
-	local root = Participants.getRoot(p)
-	if not root then
-		return
-	end
-	for ball, state in balls do
-		local toRoot = root.Position - ball.Position
-		if isFree(state) and toRoot.Magnitude <= radius and toRoot.Magnitude > 1e-3 then
-			ball.AssemblyLinearVelocity = toRoot.Unit * speed + Vector3.new(0, up, 0)
-		end
-	end
 end
 
 -- 공 개수를 맞춘다 (복제 공은 세지 않는다).

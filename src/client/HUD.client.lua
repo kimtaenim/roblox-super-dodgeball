@@ -1,4 +1,5 @@
--- 화면 표시 : 남은 시간, 살아남은 사람 수, 내 상태, 능력 게이지, 파워 막대, 알림.
+-- 화면 표시 : 남은 시간, 살아남은 사람 수, 내 상태, 갖고 있는 능력, 파워 막대, 알림.
+-- 투명 능력을 쓰면 내 화면에서는 내 몸이 반쯤 보이게 한다.
 -- 서버가 적어 둔 속성(GameState, 내 Player)을 읽어서 보여주기만 한다.
 
 local Players = game:GetService("Players")
@@ -11,8 +12,8 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local player = Players.LocalPlayer
 local gameState = ReplicatedStorage:WaitForChild("GameState")
 
-local FULL_COLOR = Color3.fromRGB(255, 210, 60) -- 게이지가 찼을 때 색
-local GAUGE_COLOR = Color3.fromRGB(80, 200, 255) -- 게이지 색
+local FULL_COLOR = Color3.fromRGB(255, 210, 60) -- 능력 칸이 깜빡일 때 색
+local ABILITY_COLOR = Color3.fromRGB(80, 200, 255) -- 능력 칸 색
 local POWER_COLOR = Color3.fromRGB(255, 120, 60) -- 파워 막대 색
 local DARK = Color3.fromRGB(20, 20, 30) -- 배경 색
 local WHITE = Color3.new(1, 1, 1)
@@ -70,8 +71,9 @@ warningLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
 local tutorialLabel = makeLabel(gui, UDim2.new(0.5, 0, 1, -150), UDim2.new(0.9, 0, 0, 36), 26)
 tutorialLabel.TextColor3 = Color3.fromRGB(255, 230, 120)
 
-local gaugeBack, gaugeFill = makeBar(gui, UDim2.new(0.5, 0, 1, -60), UDim2.new(0, 320, 0, 26), GAUGE_COLOR)
-local abilityLabel = makeLabel(gaugeBack, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
+local abilityBack, abilityFill = makeBar(gui, UDim2.new(0.5, 0, 1, -60), UDim2.new(0, 320, 0, 26), ABILITY_COLOR)
+abilityFill.Size = UDim2.fromScale(1, 1)
+local abilityLabel = makeLabel(abilityBack, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
 abilityLabel.ZIndex = 2
 local powerBack, powerFill = makeBar(gui, UDim2.new(0.5, 0, 1, -100), UDim2.new(0, 200, 0, 14), POWER_COLOR)
 
@@ -121,23 +123,30 @@ local function updateStatus(phaseName)
 	end
 end
 
--- 능력 게이지 : 가득 차면 깜빡인다.
-local function updateGauge(now)
+-- 능력 칸 : 상자에서 주운 능력이 있으면 깜빡이며 보여준다.
+local function updateAbility(now)
 	local abilityName = player:GetAttribute("AbilityName")
-	gaugeBack.Visible = abilityName ~= nil
+	abilityBack.Visible = abilityName ~= nil
 	if not abilityName then
 		return
 	end
-	local gauge = player:GetAttribute("Gauge") or 0
-	local ratio = math.clamp(gauge / Config.Gauge.Max, 0, 1)
-	gaugeFill.Size = UDim2.fromScale(ratio, 1)
-	if ratio >= 1 then
-		local blink = (math.sin(now * Config.Hud.FlashSpeed) + 1) / 2
-		gaugeFill.BackgroundColor3 = GAUGE_COLOR:Lerp(FULL_COLOR, blink)
-		abilityLabel.Text = abilityName .. " 준비 완료! (Q)"
-	else
-		gaugeFill.BackgroundColor3 = GAUGE_COLOR
-		abilityLabel.Text = abilityName .. "  " .. math.floor(gauge) .. "%"
+	local blink = (math.sin(now * Config.Hud.FlashSpeed) + 1) / 2
+	abilityFill.BackgroundColor3 = ABILITY_COLOR:Lerp(FULL_COLOR, blink)
+	abilityLabel.Text = abilityName .. "! (Q)"
+end
+
+-- 투명 중에는 내 화면에서만 내 몸을 반쯤 보이게 한다 (다른 사람 화면에는 거의 안 보인다).
+local function updateSelfVisibility()
+	local character = player.Character
+	if not character or not player:GetAttribute("Invisible") then
+		return
+	end
+	local half = Config.Abilities.Invisible.SelfTransparency
+	for _, part in character:GetDescendants() do
+		local seeThrough = (part:IsA("BasePart") or part:IsA("Decal")) and part.Transparency > half
+		if seeThrough and part.Transparency < 1 then
+			part.Transparency = half -- 이 바꿈은 내 화면에만 보인다
+		end
 	end
 end
 
@@ -167,7 +176,6 @@ local function updateTutorial(phaseName)
 		tutorialLabel.Text = ""
 		return
 	end
-	local gauge = player:GetAttribute("Gauge") or 0
 	if phaseName == "Countdown" then
 		tutorialLabel.Text = "연습 판이에요! 친구 2명과 피구를 배워 봐요"
 	elseif phaseName == "Demo" then
@@ -176,8 +184,8 @@ local function updateTutorial(phaseName)
 		tutorialLabel.Text = ""
 	elseif player:GetAttribute("Status") == "Sitting" then
 		tutorialLabel.Text = "공이 날아올 때 F(오른쪽 클릭)를 누르면 잡고 다시 일어나요"
-	elseif gauge >= Config.Gauge.Max then
-		tutorialLabel.Text = "게이지가 꽉 찼어요! Q를 눌러 능력을 써 봐요"
+	elseif player:GetAttribute("AbilityName") then
+		tutorialLabel.Text = "능력이 생겼어요! Q를 눌러 써 봐요"
 	elseif player:GetAttribute("HoldingBall") then
 		tutorialLabel.Text = "친구를 마우스로 가리키고, 왼쪽 클릭을 꾹 눌렀다 떼면 던져요"
 	else
@@ -200,7 +208,8 @@ RunService.RenderStepped:Connect(function()
 
 	updateTop(phaseName, remaining)
 	updateStatus(phaseName)
-	updateGauge(now)
+	updateAbility(now)
+	updateSelfVisibility()
 	updatePower(now)
 	updateWarning(serverNow)
 	updateTutorial(phaseName)

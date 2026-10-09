@@ -11,6 +11,7 @@ local Participants = require(script.Parent.Participants)
 local BallService = require(script.Parent.BallService)
 local CourtService = require(script.Parent.CourtService)
 local AbilityService = require(script.Parent.AbilityService)
+local AbilityBoxService = require(script.Parent.AbilityBoxService)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 
 local N = Config.Npc
@@ -240,20 +241,51 @@ function NpcService.setActive(on)
 	active = on
 end
 
--- 노릴 상대를 고른다 : 사거리 안의 살아 있는 상대 중 아무나 (투명한 상대는 빼고).
+-- 노릴 대상의 몸 중심을 찾는다. 대상은 참가자이거나 분신(Model)이다.
+local function targetRoot(target)
+	if typeof(target) == "Instance" then
+		return target.Parent and target:FindFirstChild("HumanoidRootPart")
+	end
+	return Participants.getRoot(target)
+end
+
+-- 대상이 아직 노릴 만한지 확인한다. 투명한 상대는 안 보여서 못 노린다.
+local function isGoodTarget(target)
+	if target == nil then
+		return false
+	end
+	if typeof(target) == "Instance" then
+		return targetRoot(target) ~= nil -- 분신은 터지기 전까지 진짜처럼 보인다
+	end
+	return target.inRound
+		and target.state.status == "Alive"
+		and target.state.invisibleUntil <= os.clock()
+		and Participants.getRoot(target) ~= nil
+end
+
+-- 노릴 상대를 고른다 : 사거리 안에 보이는 상대 중 아무나. 분신도 진짜인 줄 알고 노린다 (내 분신은 빼고).
 local function chooseTarget(p, myRoot)
-	local now = os.clock()
-	local inRange, nearest, nearestDistance = {}, nil, math.huge
+	local candidates = {}
 	for _, other in Participants.all() do
-		local root = Participants.getRoot(other)
-		local visible = other.state.invisibleUntil <= now
-		if root and other ~= p and other.inRound and other.state.status == "Alive" and visible then
-			local distance = (root.Position - myRoot.Position).Magnitude
+		if other ~= p then
+			table.insert(candidates, other)
+		end
+	end
+	for _, decoy in BallService.getDecoyFolder():GetChildren() do
+		if decoy:GetAttribute("DecoyOf") ~= p.name then
+			table.insert(candidates, decoy)
+		end
+	end
+
+	local inRange, nearest, nearestDistance = {}, nil, math.huge
+	for _, target in candidates do
+		if isGoodTarget(target) then
+			local distance = (targetRoot(target).Position - myRoot.Position).Magnitude
 			if distance <= N.ThrowRange then
-				table.insert(inRange, other)
+				table.insert(inRange, target)
 			end
 			if distance < nearestDistance then
-				nearest, nearestDistance = other, distance
+				nearest, nearestDistance = target, distance
 			end
 		end
 	end
@@ -261,15 +293,6 @@ local function chooseTarget(p, myRoot)
 		return inRange[math.random(1, #inRange)]
 	end
 	return nearest
-end
-
--- 상대가 아직 노릴 만한지 확인한다.
-local function isGoodTarget(target)
-	return target ~= nil
-		and target.inRound
-		and target.state.status == "Alive"
-		and target.state.invisibleUntil <= os.clock()
-		and Participants.getRoot(target) ~= nil
 end
 
 -- 코트 안쪽으로 걸어가게 한다.
@@ -288,30 +311,34 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 		return
 	end
 
-	local targetRoot = Participants.getRoot(target)
-	local distance = (targetRoot.Position - root.Position).Magnitude
+	local aimRoot = targetRoot(target)
+	local distance = (aimRoot.Position - root.Position).Magnitude
 	if distance > N.ThrowRange then
-		walkTo(humanoid, targetRoot.Position)
+		walkTo(humanoid, aimRoot.Position)
 		return
 	end
 	humanoid:MoveTo(root.Position) -- 사거리 안이면 멈춰 선다
 
 	if now >= brain.throwAt then
-		local lead = targetRoot.AssemblyLinearVelocity * N.LeadFactor
+		local lead = aimRoot.AssemblyLinearVelocity * N.LeadFactor
 		local miss = Vector3.new(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)) * N.AimError
-		BallService.throw(p, targetRoot.Position + lead + miss, randomBetween(N.HoldMin, N.HoldMax))
+		BallService.throw(p, aimRoot.Position + lead + miss, randomBetween(N.HoldMin, N.HoldMax))
 		onReaction(p, "throw")
 		brain.throwAt = nil
 		brain.target = nil
 	end
 end
 
--- 빈손일 때 : 가까운 공으로 가고, 공이 없으면 돌아다닌다.
-local function thinkEmptyHanded(brain, root, humanoid, now)
+-- 빈손일 때 : 능력이 없고 상자가 공보다 가까우면 상자로, 아니면 가까운 공으로 간다. 둘 다 없으면 돌아다닌다.
+local function thinkEmptyHanded(p, brain, root, humanoid, now)
 	brain.throwAt = nil
 	brain.target = nil
 	local ball = BallService.nearestFreeBall(root.Position)
-	if ball then
+	local box = p.state.ability == nil and AbilityBoxService.nearestBox(root.Position)
+	local boxIsCloser = box and (not ball or (box.Position - root.Position).Magnitude < (ball.Position - root.Position).Magnitude)
+	if boxIsCloser then
+		walkTo(humanoid, box.Position)
+	elseif ball then
 		walkTo(humanoid, ball.Position)
 	elseif now >= brain.wanderAt then
 		local angle = math.random() * math.pi * 2
@@ -331,13 +358,13 @@ local function think(p, brain, now)
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
 		return
 	end
-	if p.state.gauge >= Config.Gauge.Max then
-		AbilityService.use(p)
+	if p.state.ability then
+		AbilityService.use(p) -- 상자에서 주운 능력은 바로 쓴다
 	end
 	if BallService.isHolding(p) then
 		thinkWithBall(p, brain, root, humanoid, now)
 	else
-		thinkEmptyHanded(brain, root, humanoid, now)
+		thinkEmptyHanded(p, brain, root, humanoid, now)
 	end
 end
 

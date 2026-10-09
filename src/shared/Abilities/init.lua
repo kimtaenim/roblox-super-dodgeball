@@ -6,8 +6,8 @@ local list = {
 	require(script.DoubleBall),
 	require(script.Clone),
 	require(script.Shield),
-	require(script.Magnet),
-	require(script.Fastball),
+	require(script.SuperCatch),
+	require(script.SuperFastball),
 	require(script.Homing),
 	require(script.Invisible),
 	require(script.Slow),
@@ -25,9 +25,20 @@ function Abilities.get(id)
 	return id and byId[id]
 end
 
--- 아무 능력 id를 하나 고른다.
-function Abilities.randomId()
-	return list[math.random(1, #list)].id
+-- 아무 능력 id를 하나 고른다. weights(id → 숫자)가 있으면 숫자가 큰 능력이 더 자주 나온다.
+function Abilities.randomId(weights)
+	local total = 0
+	for _, ability in list do
+		total += if weights then weights[ability.id] or 0 else 1
+	end
+	local roll = math.random() * total
+	for _, ability in list do
+		roll -= if weights then weights[ability.id] or 0 else 1
+		if roll <= 0 then
+			return ability.id
+		end
+	end
+	return list[#list].id
 end
 
 return Abilities

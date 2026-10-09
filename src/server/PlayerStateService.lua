@@ -1,4 +1,4 @@
--- 참가자의 상태(Alive/Sitting)를 바꾼다 : 아웃, 캐치, 부활 연쇄, 게이지.
+-- 참가자의 상태(Alive/Sitting)를 바꾼다 : 아웃, 캐치, 부활 연쇄.
 -- 설계서 1.2장, 1.4장 규칙이 여기 들어 있다.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,8 +7,6 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Abilities = require(ReplicatedStorage.Shared.Abilities)
 local Participants = require(script.Parent.Participants)
-
-local G = Config.Gauge
 
 local PlayerStateService = {}
 
@@ -44,7 +42,6 @@ function PlayerStateService.sync(p)
 	local state = p.state
 	local ability = Abilities.get(state.ability)
 	Participants.setAttribute(p, "Status", state.status)
-	Participants.setAttribute(p, "Gauge", math.floor(state.gauge))
 	Participants.setAttribute(p, "AbilityName", ability and ability.name or nil)
 	Participants.setAttribute(p, "Kills", state.totalKills)
 	Participants.setAttribute(p, "InRound", p.inRound)
@@ -112,15 +109,6 @@ local function reviveKillsOf(p)
 	p.state.kills = {}
 end
 
--- 게이지를 더한다 (이번 판 참가 중이고 살아 있을 때만).
-function PlayerStateService.addGauge(p, amount)
-	if not p.inRound or p.state.status ~= "Alive" then
-		return
-	end
-	p.state.gauge = math.min(G.Max, p.state.gauge + amount)
-	PlayerStateService.sync(p)
-end
-
 -- 참가자를 아웃시킨다 (Sitting). how는 "hit"(맞음) 또는 "catch"(공이 잡힘).
 function PlayerStateService.knockOut(victim, by, how)
 	if victim.state.status ~= "Alive" then
@@ -133,8 +121,7 @@ function PlayerStateService.knockOut(victim, by, how)
 	if by then
 		table.insert(by.state.kills, victim)
 		by.state.totalKills += 1
-		PlayerStateService.addGauge(by, G.KillBonus)
-		PlayerStateService.notify(by, victim.name .. " 아웃! (+" .. G.KillBonus .. ")")
+		PlayerStateService.notify(by, victim.name .. " 아웃!")
 		PlayerStateService.sync(by)
 		if how ~= "catch" then
 			PlayerStateService.react(by, "kill")
@@ -165,8 +152,7 @@ function PlayerStateService.catch(catcher, thrower)
 		end
 		standUp(catcher)
 	end
-	PlayerStateService.addGauge(catcher, G.CatchBonus)
-	PlayerStateService.notify(catcher, "캐치 성공! (+" .. G.CatchBonus .. ")")
+	PlayerStateService.notify(catcher, "캐치 성공!")
 	PlayerStateService.react(catcher, "catch")
 	if thrower and thrower ~= catcher then
 		PlayerStateService.knockOut(thrower, catcher, "catch")
@@ -174,10 +160,9 @@ function PlayerStateService.catch(catcher, thrower)
 	PlayerStateService.sync(catcher)
 end
 
--- 새 판을 위해 상태를 처음으로 되돌리고 능력을 준다.
-function PlayerStateService.resetForRound(p, abilityId)
+-- 새 판을 위해 상태를 처음으로 되돌린다 (능력은 판 도중 상자에서 줍는다).
+function PlayerStateService.resetForRound(p)
 	p.state = Participants.newState()
-	p.state.ability = abilityId
 	p.inRound = true
 	standUp(p)
 end
@@ -197,12 +182,9 @@ function PlayerStateService.onLeave(p)
 	end
 end
 
--- 매 프레임 : 살아 있으면 게이지를 채우고, 몸 상태를 맞춘다.
-function PlayerStateService.tick(dt, playing)
+-- 매 프레임 : 몸 상태를 맞추고 화면용 속성을 적는다.
+function PlayerStateService.tick()
 	for _, p in Participants.all() do
-		if playing and p.inRound and p.state.status == "Alive" then
-			p.state.gauge = math.min(G.Max, p.state.gauge + G.PerSecond * dt)
-		end
 		PlayerStateService.applyBody(p)
 		PlayerStateService.sync(p)
 	end

@@ -79,12 +79,29 @@ Config.Catch = {
 	Cooldown = 1.0, -- 캐치 버튼은 이 시간에 한 번만
 }
 
--- 능력 게이지 (설계서 2.1장)
-Config.Gauge = {
-	Max = 100, -- 가득 찬 게이지
-	PerSecond = 4, -- 살아 있으면 1초마다 늘어나는 양
-	KillBonus = 25, -- 아웃시키면 더하는 양
-	CatchBonus = 30, -- 캐치하면 더하는 양
+-- 능력 상자 (설계서 2.1장) : 판 도중 코트에 떨어지고, 주우면 능력 하나를 갖는다
+Config.AbilityBox = {
+	FirstDelay = 5, -- 판이 시작되고 첫 상자가 떨어지기까지 (초)
+	Interval = 8, -- 상자가 떨어지는 간격 (초)
+	MaxOnCourt = 3, -- 코트에 동시에 있을 수 있는 상자 수
+	PickupRadius = 4, -- 이 거리 안에 오면 줍는다
+	Size = 2.5, -- 상자 크기
+	Color = Color3.fromRGB(255, 200, 60), -- 상자 색
+	SpawnRadiusRatio = 0.8, -- 떨어지는 위치 : 반지름의 몇 배 안쪽
+	Height = 2, -- 바닥에서 떠 있는 높이
+	SpinDegreesPerSecond = 90, -- 빙글빙글 도는 빠르기
+	-- 능력이 나올 비율 (숫자가 클수록 자주 나온다)
+	Weights = {
+		teleport = 3,
+		doubleball = 3,
+		clone = 3,
+		shield = 3,
+		supercatch = 3,
+		superfastball = 2,
+		homing = 2,
+		invisible = 3,
+		slow = 3,
+	},
 }
 
 -- 능력 9종 (설계서 2.2장)
@@ -93,10 +110,10 @@ Config.Abilities = {
 	DoubleBall = { SpreadDegrees = 15 }, -- 두 번째 공이 벌어지는 각도
 	Clone = { Count = 3, Seconds = 5, WanderRadius = 15, WanderInterval = 1, EdgeMargin = 2 },
 	Shield = { Seconds = 3, BounceSpeed = 30, BounceUp = 15 }, -- 튕겨 나가는 속도
-	Magnet = { Radius = 25, PullSpeed = 40, PullUp = 10 }, -- 끌어오는 범위·속도
-	Fastball = { SpeedMultiplier = 2 }, -- 속도 몇 배
+	SuperCatch = { Seconds = 5, Color = Color3.fromRGB(120, 255, 160) }, -- 자동으로 잡는 시간, 몸이 빛나는 색
+	SuperFastball = { SpeedMultiplier = 3, FireSize = 4 }, -- 속도 몇 배, 불꽃 크기
 	Homing = { Seconds = 2, TurnDegreesPerSecond = 240 }, -- 추적 시간, 1초에 꺾는 최대 각도
-	Invisible = { Seconds = 4, Transparency = 0.9 },
+	Invisible = { Seconds = 4, Transparency = 0.9, SelfTransparency = 0.5 }, -- 남이 볼 때, 내 화면에서 볼 때
 	Slow = { Radius = 30, Seconds = 3, SpeedFactor = 0.5 },
 }
 
@@ -193,7 +210,7 @@ Config.Animation = {
 -- 화면 표시
 Config.Hud = {
 	MessageSeconds = 2.5, -- 알림 글자가 떠 있는 시간
-	FlashSpeed = 6, -- 게이지가 가득 찼을 때 깜빡이는 빠르기
+	FlashSpeed = 6, -- 능력을 갖고 있을 때 능력 칸이 깜빡이는 빠르기
 }
 
 return Config

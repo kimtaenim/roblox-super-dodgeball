@@ -1,4 +1,5 @@
--- 투명 : 4초 동안 몸이 거의 안 보인다 (손에 든 공은 보인다).
+-- 투명 : 4초 동안 몸이 거의 안 보인다 (손에 든 공은 보인다). NPC도 못 보고 안 노린다.
+-- 내 화면에서는 내 몸이 반쯤 보인다 (HUD가 Invisible 속성을 보고 바꾼다).
 
 local Config = require(script.Parent.Parent.Config)
 local C = Config.Abilities.Invisible
@@ -19,6 +20,7 @@ return {
 			return
 		end
 		state.invisibleUntil = os.clock() + C.Seconds
+		services.Participants.setAttribute(who, "Invisible", true)
 
 		local saved = {} -- 원래 투명도를 기억해 둔다
 		for _, part in character:GetDescendants() do
@@ -55,6 +57,7 @@ return {
 			for _, gui in tags do
 				gui.Enabled = true
 			end
+			services.Participants.setAttribute(who, "Invisible", nil)
 		end)
 	end,
 }

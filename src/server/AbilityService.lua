@@ -1,9 +1,8 @@
--- 능력을 쓰게 해 준다 : 게이지 확인, 능력 실행, 판 끝 정리 (설계서 2장).
+-- 능력을 쓰게 해 준다 : 상자에서 주운 능력 실행, 판 끝 정리 (설계서 2장).
 -- 능력마다 하는 일은 shared/Abilities/ 모듈에 들어 있다.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Abilities = require(ReplicatedStorage.Shared.Abilities)
 local Participants = require(script.Parent.Participants)
@@ -19,22 +18,17 @@ function AbilityService.setActive(on)
 	active = on
 end
 
--- 아무 능력 id를 하나 고른다 (1차는 랜덤 배정).
-function AbilityService.randomId()
-	return Abilities.randomId()
-end
-
--- 참가자가 능력을 쓴다. 게이지가 가득 차 있어야 한다. 쓰면 true.
+-- 참가자가 갖고 있는 능력을 쓴다. 쓰면 true (능력은 한 번 쓰면 없어진다).
 function AbilityService.use(p)
 	if not active or not p.inRound then
 		return false
 	end
 	local state = p.state
 	local ability = Abilities.get(state.ability)
-	if not ability or state.gauge < Config.Gauge.Max or not ability.canUse(p, state) then
+	if not ability or not ability.canUse(p, state) then
 		return false
 	end
-	state.gauge = 0
+	state.ability = nil
 	ability.activate(p, state, services)
 	PlayerStateService.sync(p)
 	PlayerStateService.notify(p, ability.name .. "!")
@@ -46,9 +40,11 @@ end
 function AbilityService.cleanup()
 	services.Balls.getDecoyFolder():ClearAllChildren()
 	for _, p in Participants.all() do
-		local shield = p.character and p.character:FindFirstChild("ShieldEffect")
-		if shield then
-			shield:Destroy()
+		for _, name in { "ShieldEffect", "SuperCatchEffect" } do
+			local effect = p.character and p.character:FindFirstChild(name)
+			if effect then
+				effect:Destroy()
+			end
 		end
 	end
 end
