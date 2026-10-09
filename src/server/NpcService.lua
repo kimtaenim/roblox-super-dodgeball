@@ -95,8 +95,8 @@ local function makeDescription(shirt)
 	return description
 end
 
--- 머리 위에 이름표(윗옷 색 이름)를 단다. 글자도 그 색이고, 아웃되면 "(아웃)"이 붙는다.
-local function addNameTag(model, text, color)
+-- 머리 위에 이름표(윗옷 색 이름)를 단다. 글자는 검은색이고, 아웃되면 "(아웃)"이 붙는다.
+local function addNameTag(model, text)
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NameTag"
 	tag.Size = UDim2.fromOffset(N.NameTagWidth, N.NameTagTextSize * 2)
@@ -110,7 +110,7 @@ local function addNameTag(model, text, color)
 	label.BackgroundTransparency = 1
 	label.Font = Enum.Font.GothamBold
 	label.TextSize = N.NameTagTextSize
-	label.TextColor3 = color
+	label.TextColor3 = N.NameTagTextColor
 	label.TextStrokeTransparency = 0.3
 	label.Text = text
 	label.Parent = tag
@@ -202,7 +202,7 @@ function NpcService.spawn(count, tutorial)
 		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 이름표로 보여준다
 		humanoid.BreakJointsOnDeath = false
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- NPC는 죽지 않는다
-		addNameTag(model, name, shirt.color)
+		addNameTag(model, name)
 
 		model.Parent = folder
 		model.HumanoidRootPart:SetNetworkOwner(nil) -- NPC 움직임은 서버가 계산한다

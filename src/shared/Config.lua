@@ -125,7 +125,7 @@ Config.Npc = {
 		Color3.fromRGB(198, 134, 66),
 		Color3.fromRGB(141, 85, 36),
 	},
-	-- 윗옷 색. NPC 이름이 이 색 이름이 된다 (이름표 글자도 이 색)
+	-- 윗옷 색. NPC 이름이 이 색 이름이 된다
 	-- 이름은 쉬운 색 이름, 실제 색은 눈이 편한 부드러운 색 (괄호 안이 실제 색)
 	Shirts = {
 		{ name = "빨강", color = Color3.fromRGB(240, 95, 70) }, -- 다홍
@@ -134,13 +134,14 @@ Config.Npc = {
 		{ name = "하늘", color = Color3.fromRGB(120, 190, 240) }, -- 하늘
 		{ name = "분홍", color = Color3.fromRGB(250, 130, 130) }, -- 코랄핑크
 		{ name = "노랑", color = Color3.fromRGB(255, 240, 100) }, -- 레몬옐로우
-		{ name = "주황", color = Color3.fromRGB(250, 160, 90) }, -- 살구
+		{ name = "주황", color = Color3.fromRGB(255, 180, 120) }, -- 피치 오렌지
 		{ name = "보라", color = Color3.fromRGB(170, 140, 220) }, -- 라벤더
 	},
 	PantsColor = Color3.fromRGB(50, 60, 90), -- 바지 색
 	NameTagHeight = 2, -- 이름표가 머리 위로 뜨는 높이
 	NameTagWidth = 160, -- 이름표 너비 (픽셀)
 	NameTagTextSize = 18, -- 이름표 글자 크기
+	NameTagTextColor = Color3.new(0, 0, 0), -- 이름표 글자 색 (검은색)
 	SpeechHeight = 3.6, -- 말풍선이 머리 위로 뜨는 높이
 	SpeechSeconds = 2, -- 말풍선이 떠 있는 시간
 	SpeechChance = 0.3, -- 사건이 생겼을 때 말할 확률 (너무 시끄럽지 않게)
