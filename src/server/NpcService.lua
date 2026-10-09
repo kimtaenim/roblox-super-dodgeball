@@ -23,6 +23,7 @@ local brains = {} -- NPC 참가자 → 생각 기록
 local active = false -- 판이 진행 중일 때만 움직인다
 local aimDelayScale = 1 -- 공을 들고 던지기까지 기다리는 시간 배수 (튜토리얼은 더 느리다)
 local catchChance = N.CatchChance -- 날아오는 공을 잡을 확률 (튜토리얼은 0)
+local nextSpeechAt = 0 -- 이 시각 전에는 어느 NPC도 말하지 않는다 (한 번에 한 명만)
 
 -- 두 숫자 사이의 아무 숫자를 고른다.
 local function randomBetween(low, high)
@@ -122,12 +123,14 @@ local function addNameTag(model, text, color)
 	end)
 end
 
--- NPC 머리 위에 말풍선을 잠깐 띄운다 (도플갱어 호텔 Npc.say와 같은 모양).
+-- NPC 머리 위에 말풍선을 잠깐 띄운다. 누가 방금 말했으면 조용히 넘어간다.
 local function say(model, text)
 	local head = model:FindFirstChild("Head")
-	if not head then
+	local now = os.clock()
+	if not head or now < nextSpeechAt then
 		return
 	end
+	nextSpeechAt = now + N.SpeechGap
 	local old = head:FindFirstChild("Speech")
 	if old then
 		old:Destroy()

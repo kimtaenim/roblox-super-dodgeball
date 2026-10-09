@@ -133,10 +133,11 @@ Config.Npc = {
 	NameTagTextSize = 18, -- 이름표 글자 크기
 	SpeechHeight = 3.6, -- 말풍선이 머리 위로 뜨는 높이
 	SpeechSeconds = 2, -- 말풍선이 떠 있는 시간
-	SpeechChance = 0.7, -- 사건이 생겼을 때 말할 확률 (너무 시끄럽지 않게)
+	SpeechChance = 0.3, -- 사건이 생겼을 때 말할 확률 (너무 시끄럽지 않게)
+	SpeechGap = 3, -- 한 NPC가 말하면 이 시간 동안 다른 NPC는 말하지 않는다 (초)
 	SpeechMaxDistance = 80, -- 이보다 멀면 말풍선이 안 보인다
-	ChatIntervalMin = 6, -- 혼잣말 사이 최소 시간 (초)
-	ChatIntervalMax = 14, -- 혼잣말 사이 최대 시간 (초)
+	ChatIntervalMin = 20, -- 혼잣말 사이 최소 시간 (초)
+	ChatIntervalMax = 40, -- 혼잣말 사이 최대 시간 (초)
 	Names = {
 		"민준", "서연", "도윤", "하은", "지호", "수아", "예준", "지우",
 		"시우", "하린", "주원", "채원", "건우", "유나", "우진", "다은",
