@@ -1,0 +1,192 @@
+-- 참가자의 상태(Alive/Sitting)를 바꾼다 : 아웃, 캐치, 부활 연쇄, 게이지.
+-- 설계서 1.2장, 1.4장 규칙이 여기 들어 있다.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Abilities = require(ReplicatedStorage.Shared.Abilities)
+local Participants = require(script.Parent.Participants)
+
+local G = Config.Gauge
+
+local PlayerStateService = {}
+
+local notifyRemote = Remotes.get("Notify")
+
+-- 사람 참가자 화면에 알림 글자를 띄운다 (NPC는 화면이 없어서 건너뛴다).
+function PlayerStateService.notify(p, text)
+	if p.player then
+		notifyRemote:FireClient(p.player, text)
+	end
+end
+
+-- 모든 사람 화면에 알림 글자를 띄운다.
+function PlayerStateService.notifyAll(text)
+	notifyRemote:FireAllClients(text)
+end
+
+-- 상태를 화면(HUD)에서 볼 수 있게 속성으로 적어 둔다.
+function PlayerStateService.sync(p)
+	local state = p.state
+	local ability = Abilities.get(state.ability)
+	Participants.setAttribute(p, "Status", state.status)
+	Participants.setAttribute(p, "Gauge", math.floor(state.gauge))
+	Participants.setAttribute(p, "AbilityName", ability and ability.name or nil)
+	Participants.setAttribute(p, "Kills", state.totalKills)
+	Participants.setAttribute(p, "InRound", p.inRound)
+end
+
+-- 상태에 맞게 몸을 맞춘다 : 앉아 있으면 못 움직이고, 느려지면 반 속도.
+function PlayerStateService.applyBody(p)
+	local humanoid = Participants.getHumanoid(p)
+	if not humanoid then
+		return
+	end
+	local sitting = p.state.status == "Sitting"
+
+	local speed = Config.Player.WalkSpeed
+	if sitting then
+		speed = 0
+	elseif p.state.slowUntil > os.clock() then
+		speed *= Config.Abilities.Slow.SpeedFactor
+	end
+	if humanoid.WalkSpeed ~= speed then
+		humanoid.WalkSpeed = speed
+	end
+
+	local jump = if sitting then 0 else Config.Player.JumpHeight
+	humanoid.UseJumpPower = false
+	if humanoid.JumpHeight ~= jump then
+		humanoid.JumpHeight = jump
+	end
+
+	-- 앉은 사람이 점프로 일어나도 다시 앉힌다
+	if sitting and not humanoid.Sit then
+		humanoid.Sit = true
+	end
+end
+
+-- 그 자리에서 일어선다 (Alive로 바꾼다).
+local function standUp(p)
+	p.state.status = "Alive"
+	p.state.killedBy = nil
+	local humanoid = Participants.getHumanoid(p)
+	if humanoid then
+		humanoid.Sit = false
+	end
+	PlayerStateService.applyBody(p)
+	PlayerStateService.sync(p)
+end
+
+-- 목록에서 참가자 하나를 뺀다.
+local function removeFrom(list, p)
+	local index = table.find(list, p)
+	if index then
+		table.remove(list, index)
+	end
+end
+
+-- p가 아웃시킨 사람들을 전부 부활시키고 목록을 비운다 (설계서 1.2장 ④, 한 단계만).
+local function reviveKillsOf(p)
+	for _, revived in p.state.kills do
+		if revived.state.status == "Sitting" and revived.state.killedBy == p then
+			standUp(revived)
+			PlayerStateService.notify(revived, "부활! " .. p.name .. " 아웃돼서 다시 일어났어요")
+		end
+	end
+	p.state.kills = {}
+end
+
+-- 게이지를 더한다 (이번 판 참가 중이고 살아 있을 때만).
+function PlayerStateService.addGauge(p, amount)
+	if not p.inRound or p.state.status ~= "Alive" then
+		return
+	end
+	p.state.gauge = math.min(G.Max, p.state.gauge + amount)
+	PlayerStateService.sync(p)
+end
+
+-- 참가자를 아웃시킨다 (Sitting). how는 "hit"(맞음) 또는 "catch"(공이 잡힘).
+function PlayerStateService.knockOut(victim, by, how)
+	if victim.state.status ~= "Alive" then
+		return false
+	end
+	victim.state.status = "Sitting"
+	victim.state.killedBy = by
+	PlayerStateService.applyBody(victim)
+
+	if by then
+		table.insert(by.state.kills, victim)
+		by.state.totalKills += 1
+		PlayerStateService.addGauge(by, G.KillBonus)
+		PlayerStateService.notify(by, victim.name .. " 아웃! (+" .. G.KillBonus .. ")")
+		PlayerStateService.sync(by)
+	end
+
+	local byName = by and by.name or "?"
+	if how == "catch" then
+		PlayerStateService.notify(victim, "아웃! 내 공을 " .. byName .. " 님이 잡았어요")
+	else
+		PlayerStateService.notify(victim, "아웃! " .. byName .. " 님 공에 맞았어요")
+	end
+
+	-- 내가 앉으면 내가 아웃시킨 사람들은 일어난다
+	reviveKillsOf(victim)
+	PlayerStateService.sync(victim)
+	return true
+end
+
+-- 캐치 성공 : 캐처는 Alive가 되고, 던진 사람은 아웃 (설계서 1.2장 ③).
+function PlayerStateService.catch(catcher, thrower)
+	local state = catcher.state
+	if state.status == "Sitting" then
+		local killer = state.killedBy
+		if killer then
+			removeFrom(killer.state.kills, catcher)
+		end
+		standUp(catcher)
+	end
+	PlayerStateService.addGauge(catcher, G.CatchBonus)
+	PlayerStateService.notify(catcher, "캐치 성공! (+" .. G.CatchBonus .. ")")
+	if thrower and thrower ~= catcher then
+		PlayerStateService.knockOut(thrower, catcher, "catch")
+	end
+	PlayerStateService.sync(catcher)
+end
+
+-- 새 판을 위해 상태를 처음으로 되돌리고 능력을 준다.
+function PlayerStateService.resetForRound(p, abilityId)
+	p.state = Participants.newState()
+	p.state.ability = abilityId
+	p.inRound = true
+	standUp(p)
+end
+
+-- 로비로 돌아갈 때 상태를 처음으로 되돌린다.
+function PlayerStateService.resetForLobby(p)
+	p.state = Participants.newState()
+	p.inRound = false
+	standUp(p)
+end
+
+-- 참가자가 게임을 나갈 때 : 그 사람이 아웃시킨 사람들을 부활시키고, 다른 목록에서도 뺀다.
+function PlayerStateService.onLeave(p)
+	reviveKillsOf(p)
+	for _, other in Participants.all() do
+		removeFrom(other.state.kills, p)
+	end
+end
+
+-- 매 프레임 : 살아 있으면 게이지를 채우고, 몸 상태를 맞춘다.
+function PlayerStateService.tick(dt, playing)
+	for _, p in Participants.all() do
+		if playing and p.inRound and p.state.status == "Alive" then
+			p.state.gauge = math.min(G.Max, p.state.gauge + G.PerSecond * dt)
+		end
+		PlayerStateService.applyBody(p)
+		PlayerStateService.sync(p)
+	end
+end
+
+return PlayerStateService

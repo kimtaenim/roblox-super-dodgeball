@@ -11,6 +11,9 @@ local Remotes = {}
 -- 신호 이름 목록
 Remotes.Names = {
 	Throw = "Throw", -- 클라이언트 → 서버 : 공 던지기 (조준점, 홀드 시간)
+	Catch = "Catch", -- 클라이언트 → 서버 : 캐치 버튼 눌림
+	UseAbility = "UseAbility", -- 클라이언트 → 서버 : 능력 버튼 눌림
+	Notify = "Notify", -- 서버 → 클라이언트 : 화면에 띄울 알림 글자
 }
 
 -- 이름으로 RemoteEvent를 찾는다. 서버에서는 없으면 새로 만든다.
