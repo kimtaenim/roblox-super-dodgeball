@@ -77,7 +77,7 @@ BallState = {
 
 | id | 이름 | 효과 | 지속 | 구현 메모 |
 |---|---|---|---|---|
-| teleport | 텔레포트 | 바라보는 방향 20스터드 순간이동 (코트 밖이면 경계로 클램프) | 즉시 | CFrame 이동 |
+| superwings | 슈퍼날개 | 6초 동안 등에 날개가 생기고 코트 위 12스터드 높이로 떠올라 날아다님. 끝나면 내려옴. 날다가 아웃되면 떨어져 앉음 | 6초 | AlignPosition으로 높이만 붙잡음 |
 | doubleball | 공 두 개 | 다음 던지기가 공 2개 (옆으로 15도 벌어짐) | 1회 | 공 복제, 복제공은 바닥 닿으면 소멸 |
 | clone | 분신술 | 내 모습 분신 3개가 5초간 무작위 이동, 맞으면 터짐. NPC도 진짜인 줄 알고 노린다 | 5초 | 캐릭터 복제 (걷게 하려고 Humanoid는 둠, 참가자 아님) |
 | shield | 방패 | 3초간 맞아도 아웃 안 됨, 공은 튕겨나감 | 3초 | 피격 판정 무시 플래그 |
@@ -145,7 +145,7 @@ src/
     Remotes.lua                -- RemoteEvent 이름 모음
     Abilities/
       init.lua                 -- id → 모듈 테이블
-      Teleport.lua
+      SuperWings.lua
       DoubleBall.lua
       Clone.lua
       Shield.lua
@@ -160,8 +160,8 @@ src/
 
 ```lua
 return {
-  id = "teleport",
-  name = "텔레포트",
+  id = "superwings",
+  name = "슈퍼날개",
   canUse = function(who, state) return state.status == "Alive" end,
   activate = function(who, state, services) ... end,
 }
@@ -175,7 +175,7 @@ return {
 ① 코트 + 이동 + 공 줍기/던지기 (능력 없이)
 ② Alive/Sitting + 피격 + 캐치
 ③ 부활 연쇄 (kills) — 여기까지가 "개인 피구" 완성
-④ 게이지 + 능력 3개 (텔레포트·방패·공 두 개)
+④ 게이지 + 능력 3개 (텔레포트·방패·공 두 개) — 지금은 상자 방식, 텔레포트는 슈퍼날개로 바뀜
 ⑤ 나머지 능력 6개
 ⑥ 코트 축소, HUD 마무리, 모바일 버튼
 

@@ -94,7 +94,7 @@ Config.AbilityBox = {
 	SpinDegreesPerSecond = 90, -- 빙글빙글 도는 빠르기
 	-- 능력이 나올 비율 (숫자가 클수록 자주 나온다)
 	Weights = {
-		teleport = 3,
+		superwings = 3,
 		doubleball = 3,
 		clone = 3,
 		shield = 3,
@@ -108,7 +108,15 @@ Config.AbilityBox = {
 
 -- 능력 9종 (설계서 2.2장)
 Config.Abilities = {
-	Teleport = { Distance = 20, EdgeMargin = 2 }, -- 이동 거리, 코트 끝에서 남기는 여유
+	SuperWings = { -- 슈퍼날개
+		Seconds = 6, -- 날아다니는 시간
+		Height = 12, -- 코트 바닥에서 떠오르는 높이
+		Responsiveness = 15, -- 그 높이로 올라가는 빠르기
+		WingSize = Vector3.new(2.4, 1.2, 0.2), -- 날개 한 쪽 크기
+		WingOffset = Vector3.new(1.3, 0.8, 0.7), -- 등에서 날개가 붙는 자리 (옆, 위, 뒤)
+		WingTiltDegrees = 20, -- 날개가 위로 들린 각도
+		WingColor = Color3.fromRGB(255, 255, 255), -- 날개 색
+	},
 	DoubleBall = { SpreadDegrees = 15 }, -- 두 번째 공이 벌어지는 각도
 	Clone = { Count = 3, Seconds = 5, WanderRadius = 15, WanderInterval = 1, EdgeMargin = 2 },
 	Shield = { Seconds = 3, BounceSpeed = 30, BounceUp = 15 }, -- 튕겨 나가는 속도

@@ -40,9 +40,10 @@ return {
 
 		for _ = 1, C.Count do
 			local decoy = character:Clone()
-			-- 복사본 안의 스크립트·방어막은 지운다
+			-- 복사본 안의 스크립트·방어막·날개는 지운다 (분신은 땅을 걷는다)
 			for _, child in decoy:GetDescendants() do
-				if child:IsA("LuaSourceContainer") or child:IsA("ForceField") then
+				local isWings = child.Name == "SuperWingsEffect" or child.Name == "SuperWingsAttachment"
+				if child:IsA("LuaSourceContainer") or child:IsA("ForceField") or isWings then
 					child:Destroy()
 				end
 			end

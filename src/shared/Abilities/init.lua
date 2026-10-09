@@ -2,7 +2,7 @@
 -- 새 능력을 추가하려면 파일 하나를 만들고 아래 목록에 한 줄을 넣는다.
 
 local list = {
-	require(script.Teleport),
+	require(script.SuperWings),
 	require(script.DoubleBall),
 	require(script.Clone),
 	require(script.Shield),
