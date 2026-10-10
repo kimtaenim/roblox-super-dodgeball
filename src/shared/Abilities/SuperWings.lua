@@ -1,4 +1,5 @@
--- 슈퍼날개 : 6초 동안 등에 날개가 생기고 코트 위로 떠올라 날아다닌다. 시간이 끝나면 내려온다.
+-- 슈퍼날개 : 15초 동안 등에 날개가 생기고 코트 위로 떠올라 날아다닌다. 시간이 끝나면 내려온다.
+-- 나는 동안은 맞아도 아웃되지 않는다 (공이 튕겨 나간다, BallService가 wingsUntil을 본다).
 -- 높이만 붙잡아 두고 앞뒤옆 움직임은 평소처럼 조작한다. 날다가 아웃되면 바로 떨어져 앉는다.
 
 local RunService = game:GetService("RunService")
@@ -44,6 +45,7 @@ return {
 		if not root then
 			return
 		end
+		state.wingsUntil = os.clock() + C.Seconds
 		local folder = Instance.new("Folder")
 		folder.Name = "SuperWingsEffect"
 		folder.Parent = who.character
@@ -72,6 +74,9 @@ return {
 			end
 			folder:Destroy()
 			attachment:Destroy()
+			if who.state == state then
+				state.wingsUntil = 0 -- 내려오면 보호도 끝
+			end
 		end)
 	end,
 }

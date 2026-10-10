@@ -74,7 +74,7 @@ Config.Throw = {
 
 -- 캐치 (설계서 1.4장)
 Config.Catch = {
-	Window = 0.5, -- 공이 닿기 전 이 시간 안에 눌렀으면 캐치
+	Window = 0.8, -- 공이 닿기 전 이 시간 안에 눌렀으면 캐치 (넉넉하게, 쉬운 난이도)
 	Cooldown = 1.0, -- 캐치 버튼은 이 시간에 한 번만
 }
 
@@ -111,7 +111,7 @@ Config.AbilityBox = {
 -- 능력 9종 (설계서 2.2장)
 Config.Abilities = {
 	SuperWings = { -- 슈퍼날개
-		Seconds = 6, -- 날아다니는 시간
+		Seconds = 15, -- 날아다니는 시간 (이 동안은 맞아도 아웃 안 됨)
 		Height = 12, -- 코트 바닥에서 떠오르는 높이
 		Responsiveness = 15, -- 그 높이로 올라가는 빠르기
 		WingSize = Vector3.new(2.4, 1.2, 0.2), -- 날개 한 쪽 크기
@@ -147,17 +147,17 @@ Config.Revenge = {
 Config.Npc = {
 	TargetTotal = 6, -- 한 판 참가자가 이 수가 되도록 NPC를 채운다 (너무 많으면 정신없다)
 	ThinkInterval = 0.25, -- NPC가 다음 행동을 고르는 간격
-	AimDelayMin = 0.6, -- 공을 들고 던지기까지 최소 시간
-	AimDelayMax = 1.6, -- 공을 들고 던지기까지 최대 시간
+	AimDelayMin = 1.2, -- 공을 들고 던지기까지 최소 시간 (쉬운 난이도 : 천천히)
+	AimDelayMax = 2.5, -- 공을 들고 던지기까지 최대 시간
 	ThrowRange = 65, -- 이 거리 안의 상대를 노린다
 	FocusMemorySeconds = 20, -- 이 시간 동안 NPC 공을 많이 받은 상대는 덜 노린다 (한 사람만 집중 공격하지 않게)
 	SameTargetPenalty = 2, -- 방금 던진 상대를 또 노리지 않게 하는 정도 (공 2번 받은 것으로 친다)
-	AimError = 4, -- 조준이 빗나가는 정도 (스터드)
-	LeadFactor = 0.3, -- 움직이는 상대 앞쪽을 노리는 정도
-	HoldMin = 0.5, -- 던지기 홀드 시간 최소
-	HoldMax = 1.0, -- 던지기 홀드 시간 최대
+	AimError = 8, -- 조준이 빗나가는 정도 (스터드, 쉬운 난이도 : 자주 빗나감)
+	LeadFactor = 0.1, -- 움직이는 상대 앞쪽을 노리는 정도 (낮을수록 움직이면 잘 안 맞는다)
+	HoldMin = 0.4, -- 던지기 홀드 시간 최소 (짧을수록 공이 느리다)
+	HoldMax = 0.7, -- 던지기 홀드 시간 최대 (쉬운 난이도 : 세게 안 던진다)
 	CatchReactDistance = 12, -- 날아오는 공이 이 거리 안에 오면 캐치를 시도
-	CatchChance = 0.25, -- 캐치 시도가 성공할 확률
+	CatchChance = 0.12, -- 캐치 시도가 성공할 확률 (쉬운 난이도 : 잘 못 잡는다)
 	AbilityDelayMin = 20, -- 능력을 한 번 쓰고 다음에 쓰기까지 최소 시간 (초, 아주 가끔만 쓴다)
 	AbilityDelayMax = 40, -- 능력을 한 번 쓰고 다음에 쓰기까지 최대 시간 (초)
 	BoxInterestDistance = 6, -- 능력 상자가 이 거리 안에 있을 때만 주우러 간다 (상자에 큰 관심 없음)
@@ -948,8 +948,10 @@ Config.Sounds = {
 	},
 	HearDistance = 150, -- 효과음이 들리는 거리
 	EffectLifetime = 5, -- 효과음을 치우기까지 시간 (초)
-	MusicIds = { "rbxassetid://1841461968", "rbxassetid://1843404009" }, -- 배경 음악 (앞의 곡이 안 되면 다음 곡)
-	MusicVolume = 0.3,
+	-- 배경 음악 (앞의 곡이 안 되면 다음 곡) : Stadium Rave, Tear It Up, 공식 튜토리얼 곡, Happy Song
+	MusicIds = { "rbxassetid://1846368080", "rbxassetid://1842763322", "rbxassetid://1841461968", "rbxassetid://1843404009" },
+	MusicVolume = 0.45,
+	MusicSpeed = 1.05, -- 조금 빠르게 (더 신나게)
 }
 
 -- 화면 표시

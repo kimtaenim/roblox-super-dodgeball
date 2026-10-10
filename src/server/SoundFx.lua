@@ -53,6 +53,7 @@ local function loadMusic()
 	music.Name = "Music"
 	music.Looped = true
 	music.Volume = S.MusicVolume
+	music.PlaybackSpeed = S.MusicSpeed
 	music.Parent = workspace
 	for _, id in S.MusicIds do
 		music.SoundId = id
