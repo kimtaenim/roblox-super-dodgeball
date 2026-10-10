@@ -1,4 +1,5 @@
--- NPC 한 명 한 명의 생김새를 만든다 : 체형, 얼굴(눈·눈썹·코·입·볼), 머리 모양, 옷, 등번호 (설계서 9장).
+-- NPC 한 명 한 명의 생김새를 만든다 : 체형, 둥근 몸, 머리 모양, 볼터치·안경 같은 꾸밈, 옷, 등번호 (설계서 9장).
+-- 얼굴은 로블록스 기본 얼굴 그림을 쓴다 (persona.face에 얼굴 에셋 번호를 넣으면 그 얼굴).
 -- 생김새 정보는 Config.Npc.Personas, 부품 크기·위치 비율은 Config.Looks에 있다.
 -- 덧붙인 부품은 모두 공 판정에 안 걸린다 (공 판정은 원래 R15 몸으로만 한다).
 
@@ -51,83 +52,6 @@ local function piece(folder, base, offset, size, color, shape)
 	weld.Parent = part
 	part.Parent = folder
 	return part
-end
-
--- 두 점을 잇는 방향으로 기울어진 조각의 각도(라디안)를 구한다 (머리 크기 비율 고려).
-local function slope(headSize, dx, dy)
-	return math.atan2(dy * headSize.Y, dx * headSize.X)
-end
-
--- 눈 : 흰자 + 눈동자 + 반짝임. "happy"는 ^ ^ 모양, "sleepy"는 눈꺼풀이 반쯤 덮는다.
-local function addEyes(folder, head, style, skin)
-	local size = head.Size
-	local E = L.Eyes[style]
-	local z = L.FaceDepth
-	for _, side in { -1, 1 } do
-		local x = side * E.gapX
-		if E.arc then
-			for _, half in { -1, 1 } do
-				local tilt = CFrame.Angles(0, 0, -half * math.rad(E.arcTiltDegrees))
-				local offset = at(size, x + half * E.arc.X * E.arcSpread, E.y, z) * tilt
-				piece(folder, head, offset, scaled(size, E.arc), L.PupilColor, "block")
-			end
-			continue
-		end
-		piece(folder, head, at(size, x, E.y, z), scaled(size, E.white), L.EyeWhiteColor, "ball")
-		local pupilZ = z - E.white.Z / 2
-		piece(folder, head, at(size, x, E.y, pupilZ), scaled(size, E.pupil), L.PupilColor, "ball")
-		local shine = at(size, x + L.ShineOffset.X, E.y + L.ShineOffset.Y, pupilZ - E.pupil.Z / 2)
-		piece(folder, head, shine, round(size, L.ShineSize), L.EyeWhiteColor, "ball")
-		if E.lid then
-			-- 졸린 눈꺼풀 : 흰자 위쪽을 피부색으로 덮는다
-			local lidOffset = at(size, x, E.y + E.white.Y * E.lidRaise, pupilZ - E.pupil.Z)
-			piece(folder, head, lidOffset, scaled(size, E.white * E.lid), skin, "ball")
-		end
-	end
-end
-
--- 눈썹 : brave(씩씩, 안쪽이 내려감) / calm(일자) / happy(올라감).
-local function addBrows(folder, head, style, hairColor)
-	local size = head.Size
-	local B = L.Brows
-	local tilt = math.rad(B.tiltDegrees[style] or 0)
-	for _, side in { -1, 1 } do
-		local offset = at(size, side * B.gapX, B.y, L.FaceDepth - L.LayerStep) * CFrame.Angles(0, 0, side * tilt)
-		piece(folder, head, offset, scaled(size, B.size), hairColor:Lerp(Color3.new(0, 0, 0), B.darken), "block")
-	end
-end
-
--- 코 : 피부보다 조금 진한 작은 동그라미.
-local function addNose(folder, head, skin)
-	local size = head.Size
-	local color = skin:Lerp(Color3.new(0, 0, 0), L.NoseDarken)
-	piece(folder, head, at(size, 0, L.NoseY, L.FaceDepth - L.NoseSize.Z), scaled(size, L.NoseSize), color, "ball")
-end
-
--- 입 : smile(웃음) / grin(이 보이는 웃음) / open(벌린 입) / o(동그란 입) / small(작은 입).
-local function addMouth(folder, head, style)
-	local size = head.Size
-	local M = L.Mouths[style]
-	local z = L.FaceDepth - L.LayerStep
-	if style == "smile" then
-		piece(folder, head, at(size, 0, M.y, z), scaled(size, M.segment), L.MouthColor, "block")
-		local angle = slope(size, M.spreadX, M.liftY)
-		for _, side in { -1, 1 } do
-			local offset = at(size, side * M.spreadX, M.y + M.liftY, z) * CFrame.Angles(0, 0, side * angle)
-			piece(folder, head, offset, scaled(size, M.segment), L.MouthColor, "block")
-		end
-		return
-	end
-	local shape = if style == "small" then "block" else "ball"
-	piece(folder, head, at(size, 0, M.y, z), scaled(size, M.size), L.MouthColor, shape)
-	if M.teeth then
-		local teeth = at(size, 0, M.y + M.size.Y * M.shift, z - M.size.Z / 2)
-		piece(folder, head, teeth, scaled(size, M.teeth), L.TeethColor, "block")
-	end
-	if M.tongue then
-		local tongue = at(size, 0, M.y + M.size.Y * M.shift, z - M.size.Z / 2)
-		piece(folder, head, tongue, scaled(size, M.tongue), L.TongueColor, "ball")
-	end
 end
 
 -- 볼터치 : 발그레한 분홍 동그라미.
@@ -280,41 +204,97 @@ local function addHairClip(folder, head)
 	piece(folder, head, offset, round(size, C.size), C.color, "block")
 end
 
--- 몸 부위마다 옷·피부·신발 색을 칠한다. (반팔 : 윗팔만 윗옷 색, 반바지 : 종아리는 피부색)
-local function paintBody(model, persona)
-	local clothes = Enum.Material.Fabric
-	local paint = {
-		Head = { persona.skin, Enum.Material.SmoothPlastic },
-		UpperTorso = { persona.shirt, clothes },
-		LowerTorso = { persona.pants, clothes },
-		LeftUpperArm = { persona.shirt, clothes },
-		RightUpperArm = { persona.shirt, clothes },
-		LeftLowerArm = { persona.skin, Enum.Material.SmoothPlastic },
-		RightLowerArm = { persona.skin, Enum.Material.SmoothPlastic },
-		LeftHand = { persona.skin, Enum.Material.SmoothPlastic },
-		RightHand = { persona.skin, Enum.Material.SmoothPlastic },
-		LeftUpperLeg = { persona.pants, clothes },
-		RightUpperLeg = { persona.pants, clothes },
-		LeftLowerLeg = { if persona.legs == "shorts" then persona.skin else persona.pants, clothes },
-		RightLowerLeg = { if persona.legs == "shorts" then persona.skin else persona.pants, clothes },
-		LeftFoot = { persona.shoes, Enum.Material.SmoothPlastic },
-		RightFoot = { persona.shoes, Enum.Material.SmoothPlastic },
-	}
-	for name, look in paint do
-		local part = model:FindFirstChild(name)
-		if part then
-			part.Color = look[1]
-			part.Material = look[2]
-		end
+-- 원기둥 하나를 세워서 만든다 (둥근 몸 조각용). 길이는 위아래(Y) 방향.
+local function upright(folder, base, offset, diameter, length, color, material)
+	local part = piece(folder, base, offset * CFrame.Angles(0, 0, math.rad(90)), Vector3.new(length, diameter, diameter), color, "block")
+	part.Shape = Enum.PartType.Cylinder
+	part.Material = material
+	return part
+end
+
+-- 팔다리 한 마디를 캡슐(원기둥 + 양 끝 공) 모양으로 덮는다.
+local function capsule(folder, base, color, material)
+	local size = base.Size
+	local diameter = math.min(size.X, size.Z) * L.Body.LimbRoundness
+	local length = math.max(size.Y - diameter, L.Body.MinLength)
+	upright(folder, base, CFrame.identity, diameter, length, color, material)
+	for _, side in { -1, 1 } do
+		local ball = piece(folder, base, CFrame.new(0, side * length / 2, 0), Vector3.one * diameter, color, "ball")
+		ball.Material = material
 	end
 end
 
--- 윗옷 목둘레와 등번호를 단다.
-local function addJersey(folder, model, persona)
-	local torso = model:FindFirstChild("UpperTorso")
-	if not torso then
-		return
+-- 몸통을 옆이 둥근 모양으로 덮는다 (가운데 상자 + 양옆 원기둥). 가운데 상자를 돌려준다.
+local function roundedTorso(folder, base, color, material)
+	local size = base.Size
+	local depth = size.Z * L.Body.TorsoRoundness
+	local core = piece(folder, base, CFrame.identity, Vector3.new(size.X - depth, size.Y, depth), color, "block")
+	core.Material = material
+	for _, side in { -1, 1 } do
+		upright(folder, base, CFrame.new(side * (size.X - depth) / 2, 0, 0), depth, size.Y, color, material)
 	end
+	return core
+end
+
+-- 손은 공, 신발은 앞으로 길쭉한 타원으로 덮는다.
+local function roundedEnd(folder, base, ratio, forward, color, material)
+	local size = base.Size
+	local part = piece(folder, base, CFrame.new(0, 0, -size.Z * forward), Vector3.new(size.X * ratio.X, size.Y * ratio.Y, size.Z * ratio.Z), color, "ball")
+	part.Material = material
+end
+
+-- 네모난 R15 몸을 숨기고 둥근 몸으로 덮는다 (공 판정은 숨긴 원래 몸으로 한다).
+-- 반팔 : 윗팔만 윗옷 색, 반바지 : 종아리는 피부색. 윗몸 덮개(등번호 붙일 곳)를 돌려준다.
+local function roundBody(folder, model, persona)
+	local clothes, skin = Enum.Material.Fabric, Enum.Material.SmoothPlastic
+	local lowerLeg = if persona.legs == "shorts" then persona.skin else persona.pants
+	local function hide(name)
+		local part = model:FindFirstChild(name)
+		if part then
+			part.Transparency = 1
+		end
+		return part
+	end
+	local torsoCover
+	local upper = hide("UpperTorso")
+	if upper then
+		torsoCover = roundedTorso(folder, upper, persona.shirt, clothes)
+	end
+	local lower = hide("LowerTorso")
+	if lower then
+		roundedTorso(folder, lower, persona.pants, clothes)
+	end
+	for _, side in { "Left", "Right" } do
+		local limbs = {
+			{ side .. "UpperArm", persona.shirt, clothes },
+			{ side .. "LowerArm", persona.skin, skin },
+			{ side .. "UpperLeg", persona.pants, clothes },
+			{ side .. "LowerLeg", lowerLeg, clothes },
+		}
+		for _, limb in limbs do
+			local part = hide(limb[1])
+			if part then
+				capsule(folder, part, limb[2], limb[3])
+			end
+		end
+		local hand = hide(side .. "Hand")
+		if hand then
+			roundedEnd(folder, hand, L.Body.HandRatio, 0, persona.skin, skin)
+		end
+		local foot = hide(side .. "Foot")
+		if foot then
+			roundedEnd(folder, foot, L.Body.ShoeRatio, L.Body.ShoeForward, persona.shoes, skin)
+		end
+	end
+	local head = model:FindFirstChild("Head")
+	if head then
+		head.Color = persona.skin
+	end
+	return torsoCover
+end
+
+-- 윗옷 목둘레와 등번호를 단다 (등번호는 윗몸 덮개 뒷면에).
+local function addJersey(folder, torso, cover, persona)
 	local collar = persona.shirt:Lerp(Color3.new(0, 0, 0), L.CollarDarken)
 	piece(folder, torso, CFrame.new(0, torso.Size.Y / 2, 0), scaled(torso.Size, L.CollarSize), collar, "ball")
 
@@ -323,7 +303,7 @@ local function addJersey(folder, model, persona)
 	gui.Face = Enum.NormalId.Back
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = L.NumberPixelsPerStud
-	gui.Parent = torso
+	gui.Parent = cover
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
@@ -342,6 +322,9 @@ function NpcLooks.describe(persona)
 	description.WidthScale = persona.body.width
 	description.DepthScale = persona.body.depth
 	description.HeadScale = persona.body.head
+	if persona.face then
+		description.Face = persona.face -- 로블록스 얼굴 에셋 번호 (없으면 기본 얼굴)
+	end
 	description.HeadColor = persona.skin
 	description.LeftArmColor = persona.skin
 	description.RightArmColor = persona.skin
@@ -351,31 +334,22 @@ function NpcLooks.describe(persona)
 	return description
 end
 
--- 만들어진 몸에 얼굴·머리·옷을 입힌다.
+-- 만들어진 몸을 둥글게 덮고, 머리 모양·꾸밈·옷을 입힌다. 얼굴은 로블록스 기본 얼굴 그림 그대로.
 function NpcLooks.dress(model, persona)
 	local head = model:FindFirstChild("Head")
 	if not head then
 		return
 	end
-	-- 기본 얼굴 그림과 몸 색 고정을 치운다 (직접 만든 얼굴과 색을 쓴다)
-	for _, child in head:GetChildren() do
-		if child:IsA("Decal") then
-			child:Destroy()
-		end
-	end
+	-- 몸 색 고정을 치운다 (직접 칠한 색을 쓴다)
 	local bodyColors = model:FindFirstChildOfClass("BodyColors")
 	if bodyColors then
 		bodyColors:Destroy()
 	end
-	paintBody(model, persona)
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Looks"
 	folder.Parent = model
-	addEyes(folder, head, persona.eyes, persona.skin)
-	addBrows(folder, head, persona.brows, persona.hairColor)
-	addNose(folder, head, persona.skin)
-	addMouth(folder, head, persona.mouth)
+	local cover = roundBody(folder, model, persona)
 	HAIR[persona.hair](folder, head, persona.hairColor)
 	for _, extra in persona.extras do
 		if extra == "blush" then
@@ -388,7 +362,10 @@ function NpcLooks.dress(model, persona)
 			addHairClip(folder, head)
 		end
 	end
-	addJersey(folder, model, persona)
+	local torso = model:FindFirstChild("UpperTorso")
+	if torso and cover then
+		addJersey(folder, torso, cover, persona)
+	end
 end
 
 return NpcLooks

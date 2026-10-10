@@ -120,7 +120,8 @@ local function say(model, text, force)
 	if not head or (now < nextSpeechAt and not force) then
 		return
 	end
-	nextSpeechAt = now + N.SpeechGap
+	local loud = ArenaService.isQuiet()
+	nextSpeechAt = now + (if loud then N.LoudSpeechGap else N.SpeechGap)
 	local old = head:FindFirstChild("Speech")
 	if old then
 		old:Destroy()
@@ -128,7 +129,8 @@ local function say(model, text, force)
 
 	local bubble = Instance.new("BillboardGui")
 	bubble.Name = "Speech"
-	bubble.Size = UDim2.fromOffset(N.NameTagWidth, N.NameTagTextSize * 2)
+	local scale = if loud then N.LoudBubbleScale else 1 -- 시끄러운 곳에서는 말풍선도 크게
+	bubble.Size = UDim2.fromOffset(N.NameTagWidth * scale, N.NameTagTextSize * 2 * scale)
 	bubble.StudsOffset = Vector3.new(0, N.SpeechHeight, 0)
 	bubble.AlwaysOnTop = true
 	bubble.MaxDistance = N.SpeechMaxDistance
@@ -153,10 +155,10 @@ local function say(model, text, force)
 	end)
 end
 
--- 대사 목록을 고른다 : 조용한 경기장(도서관·박물관)에서는 속삭이는 대사.
+-- 대사 목록을 고른다 : 조용해야 하는 경기장(도서관·박물관)에서는 오히려 시끄럽게 떠드는 대사.
 local function linesFor(kind)
-	if ArenaService.isQuiet() and N.QuietLines[kind] then
-		return N.QuietLines[kind]
+	if ArenaService.isQuiet() and N.LoudLines[kind] then
+		return N.LoudLines[kind]
 	end
 	return N.Lines[kind]
 end
@@ -164,7 +166,8 @@ end
 -- 사건이 생기면 NPC가 가끔 한마디 한다.
 local function onReaction(p, kind)
 	local lines = linesFor(kind)
-	if brains[p] and lines and p.character and math.random() < N.SpeechChance then
+	local chance = if ArenaService.isQuiet() then N.LoudSpeechChance else N.SpeechChance
+	if brains[p] and lines and p.character and math.random() < chance then
 		say(p.character, pick(lines))
 	end
 end
@@ -436,7 +439,8 @@ local function chat(p, brain, now)
 	if now < brain.chatAt or not p.character then
 		return
 	end
-	brain.chatAt = now + randomBetween(N.ChatIntervalMin, N.ChatIntervalMax)
+	local gap = randomBetween(N.ChatIntervalMin, N.ChatIntervalMax)
+	brain.chatAt = now + gap * (if ArenaService.isQuiet() then N.LoudChatScale else 1) -- 시끄러운 곳에서는 더 자주 떠든다
 	local lines = linesFor(if p.state.status == "Sitting" then "sittingChat" else "chat")
 	say(p.character, pick(lines))
 end

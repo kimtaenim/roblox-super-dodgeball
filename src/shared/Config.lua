@@ -162,17 +162,18 @@ Config.Npc = {
 	FallLimitY = -50, -- 이보다 아래로 떨어지면 코트에 다시 세운다
 	-- NPC 8명 : 한 명 한 명 생김새가 정해져 있다 (판마다 섞어서 겹치지 않게 나온다)
 	-- name = 이름 (윗옷 색 이름), shirt = 윗옷 색 (이름은 쉬운 색, 실제 색은 눈이 편한 색)
+	-- face = 로블록스 얼굴 에셋 번호 (넣지 않으면 로블록스 기본 웃는 얼굴)
 	-- body = 체형 (키, 어깨 너비, 몸 두께, 머리 크기), skin = 피부색
-	-- hair = 머리 모양, hairColor = 머리 색, eyes/brows/mouth = 눈·눈썹·입 모양 (Config.Looks에 있는 이름)
+	-- hair = 머리 모양, hairColor = 머리 색 (Config.Looks에 있는 이름)
 	-- extras = 덧붙이는 것 (blush 볼터치, freckles 주근깨, glasses 안경, hairclip 별 핀)
 	-- legs = "pants" 긴바지 / "shorts" 반바지, pants = 바지 색, shoes = 신발 색, number = 등번호
 	Personas = {
 		{
-			name = "빨강", shirt = Color3.fromRGB(240, 95, 70), -- 다홍 : 키 크고 듬직한 대장
+			name = "빨강", shirt = Color3.fromRGB(240, 95, 70), -- 다홍 : 키 크고 듬직한 대장, 삐죽머리
 			body = { height = 1.08, width = 1.12, depth = 1.05, head = 1.0 },
 			skin = Color3.fromRGB(241, 194, 125),
 			hair = "spiky", hairColor = Color3.fromRGB(35, 30, 30),
-			eyes = "normal", brows = "brave", mouth = "grin", extras = {},
+			extras = {},
 			legs = "shorts", pants = Color3.fromRGB(40, 45, 60), shoes = Color3.fromRGB(230, 60, 50), number = 7,
 		},
 		{
@@ -180,7 +181,7 @@ Config.Npc = {
 			body = { height = 1.1, width = 0.88, depth = 0.9, head = 0.98 },
 			skin = Color3.fromRGB(255, 224, 189),
 			hair = "sidepart", hairColor = Color3.fromRGB(90, 60, 40),
-			eyes = "normal", brows = "calm", mouth = "smile", extras = { "glasses" },
+			extras = { "glasses" },
 			legs = "pants", pants = Color3.fromRGB(60, 70, 110), shoes = Color3.fromRGB(245, 245, 245), number = 4,
 		},
 		{
@@ -188,15 +189,15 @@ Config.Npc = {
 			body = { height = 0.98, width = 0.95, depth = 0.95, head = 1.02 },
 			skin = Color3.fromRGB(250, 214, 175),
 			hair = "ponytail", hairColor = Color3.fromRGB(150, 90, 50),
-			eyes = "normal", brows = "happy", mouth = "open", extras = { "freckles" },
+			extras = { "freckles" },
 			legs = "shorts", pants = Color3.fromRGB(70, 90, 140), shoes = Color3.fromRGB(255, 255, 255), number = 11,
 		},
 		{
-			name = "하늘", shirt = Color3.fromRGB(120, 190, 240), -- 하늘 : 작고 눈 큰 야구모자
+			name = "하늘", shirt = Color3.fromRGB(120, 190, 240), -- 하늘 : 작은 체구, 야구모자
 			body = { height = 0.9, width = 0.95, depth = 0.95, head = 1.08 },
 			skin = Color3.fromRGB(224, 172, 105),
 			hair = "cap", hairColor = Color3.fromRGB(40, 50, 90),
-			eyes = "big", brows = "happy", mouth = "o", extras = {},
+			extras = {},
 			legs = "shorts", pants = Color3.fromRGB(230, 230, 230), shoes = Color3.fromRGB(40, 50, 90), number = 2,
 		},
 		{
@@ -204,7 +205,7 @@ Config.Npc = {
 			body = { height = 0.95, width = 0.94, depth = 0.95, head = 1.04 },
 			skin = Color3.fromRGB(255, 228, 205),
 			hair = "buns", hairColor = Color3.fromRGB(30, 25, 30),
-			eyes = "happy", brows = "happy", mouth = "smile", extras = { "blush" },
+			extras = { "blush" },
 			legs = "pants", pants = Color3.fromRGB(250, 240, 245), shoes = Color3.fromRGB(240, 110, 150), number = 9,
 		},
 		{
@@ -212,7 +213,7 @@ Config.Npc = {
 			body = { height = 0.96, width = 1.22, depth = 1.18, head = 1.05 },
 			skin = Color3.fromRGB(198, 134, 66),
 			hair = "curly", hairColor = Color3.fromRGB(60, 35, 20),
-			eyes = "normal", brows = "happy", mouth = "grin", extras = { "blush" },
+			extras = { "blush" },
 			legs = "pants", pants = Color3.fromRGB(90, 70, 50), shoes = Color3.fromRGB(250, 200, 60), number = 5,
 		},
 		{
@@ -220,15 +221,15 @@ Config.Npc = {
 			body = { height = 1.02, width = 1.02, depth = 1.0, head = 0.97 },
 			skin = Color3.fromRGB(141, 85, 36),
 			hair = "headband", hairColor = Color3.fromRGB(25, 20, 20),
-			eyes = "normal", brows = "brave", mouth = "smile", extras = {},
+			extras = {},
 			legs = "shorts", pants = Color3.fromRGB(35, 35, 40), shoes = Color3.fromRGB(255, 140, 40), number = 23,
 		},
 		{
-			name = "보라", shirt = Color3.fromRGB(170, 140, 220), -- 라벤더 : 긴 머리, 졸린 눈, 별 핀
+			name = "보라", shirt = Color3.fromRGB(170, 140, 220), -- 라벤더 : 긴 머리, 별 핀
 			body = { height = 1.03, width = 0.92, depth = 0.92, head = 1.0 },
 			skin = Color3.fromRGB(255, 220, 200),
 			hair = "long", hairColor = Color3.fromRGB(45, 30, 55),
-			eyes = "sleepy", brows = "calm", mouth = "small", extras = { "hairclip" },
+			extras = { "hairclip" },
 			legs = "pants", pants = Color3.fromRGB(50, 45, 70), shoes = Color3.fromRGB(170, 140, 220), number = 3,
 		},
 	},
@@ -256,17 +257,21 @@ Config.Npc = {
 		-- 앉아 있을 때 가끔 하는 혼잣말
 		sittingChat = { "누가 나 좀 살려 줘~", "공만 오면 잡는다!", "아깝다…", "다음엔 꼭 피할 거야" },
 	},
-	-- 조용한 경기장(도서관·박물관)에서는 속삭이듯 말한다
-	QuietLines = {
-		out = { "(소곤) 으악…", "(소곤) 맞았다…", "(소곤) 쉿, 아웃이야…" },
-		kill = { "(소곤) 맞았다…", "(소곤) 명중…", "(소곤) 쉿, 아웃!" },
-		catch = { "(소곤) 잡았다…", "(소곤) 캐치…" },
-		revive = { "(소곤) 살았다…", "(소곤) 다시 간다…" },
-		ability = { "(소곤) 능력…", "(소곤) 받아라…" },
-		throw = { "(소곤) 간다…", "(소곤) 슛…", "(소곤) 쉿, 받아…" },
-		chat = { "(소곤) 조용히 해야 해…", "(소곤) 사서 선생님 오신다…", "(소곤) 쉿…" },
-		sittingChat = { "(소곤) 누가 나 좀…", "(소곤) 살려 줘…" },
+	-- 조용해야 하는 경기장(도서관·박물관)에서는 오히려 시끄럽게 떠든다 (그게 재미)
+	LoudLines = {
+		out = { "으아아악!!", "아야야야!!", "안 돼애애!!" },
+		kill = { "맞았다아아!!", "명중이다!!", "와하하하!!" },
+		catch = { "잡았다아아!!", "캐치이이!!" },
+		revive = { "살았다아아!!", "부활이다!!" },
+		ability = { "능력 발동!!!", "받아라아아!!" },
+		throw = { "간다아아!!", "슈우우웃!!", "피해 봐라아!!" },
+		chat = { "와아아아!!", "여기 도서관 맞아?!", "쉿은 무슨 쉿이야!!", "야호오오!!" },
+		sittingChat = { "살려 줘어어!!", "공 좀 던져 줘어!!" },
 	},
+	LoudSpeechChance = 0.8, -- 시끄러운 곳에서 사건이 생겼을 때 말할 확률
+	LoudSpeechGap = 1, -- 시끄러운 곳에서는 다른 NPC가 금방 또 말한다 (초)
+	LoudChatScale = 0.4, -- 시끄러운 곳에서는 혼잣말 간격이 이 배로 짧아진다
+	LoudBubbleScale = 1.4, -- 시끄러운 곳 말풍선 크기 배
 }
 
 -- 튜토리얼 : 처음 온 사람의 첫 판은 NPC 몇 명과만 천천히 한다
@@ -286,44 +291,26 @@ Config.Tutorial = {
 	DemoAfterSeconds = 3, -- 캐치 뒤 설명을 읽을 시간
 }
 
--- NPC 얼굴·머리·옷 모양 (server/NpcLooks.lua가 쓴다)
--- 얼굴 부품 크기와 위치는 머리 크기에 대한 비율이다 : x = 머리 너비, y = 머리 높이, z = 머리 두께 배.
--- 위치의 z가 음수면 얼굴 앞쪽이다.
+-- NPC 몸·머리·옷 모양 (server/NpcLooks.lua가 쓴다)
+-- 머리 꾸밈 부품 크기와 위치는 머리 크기에 대한 비율이다 : x = 머리 너비, y = 머리 높이, z = 머리 두께 배.
+-- 위치의 z가 음수면 얼굴 앞쪽이다. 얼굴은 로블록스 기본 얼굴 그림을 쓴다.
 Config.Looks = {
-	FaceDepth = -0.47, -- 얼굴 부품이 붙는 깊이 (머리 앞면)
+	FaceDepth = -0.47, -- 꾸밈 부품이 붙는 깊이 (머리 앞면)
 	LayerStep = 0.02, -- 겹치는 부품을 앞으로 조금씩 내미는 정도 (깜빡이지 않게)
-	Eyes = {
-		normal = { white = Vector3.new(0.2, 0.24, 0.06), pupil = Vector3.new(0.11, 0.14, 0.04), gapX = 0.2, y = 0.06 },
-		big = { white = Vector3.new(0.25, 0.3, 0.06), pupil = Vector3.new(0.14, 0.18, 0.04), gapX = 0.21, y = 0.05 },
-		sleepy = { -- 눈꺼풀(lid, 흰자 크기의 배)이 위쪽을 덮는다
-			white = Vector3.new(0.2, 0.18, 0.06), pupil = Vector3.new(0.11, 0.1, 0.04), gapX = 0.2, y = 0.04,
-			lid = Vector3.new(1.15, 0.6, 1), lidRaise = 0.32,
-		},
-		happy = { arc = Vector3.new(0.12, 0.035, 0.04), arcTiltDegrees = 30, arcSpread = 0.4, gapX = 0.2, y = 0.06 }, -- ^ ^ 웃는 눈
+	-- 둥근 몸 : 네모난 R15 몸 위에 덮는 둥근 조각
+	Body = {
+		LimbRoundness = 0.92, -- 팔다리 굵기 (원래 굵기에 대한 비율)
+		MinLength = 0.05, -- 팔다리 원기둥 최소 길이
+		TorsoRoundness = 1.05, -- 몸통 옆 둥근 기둥 지름 (몸 두께에 대한 비율)
+		HandRatio = Vector3.new(0.85, 2.8, 0.85), -- 손 공 크기 (손 크기에 대한 비율)
+		ShoeRatio = Vector3.new(1.0, 2.0, 1.4), -- 신발 크기 (발 크기에 대한 비율)
+		ShoeForward = 0.15, -- 신발이 앞으로 나온 정도
 	},
-	ShineSize = 0.045, -- 눈동자 반짝임 크기
-	ShineOffset = Vector2.new(0.025, 0.035), -- 반짝임이 눈동자 가운데에서 떨어진 정도 (옆, 위)
-	PupilColor = Color3.fromRGB(35, 25, 20),
-	EyeWhiteColor = Color3.fromRGB(255, 255, 255),
-	Brows = {
-		size = Vector3.new(0.17, 0.04, 0.04), y = 0.2, gapX = 0.2, darken = 0.35, -- 눈썹은 머리색보다 진하게
-		tiltDegrees = { brave = 18, calm = 0, happy = -10 }, -- + 면 안쪽이 내려간다 (씩씩한 눈썹)
-	},
-	NoseSize = Vector3.new(0.08, 0.07, 0.06), NoseY = -0.06, NoseDarken = 0.12,
-	Mouths = {
-		smile = { y = -0.2, segment = Vector3.new(0.09, 0.035, 0.04), spreadX = 0.08, liftY = 0.025 }, -- 세 조각으로 만든 웃는 입
-		grin = { y = -0.2, size = Vector3.new(0.3, 0.12, 0.05), teeth = Vector3.new(0.24, 0.045, 0.02), shift = 0.22 }, -- 이가 보이는 큰 웃음 (이는 위쪽)
-		open = { y = -0.21, size = Vector3.new(0.2, 0.13, 0.05), tongue = Vector3.new(0.11, 0.05, 0.02), shift = -0.22 }, -- 혀는 아래쪽
-		o = { y = -0.21, size = Vector3.new(0.1, 0.11, 0.05) },
-		small = { y = -0.2, size = Vector3.new(0.12, 0.03, 0.04) },
-	},
-	MouthColor = Color3.fromRGB(90, 30, 35),
-	TeethColor = Color3.fromRGB(255, 255, 250),
-	TongueColor = Color3.fromRGB(240, 120, 130),
 	Blush = { size = Vector3.new(0.14, 0.07, 0.03), gapX = 0.3, y = -0.08, color = Color3.fromRGB(255, 130, 150), transparency = 0.35 },
 	Freckles = { size = 0.025, color = Color3.fromRGB(150, 90, 60), y = -0.07, gapX = 0.28, spread = 0.05 },
 	Glasses = {
-		lens = Vector3.new(0.27, 0.24, 0.02), gapX = 0.2, y = 0.03, front = 0.08, -- 눈썹이 보이게 살짝 아래 lensColor = Color3.fromRGB(200, 230, 255), lensTransparency = 0.6,
+		lens = Vector3.new(0.27, 0.24, 0.02), gapX = 0.2, y = 0.1, front = 0.08, -- y : 기본 얼굴 눈 높이
+		lensColor = Color3.fromRGB(200, 230, 255), lensTransparency = 0.6,
 		bridge = Vector3.new(0.1, 0.025, 0.02), frameColor = Color3.fromRGB(30, 30, 35), rim = 0.03,
 	},
 	-- 머리카락 : 모든 머리 모양은 정수리를 덮는 "모자" 부분을 먼저 깔고 모양마다 덧붙인다
@@ -735,7 +722,8 @@ Config.Prefabs = {
 -- 경기장 9곳. room = 방 (없으면 바깥), items = 놓을 가구 목록.
 -- item : prefab(조립법 이름) 또는 parts(부품 목록), scale(크기 배), pos(바닥 자리), rotY(돌리기, 0이면 앞이 -Z),
 --        repeatCount + step(줄지어 여러 개), ring(코트를 둘러싼 원 : count, radius, startDeg), colors(tint 색, 차례로)
--- 방 크기 : half = 가운데에서 벽까지, height = 천장 높이. 집과 거인 교실은 내가 작아진 것처럼 가구가 거대하다.
+-- 방 크기 : half = 가운데에서 벽까지, height = 천장 높이. 거인 교실만 내가 작아진 것처럼 가구가 거대하다.
+-- y = 바닥에서 띄우는 높이 (식탁 위 그릇처럼)
 local SHIRTS = { RGB(240, 95, 70), RGB(40, 180, 170), RGB(130, 220, 180), RGB(120, 190, 240), RGB(250, 130, 130), RGB(255, 240, 100), RGB(255, 180, 120), RGB(170, 140, 220) }
 local OUTDOOR = { clockTime = 14.5, brightness = 2.5, ambient = RGB(90, 90, 100), outdoorAmbient = RGB(140, 140, 150), atmosphereDensity = 0.28, tint = RGB(255, 255, 255) }
 local INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(150, 150, 158), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 255, 255) }
@@ -806,53 +794,61 @@ Config.Arenas = {
 	{
 		id = "anbang", name = "안방", light = WARM_INDOOR, courtColor = RGB(120, 170, 220),
 		room = {
-			half = 70, height = 56, floorColor = RGB(232, 190, 120), floorMat = M.SmoothPlastic, -- 노란 장판
+			half = 70, height = 30, floorColor = RGB(232, 190, 120), floorMat = M.SmoothPlastic, -- 노란 장판
 			wallColor = RGB(245, 235, 215), trimColor = RGB(150, 110, 70), ceilingColor = RGB(250, 245, 235),
-			lightGrid = 2, lampColor = RGB(255, 245, 225), lampBrightness = 3,
+			lightGrid = 3, lampColor = RGB(255, 245, 225), lampBrightness = 2,
 		},
 		items = {
-			{ prefab = "wardrobe", scale = 4, pos = V(0, 0, 62) },
-			{ prefab = "vanity", scale = 4, pos = V(-54, 0, -54), rotY = -135 },
-			{ prefab = "futonStack", scale = 4, pos = V(56, 0, -54), rotY = 135 },
-			{ prefab = "lowTable", scale = 4, pos = V(-56, 0, 30), rotY = -90 },
-			{ prefab = "cushion", scale = 4, pos = V(56, 0, 20), repeatCount = 3, step = V(0, 0, 12), colors = { RGB(240, 95, 70), RGB(130, 220, 180), RGB(255, 240, 100) } },
-			{ prefab = "clock", scale = 2, pos = V(-40, 0, 69.8) },
+			{ prefab = "wardrobe", pos = V(-45, 0, 68), repeatCount = 10, step = V(10, 0, 0) },
+			{ prefab = "futonStack", pos = V(65.5, 0, -40), rotY = 90, repeatCount = 9, step = V(0, 0, 10) },
+			{ prefab = "vanity", pos = V(-66, 0, -30), rotY = -90, repeatCount = 3, step = V(0, 0, 30) },
+			{ prefab = "lowTable", pos = V(-40, 0, -59), repeatCount = 3, step = V(40, 0, 0) },
+			{ prefab = "cushion", pos = V(-42, 0, -53.5), repeatCount = 3, step = V(40, 0, 0), colors = { RGB(240, 95, 70), RGB(130, 220, 180), RGB(255, 240, 100) } },
+			{ prefab = "cushion", pos = V(-38, 0, -64.5), repeatCount = 3, step = V(40, 0, 0), colors = { RGB(170, 140, 220), RGB(250, 130, 130), RGB(120, 190, 240) } },
+			{ prefab = "floorLamp", pos = V(-62, 0, 62) },
+			{ prefab = "plant", pos = V(62, 0, 62) },
+			{ prefab = "clock", pos = V(0, 0, 69.8), rotY = 0 },
 		},
 	},
 	{
 		id = "dining", name = "식당", light = WARM_INDOOR, courtColor = RGB(240, 150, 120),
 		room = {
-			half = 70, height = 56, floorColor = RGB(235, 230, 220), floorMat = M.Marble,
+			half = 70, height = 30, floorColor = RGB(235, 230, 220), floorMat = M.Marble,
 			wallColor = RGB(255, 245, 230), trimColor = RGB(180, 120, 80), ceilingColor = RGB(255, 250, 245),
-			lightGrid = 2, lampColor = RGB(255, 240, 215), lampBrightness = 3,
+			lightGrid = 3, lampColor = RGB(255, 240, 215), lampBrightness = 2,
 		},
 		items = {
-			{ prefab = "diningTable", scale = 4, pos = V(0, 0, 58), colors = { RGB(240, 95, 70) } },
-			{ prefab = "diningChair", scale = 4, pos = V(-12, 0, 46), rotY = 180, colors = { RGB(255, 240, 100) } },
-			{ prefab = "diningChair", scale = 4, pos = V(12, 0, 46), rotY = 180, colors = { RGB(130, 220, 180) } },
-			{ prefab = "fridge", scale = 4, pos = V(-62, 0, -40), rotY = -90 },
-			{ prefab = "jar", scale = 4, pos = V(58, 0, -56), repeatCount = 2, step = V(-14, 0, -4) },
-			{ prefab = "riceBowl", scale = 6, pos = V(50, 0, 30) },
-			{ prefab = "spoon", scale = 6, pos = V(-50, 0, 30), rotY = 30 },
-			{ prefab = "chopsticks", scale = 6, pos = V(-42, 0, -55), rotY = -20 },
-			{ prefab = "plate", scale = 6, pos = V(56, 0, 2), colors = { RGB(250, 200, 60) } },
+			-- 코트를 빙 둘러싼 식탁 10개, 식탁마다 앞뒤로 의자, 위에 밥그릇
+			{ prefab = "diningTable", ring = { count = 10, radius = 58 }, colors = SHIRTS },
+			{ prefab = "diningChair", ring = { count = 10, radius = 52.5 }, rotY = 180, colors = SHIRTS },
+			{ prefab = "diningChair", ring = { count = 10, radius = 63.5 }, colors = SHIRTS },
+			{ prefab = "riceBowl", ring = { count = 10, radius = 57 }, y = 3.03 },
+			{ prefab = "plate", ring = { count = 10, radius = 59, startDeg = 4 }, y = 3.03, colors = { RGB(250, 200, 60), RGB(230, 70, 60) } },
+			-- 구석 식탁 4개
+			{ prefab = "diningTable", pos = V(61, 0, 61), rotY = 45, colors = SHIRTS },
+			{ prefab = "diningTable", pos = V(-61, 0, 61), rotY = -45, colors = SHIRTS },
+			{ prefab = "diningTable", pos = V(61, 0, -61), rotY = 135, colors = SHIRTS },
+			{ prefab = "diningTable", pos = V(-61, 0, -61), rotY = -135, colors = SHIRTS },
+			{ prefab = "fridge", pos = V(-30, 0, 67.8), repeatCount = 2, step = V(-6, 0, 0) },
+			{ prefab = "jar", pos = V(28, 0, 67), repeatCount = 3, step = V(5, 0, 0) },
 		},
 	},
 	{
 		id = "bedroom", name = "침실", light = WARM_INDOOR, courtColor = RGB(170, 140, 220),
 		room = {
-			half = 70, height = 56, floorColor = RGB(190, 150, 110), floorMat = M.WoodPlanks,
+			half = 70, height = 30, floorColor = RGB(190, 150, 110), floorMat = M.WoodPlanks,
 			wallColor = RGB(220, 235, 250), trimColor = RGB(250, 250, 250), ceilingColor = RGB(250, 250, 255),
-			lightGrid = 2, lampColor = RGB(255, 250, 240), lampBrightness = 3,
+			lightGrid = 3, lampColor = RGB(255, 250, 240), lampBrightness = 2,
 		},
 		items = {
 			{ parts = { { kind = "column", size = V(100, 0.04, 100), at = V(0, 0.06, 0), color = RGB(250, 180, 200), mat = M.Fabric, collide = false } }, pos = V(0, 0, 0) }, -- 동그란 러그
-			{ prefab = "bed", scale = 4, pos = V(-42, 0, 52), rotY = 180, colors = { RGB(120, 190, 240) } },
-			{ prefab = "teddy", scale = 5, pos = V(50, 0, 50), rotY = 45, colors = { RGB(240, 95, 70) } },
-			{ prefab = "toyBlock", scale = 4, pos = V(40, 0, -60), repeatCount = 3, step = V(9, 0, 2), colors = { RGB(240, 95, 70), RGB(255, 240, 100), RGB(40, 180, 170) } },
-			{ prefab = "floorLamp", scale = 4, pos = V(-60, 0, -60) },
-			{ prefab = "window", scale = 2, pos = V(69.8, 0, 0), rotY = 90 },
-			{ prefab = "bookStack", scale = 4, pos = V(-58, 0, 10), rotY = 20 },
+			-- 네 벽을 따라 침대가 줄지어 있다 (머리 쪽이 벽)
+			{ prefab = "bed", pos = V(-56, 0, 65.6), rotY = 180, repeatCount = 15, step = V(8, 0, 0), colors = SHIRTS },
+			{ prefab = "bed", pos = V(-56, 0, -65.6), repeatCount = 15, step = V(8, 0, 0), colors = SHIRTS },
+			{ prefab = "bed", pos = V(65.6, 0, -44), rotY = -90, repeatCount = 12, step = V(0, 0, 8), colors = SHIRTS },
+			{ prefab = "bed", pos = V(-65.6, 0, -44), rotY = 90, repeatCount = 12, step = V(0, 0, 8), colors = SHIRTS },
+			{ prefab = "teddy", pos = V(-40, 0, 58), rotY = 0, repeatCount = 3, step = V(40, 0, 0), colors = { RGB(240, 95, 70), RGB(40, 180, 170), RGB(255, 240, 100) } },
+			{ prefab = "toyBlock", pos = V(52, 0, -52), repeatCount = 3, step = V(2.5, 0, 1), colors = { RGB(240, 95, 70), RGB(255, 240, 100), RGB(40, 180, 170) } },
 		},
 	},
 	{

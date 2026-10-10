@@ -129,11 +129,12 @@ end
 local function placements(item)
 	local list = {}
 	local baseRotation = CFrame.Angles(0, math.rad(item.rotY or 0), 0)
+	local lift = Vector3.new(0, item.y or 0, 0) -- 식탁 위처럼 바닥에서 띄우기
 	if item.ring then
 		local R = item.ring
 		for i = 1, R.count do
 			local angle = math.rad(R.startDeg or 0) + (i - 1) / R.count * math.pi * 2
-			local position = C.Center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * R.radius
+			local position = C.Center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * R.radius + lift
 			-- 앞(-Z)이 코트 가운데를 보게 세운다
 			local facing = CFrame.lookAt(position, Vector3.new(C.Center.X, position.Y, C.Center.Z))
 			table.insert(list, facing * baseRotation)
@@ -142,7 +143,7 @@ local function placements(item)
 		local count = item.repeatCount or 1
 		local step = item.step or Vector3.zero
 		for i = 1, count do
-			table.insert(list, CFrame.new(C.Center + item.pos + step * (i - 1)) * baseRotation)
+			table.insert(list, CFrame.new(C.Center + item.pos + lift + step * (i - 1)) * baseRotation)
 		end
 	end
 	return list
