@@ -216,7 +216,8 @@ end
 --   "round"  = 모서리를 둥글게 (어깨, 몸통 맨 위·아래)
 --   "flat"   = 마디 경계에서 딱 끝난다 (다음 마디와 맞닿는 곳, 관절 공이 틈을 메운다)
 --   "extend" = 곧게 조금 더 늘려서 이웃(몸통·손·신발) 속으로 들어간다
-local function joinedCylinder(folder, base, inset, diameter, top, bottom, color, material)
+-- topTrim : 위쪽을 이만큼 잘라 낮춘다 (팔이 몸통 꼭대기보다 아래에서 시작하게)
+local function joinedCylinder(folder, base, inset, diameter, top, bottom, color, material, topTrim)
 	local height = base.Size.Y
 	local overlap = L.Body.JointOverlap
 	local extTop = if top == "extend" then overlap else 0
@@ -226,7 +227,7 @@ local function joinedCylinder(folder, base, inset, diameter, top, bottom, color,
 	local edgeBottom = if bottom == "round" then edge else 0
 
 	-- 곧은 원기둥 부분 (둥근 모서리 자리는 빼고)
-	local upper = height / 2 + extTop - edgeTop
+	local upper = height / 2 + extTop - (topTrim or 0) - edgeTop
 	local lower = -height / 2 - extBottom + edgeBottom
 	local length = math.max(upper - lower, L.Body.MinLength)
 	upright(folder, base, CFrame.new(inset, (upper + lower) / 2, 0), diameter, length, color, material)
@@ -306,7 +307,8 @@ local function roundBody(folder, model, persona)
 		if upperArm then
 			local inset = armInset(upper, upperArm)
 			local armDiameter = limbDiameter(upperArm)
-			joinedCylinder(folder, upperArm, inset, armDiameter, "round", "flat", persona.shirt, clothes)
+			local drop = upperArm.Size.Y * L.Body.ShoulderDrop -- 어깨는 몸통 꼭대기보다 조금 아래
+			joinedCylinder(folder, upperArm, inset, armDiameter, "round", "flat", persona.shirt, clothes, drop)
 			jointBall(folder, upperArm, inset, armDiameter, persona.skin, skin)
 			if lowerArm then
 				joinedCylinder(folder, lowerArm, inset, armDiameter, "flat", "extend", persona.skin, skin)
