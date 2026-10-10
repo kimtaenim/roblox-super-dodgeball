@@ -224,28 +224,42 @@ local function roundedCylinder(folder, base, offset, diameter, length, color, ma
 end
 
 -- 팔다리 한 마디 : 모서리 둥근 원기둥. 이웃 마디·손·발과 이어지게 위아래로 조금씩 길게.
-local function limb(folder, base, color, material)
-	local size = base.Size
-	local diameter = math.min(size.X, size.Z) * L.Body.LimbRoundness
-	roundedCylinder(folder, base, CFrame.identity, diameter, size.Y + L.Body.JointOverlap * 2, color, material)
+-- inset : 몸통 쪽으로 붙이는 거리 (팔만, 몸통에서 떨어져 보이지 않게)
+local function limbDiameter(base)
+	return math.min(base.Size.X, base.Size.Z) * L.Body.LimbRoundness
+end
+local function limb(folder, base, inset, color, material)
+	local offset = CFrame.new(inset, 0, 0)
+	roundedCylinder(folder, base, offset, limbDiameter(base), base.Size.Y + L.Body.JointOverlap * 2, color, material)
 end
 
--- 몸통 : 모서리 둥근 원기둥 (지름은 몸 너비에 대한 비율). 등번호 붙일 가운데 원기둥을 돌려준다.
+-- 몸통 원기둥 지름 (몸 너비에 대한 비율).
+local function torsoDiameter(base)
+	return base.Size.X * L.Body.TorsoDiameterRatio
+end
+
+-- 몸통 : 모서리 둥근 원기둥.
 local function torso(folder, base, color, material)
-	local size = base.Size
-	return roundedCylinder(folder, base, CFrame.identity, size.X * L.Body.TorsoDiameterRatio, size.Y, color, material)
+	roundedCylinder(folder, base, CFrame.identity, torsoDiameter(base), base.Size.Y, color, material)
+end
+
+-- 팔을 몸통 쪽으로 얼마나 붙일지 구한다 (어깨에서 몸통 가장자리까지 남는 틈만큼, 몸통 쪽 방향으로).
+local function armInset(upperTorso, upperArm)
+	local side = upperTorso.CFrame:PointToObjectSpace(upperArm.Position).X
+	local gap = math.abs(side) - torsoDiameter(upperTorso) / 2 - limbDiameter(upperArm) / 2 + L.Body.ArmTouch
+	return -math.sign(side) * math.max(gap, 0)
 end
 
 -- 손과 신발 : 둥근 타원 (신발은 앞으로 조금 나온다).
-local function roundedEnd(folder, base, ratio, forward, lift, color, material)
+local function roundedEnd(folder, base, ratio, forward, lift, inset, color, material)
 	local size = base.Size
-	local offset = CFrame.new(0, size.Y * lift, -size.Z * forward)
+	local offset = CFrame.new(inset, size.Y * lift, -size.Z * forward)
 	local part = piece(folder, base, offset, Vector3.new(size.X * ratio.X, size.Y * ratio.Y, size.Z * ratio.Z), color, "ball")
 	part.Material = material
 end
 
 -- 네모난 R15 몸을 숨기고 둥근 몸으로 덮는다 (공 판정은 숨긴 원래 몸으로 한다).
--- 반팔 : 윗팔만 윗옷 색, 반바지 : 종아리는 피부색. 윗몸 덮개(등번호 붙일 곳)를 돌려준다.
+-- 반팔 : 윗팔만 윗옷 색, 반바지 : 종아리는 피부색.
 local function roundBody(folder, model, persona)
 	local clothes, skin = Enum.Material.Fabric, Enum.Material.SmoothPlastic
 	local lowerLeg = if persona.legs == "shorts" then persona.skin else persona.pants
@@ -256,55 +270,60 @@ local function roundBody(folder, model, persona)
 		end
 		return part
 	end
-	local torsoCover
 	local upper = hide("UpperTorso")
 	if upper then
-		torsoCover = torso(folder, upper, persona.shirt, clothes)
+		torso(folder, upper, persona.shirt, clothes)
 	end
 	local lower = hide("LowerTorso")
 	if lower then
 		torso(folder, lower, persona.pants, clothes)
 	end
 	for _, side in { "Left", "Right" } do
+		local upperArm = model:FindFirstChild(side .. "UpperArm")
+		local inset = if upper and upperArm then armInset(upper, upperArm) else 0
 		local limbs = {
-			{ side .. "UpperArm", persona.shirt, clothes },
-			{ side .. "LowerArm", persona.skin, skin },
-			{ side .. "UpperLeg", persona.pants, clothes },
-			{ side .. "LowerLeg", lowerLeg, clothes },
+			{ side .. "UpperArm", persona.shirt, clothes, inset },
+			{ side .. "LowerArm", persona.skin, skin, inset },
+			{ side .. "UpperLeg", persona.pants, clothes, 0 },
+			{ side .. "LowerLeg", lowerLeg, clothes, 0 },
 		}
 		for _, info in limbs do
 			local part = hide(info[1])
 			if part then
-				limb(folder, part, info[2], info[3])
+				limb(folder, part, info[4], info[2], info[3])
 			end
 		end
 		local hand = hide(side .. "Hand")
 		if hand then
-			roundedEnd(folder, hand, L.Body.HandRatio, 0, 0, persona.skin, skin)
+			roundedEnd(folder, hand, L.Body.HandRatio, 0, 0, inset, persona.skin, skin)
 		end
 		local foot = hide(side .. "Foot")
 		if foot then
-			roundedEnd(folder, foot, L.Body.ShoeRatio, L.Body.ShoeForward, L.Body.ShoeLift, persona.shoes, skin)
+			roundedEnd(folder, foot, L.Body.ShoeRatio, L.Body.ShoeForward, L.Body.ShoeLift, 0, persona.shoes, skin)
 		end
 	end
 	local head = model:FindFirstChild("Head")
 	if head then
 		head.Color = persona.skin
 	end
-	return torsoCover
 end
 
--- 윗옷 목둘레와 등번호를 단다 (등번호는 윗몸 덮개 뒷면에).
-local function addJersey(folder, torso, cover, persona)
+-- 윗옷 목둘레와 등번호를 단다. 등번호는 등에 붙인 투명한 판에 쓴다 (둥근 몸통에서도 똑바로 보이게).
+local function addJersey(folder, upperTorso, persona)
+	local diameter = torsoDiameter(upperTorso)
+	local round = Vector3.new(diameter, upperTorso.Size.Y, diameter)
 	local collar = persona.shirt:Lerp(Color3.new(0, 0, 0), L.CollarDarken)
-	piece(folder, torso, CFrame.new(0, torso.Size.Y / 2, 0), scaled(torso.Size, L.CollarSize), collar, "ball")
+	piece(folder, upperTorso, CFrame.new(0, upperTorso.Size.Y / 2, 0), scaled(round, L.CollarSize), collar, "ball")
 
+	local card = piece(folder, upperTorso, CFrame.new(0, 0, diameter / 2 + L.NumberCardGap), scaled(round, L.NumberCardSize), persona.shirt, "block")
+	card.Name = "NumberCard"
+	card.Transparency = 1
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "JerseyNumber"
 	gui.Face = Enum.NormalId.Back
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = L.NumberPixelsPerStud
-	gui.Parent = cover
+	gui.Parent = card
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
@@ -350,7 +369,7 @@ function NpcLooks.dress(model, persona)
 	local folder = Instance.new("Folder")
 	folder.Name = "Looks"
 	folder.Parent = model
-	local cover = roundBody(folder, model, persona)
+	roundBody(folder, model, persona)
 	HAIR[persona.hair](folder, head, persona.hairColor)
 	for _, extra in persona.extras do
 		if extra == "blush" then
@@ -363,9 +382,9 @@ function NpcLooks.dress(model, persona)
 			addHairClip(folder, head)
 		end
 	end
-	local torso = model:FindFirstChild("UpperTorso")
-	if torso and cover then
-		addJersey(folder, torso, cover, persona)
+	local upperTorso = model:FindFirstChild("UpperTorso")
+	if upperTorso then
+		addJersey(folder, upperTorso, persona)
 	end
 end
 

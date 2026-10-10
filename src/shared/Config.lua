@@ -303,7 +303,8 @@ Config.Looks = {
 		EdgeRatio = 0.22, -- 원기둥 모서리를 둥글게 하는 정도 (지름에 대한 비율)
 		JointOverlap = 0.15, -- 팔다리 마디가 이웃 마디·손·발과 겹치는 길이 (이어져 보이게)
 		MinLength = 0.05, -- 원기둥 최소 길이
-		TorsoDiameterRatio = 0.8, -- 몸통 원기둥 지름 (몸 너비에 대한 비율)
+		TorsoDiameterRatio = 0.7, -- 몸통 원기둥 지름 (몸 너비에 대한 비율, 너무 두껍지 않게)
+		ArmTouch = 0.05, -- 팔이 몸통에 살짝 파묻히는 정도 (떨어져 보이지 않게)
 		HandRatio = Vector3.new(0.75, 3.2, 0.85), -- 손 타원 크기 (손 크기에 대한 비율)
 		ShoeRatio = Vector3.new(1.0, 2.0, 1.4), -- 신발 타원 크기 (발 크기에 대한 비율)
 		ShoeForward = 0.15, -- 신발이 앞으로 나온 정도
@@ -330,7 +331,9 @@ Config.Looks = {
 	},
 	HairClip = { size = 0.16, offset = Vector3.new(0.42, 0.32, -0.25), color = Color3.fromRGB(255, 220, 60) },
 	-- 옷
-	CollarSize = Vector3.new(0.75, 0.12, 0.7), -- 윗옷 목둘레 (윗몸 크기에 대한 비율)
+	CollarSize = Vector3.new(0.55, 0.12, 0.55), -- 윗옷 목둘레 (둥근 몸통 크기에 대한 비율)
+	NumberCardSize = Vector3.new(0.6, 0.7, 0.02), -- 등번호 판 크기 (둥근 몸통 크기에 대한 비율)
+	NumberCardGap = 0.02, -- 등번호 판이 등에서 떨어진 거리
 	CollarDarken = 0.15, -- 목둘레는 윗옷보다 조금 진하게
 	NumberColor = Color3.fromRGB(255, 255, 255), -- 등번호 색
 	NumberPixelsPerStud = 50, -- 등번호 글자 선명도
