@@ -305,6 +305,7 @@ Config.Looks = {
 		MinLength = 0.05, -- 원기둥 최소 길이
 		TorsoDiameterRatio = 0.7, -- 몸통 원기둥 지름 (몸 너비에 대한 비율, 너무 두껍지 않게)
 		ArmTouch = 0.05, -- 팔이 몸통에 살짝 파묻히는 정도 (떨어져 보이지 않게)
+		InnerShrink = 0.97, -- 겹쳐 들어가는 조각(아랫몸 윗부분, 관절 공)을 이만큼 가늘게 (겹친 면이 지글거리지 않게)
 		HandRatio = Vector3.new(0.75, 3.2, 0.85), -- 손 타원 크기 (손 크기에 대한 비율)
 		ShoeRatio = Vector3.new(1.0, 2.0, 1.4), -- 신발 타원 크기 (발 크기에 대한 비율)
 		ShoeForward = 0.15, -- 신발이 앞으로 나온 정도

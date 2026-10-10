@@ -212,38 +212,48 @@ local function upright(folder, base, offset, diameter, length, color, material)
 	return part
 end
 
--- 모서리가 둥근 원기둥 : 가운데 원기둥 + 위아래 납작한 타원(모서리를 둥글게). 가운데 원기둥을 돌려준다.
-local function roundedCylinder(folder, base, offset, diameter, length, color, material)
-	local edge = math.min(diameter * L.Body.EdgeRatio, length / 2)
-	local core = upright(folder, base, offset, diameter, math.max(length - edge * 2, L.Body.MinLength), color, material)
-	for _, side in { -1, 1 } do
-		local cap = piece(folder, base, offset * CFrame.new(0, side * (length / 2 - edge), 0), Vector3.new(diameter, edge * 2, diameter), color, "ball")
-		cap.Material = material
+-- 한 덩어리처럼 이어지는 원기둥. 끝마다 모양을 고른다 :
+--   "round"  = 모서리를 둥글게 (어깨, 몸통 맨 위·아래)
+--   "flat"   = 마디 경계에서 딱 끝난다 (다음 마디와 맞닿는 곳, 관절 공이 틈을 메운다)
+--   "extend" = 곧게 조금 더 늘려서 이웃(몸통·손·신발) 속으로 들어간다
+local function joinedCylinder(folder, base, inset, diameter, top, bottom, color, material)
+	local height = base.Size.Y
+	local overlap = L.Body.JointOverlap
+	local extTop = if top == "extend" then overlap else 0
+	local extBottom = if bottom == "extend" then overlap else 0
+	local edge = math.min(diameter * L.Body.EdgeRatio, height / 2)
+	local edgeTop = if top == "round" then edge else 0
+	local edgeBottom = if bottom == "round" then edge else 0
+
+	-- 곧은 원기둥 부분 (둥근 모서리 자리는 빼고)
+	local upper = height / 2 + extTop - edgeTop
+	local lower = -height / 2 - extBottom + edgeBottom
+	local length = math.max(upper - lower, L.Body.MinLength)
+	upright(folder, base, CFrame.new(inset, (upper + lower) / 2, 0), diameter, length, color, material)
+
+	-- 둥근 모서리 : 납작한 타원
+	for _, cap in { { edgeTop, upper }, { edgeBottom, lower } } do
+		if cap[1] > 0 then
+			local part = piece(folder, base, CFrame.new(inset, cap[2], 0), Vector3.new(diameter, cap[1] * 2, diameter), color, "ball")
+			part.Material = material
+		end
 	end
-	return core
 end
 
--- 팔다리 한 마디 : 모서리 둥근 원기둥. 이웃 마디·손·발과 이어지게 위아래로 조금씩 길게.
--- inset : 몸통 쪽으로 붙이는 거리 (팔만, 몸통에서 떨어져 보이지 않게)
--- shoulder : 윗팔이면 위로는 늘리지 않는다 (어깨가 목 옆으로 솟지 않게)
+-- 관절 공 : 팔꿈치·무릎에 원기둥과 같은 굵기의 공을 넣어 굽혀도 틈이 안 보이게 한다.
+local function jointBall(folder, base, inset, diameter, color, material)
+	local part = piece(folder, base, CFrame.new(inset, -base.Size.Y / 2, 0), Vector3.one * diameter * L.Body.InnerShrink, color, "ball")
+	part.Material = material
+end
+
+-- 팔다리 굵기 (윗마디 기준, 아랫마디도 같은 굵기로 이어진다).
 local function limbDiameter(base)
 	return math.min(base.Size.X, base.Size.Z) * L.Body.LimbRoundness
 end
-local function limb(folder, base, inset, shoulder, color, material)
-	local overlap = L.Body.JointOverlap
-	local top = if shoulder then 0 else overlap
-	local offset = CFrame.new(inset, (top - overlap) / 2, 0)
-	roundedCylinder(folder, base, offset, limbDiameter(base), base.Size.Y + top + overlap, color, material)
-end
 
--- 몸통 원기둥 지름 (몸 너비에 대한 비율).
-local function torsoDiameter(base)
-	return base.Size.X * L.Body.TorsoDiameterRatio
-end
-
--- 몸통 : 모서리 둥근 원기둥.
-local function torso(folder, base, color, material)
-	roundedCylinder(folder, base, CFrame.identity, torsoDiameter(base), base.Size.Y, color, material)
+-- 몸통 원기둥 지름 (윗몸 너비에 대한 비율, 아랫몸도 같은 굵기).
+local function torsoDiameter(upperTorso)
+	return upperTorso.Size.X * L.Body.TorsoDiameterRatio
 end
 
 -- 팔을 몸통 쪽으로 얼마나 붙일지 구한다 (어깨에서 몸통 가장자리까지 남는 틈만큼, 몸통 쪽 방향으로).
@@ -262,10 +272,9 @@ local function roundedEnd(folder, base, ratio, forward, lift, inset, color, mate
 end
 
 -- 네모난 R15 몸을 숨기고 둥근 몸으로 덮는다 (공 판정은 숨긴 원래 몸으로 한다).
--- 반팔 : 윗팔만 윗옷 색, 반바지 : 종아리는 피부색.
+-- 몸통·팔·다리가 마디마다 따로 놀지 않고 한 덩어리처럼 이어지게 만든다. 반팔 : 윗팔만 윗옷 색, 반바지 : 종아리는 피부색.
 local function roundBody(folder, model, persona)
 	local clothes, skin = Enum.Material.Fabric, Enum.Material.SmoothPlastic
-	local lowerLeg = if persona.legs == "shorts" then persona.skin else persona.pants
 	local function hide(name)
 		local part = model:FindFirstChild(name)
 		if part then
@@ -273,34 +282,51 @@ local function roundBody(folder, model, persona)
 		end
 		return part
 	end
+	-- 몸통 : 윗몸(윗옷)과 아랫몸(바지)이 같은 굵기로 이어진 원기둥 하나처럼. 맨 위와 맨 아래만 둥글다.
 	local upper = hide("UpperTorso")
-	if upper then
-		torso(folder, upper, persona.shirt, clothes)
-	end
 	local lower = hide("LowerTorso")
-	if lower then
-		torso(folder, lower, persona.pants, clothes)
+	if not upper then
+		return
 	end
+	local bodyDiameter = torsoDiameter(upper)
+	joinedCylinder(folder, upper, 0, bodyDiameter, "round", "flat", persona.shirt, clothes)
+	if lower then
+		joinedCylinder(folder, lower, 0, bodyDiameter * L.Body.InnerShrink, "extend", "round", persona.pants, clothes)
+	end
+
 	for _, side in { "Left", "Right" } do
-		local upperArm = model:FindFirstChild(side .. "UpperArm")
-		local inset = if upper and upperArm then armInset(upper, upperArm) else 0
-		local limbs = {
-			{ side .. "UpperArm", persona.shirt, clothes, inset, true },
-			{ side .. "LowerArm", persona.skin, skin, inset, false },
-			{ side .. "UpperLeg", persona.pants, clothes, 0, false },
-			{ side .. "LowerLeg", lowerLeg, clothes, 0, false },
-		}
-		for _, info in limbs do
-			local part = hide(info[1])
-			if part then
-				limb(folder, part, info[4], info[5], info[2], info[3])
+		local upperArm = hide(side .. "UpperArm")
+		local lowerArm = hide(side .. "LowerArm")
+		local hand = hide(side .. "Hand")
+		local upperLeg = hide(side .. "UpperLeg")
+		local lowerLeg = hide(side .. "LowerLeg")
+		local foot = hide(side .. "Foot")
+
+		-- 팔 : 둥근 어깨 → 윗팔(윗옷 색) → 팔꿈치 공 → 아랫팔(피부색) → 손 속으로
+		if upperArm then
+			local inset = armInset(upper, upperArm)
+			local armDiameter = limbDiameter(upperArm)
+			joinedCylinder(folder, upperArm, inset, armDiameter, "round", "flat", persona.shirt, clothes)
+			jointBall(folder, upperArm, inset, armDiameter, persona.skin, skin)
+			if lowerArm then
+				joinedCylinder(folder, lowerArm, inset, armDiameter, "flat", "extend", persona.skin, skin)
+			end
+			if hand then
+				roundedEnd(folder, hand, L.Body.HandRatio, 0, 0, inset, persona.skin, skin)
 			end
 		end
-		local hand = hide(side .. "Hand")
-		if hand then
-			roundedEnd(folder, hand, L.Body.HandRatio, 0, 0, inset, persona.skin, skin)
+
+		-- 다리 : 몸통 속에서 시작 → 허벅지(바지) → 무릎 공 → 종아리(바지 또는 피부) → 신발 속으로
+		if upperLeg then
+			local legDiameter = limbDiameter(upperLeg)
+			local shin = if persona.legs == "shorts" then persona.skin else persona.pants
+			local shinMaterial = if persona.legs == "shorts" then skin else clothes
+			joinedCylinder(folder, upperLeg, 0, legDiameter, "extend", "flat", persona.pants, clothes)
+			jointBall(folder, upperLeg, 0, legDiameter, shin, shinMaterial)
+			if lowerLeg then
+				joinedCylinder(folder, lowerLeg, 0, legDiameter, "flat", "extend", shin, shinMaterial)
+			end
 		end
-		local foot = hide(side .. "Foot")
 		if foot then
 			roundedEnd(folder, foot, L.Body.ShoeRatio, L.Body.ShoeForward, L.Body.ShoeLift, 0, persona.shoes, skin)
 		end
