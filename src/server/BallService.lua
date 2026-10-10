@@ -436,6 +436,8 @@ local function judgeContact(ball, state, part)
 		end
 		makeDead(ball)
 		ball.AssemblyLinearVelocity = back * A.Shield.BounceSpeed + Vector3.new(0, A.Shield.BounceUp, 0)
+		SoundFx.playAt("Block", ball)
+		PlayerStateService.notify(p, "방패로 막았어요!")
 		return true
 	end
 
