@@ -401,10 +401,13 @@ local function paintCatalogBody(model, persona)
 	for name, color in colors do
 		local part = model:FindFirstChild(name)
 		if part then
-			if part:IsA("MeshPart") then
-				pcall(function()
+			if part:IsA("MeshPart") and part.TextureID ~= "" then
+				local cleared = pcall(function()
 					part.TextureID = "" -- 몸에 그려진 무늬를 지운다
 				end)
+				if not cleared then
+					warn(("%s의 %s에 그려진 옷 그림을 지우지 못했어요 (윗옷 색이 안 맞을 수 있어요)"):format(persona.name, name))
+				end
 			end
 			for _, child in part:GetChildren() do
 				if child:IsA("SurfaceAppearance") then

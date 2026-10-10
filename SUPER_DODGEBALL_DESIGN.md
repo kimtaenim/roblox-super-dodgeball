@@ -230,14 +230,15 @@ return {
   요즘 아바타 느낌 : 로블록스 카탈로그 부품을 입힌다 (`persona.catalog`, 코드는 `server/AvatarCatalog.lua`).
   | 이름 | 몸 번들 | 얼굴 | 머리카락 |
   |---|---|---|---|
-  | 빨강 | Man (238) | Chiseled Good Looks (다이내믹 헤드 949) | Brown Charmer Hair |
+  | 빨강 | Base Body - Devin (986) | Chiseled Good Looks (다이내믹 헤드 949) | Brown Charmer Hair |
   | 청록 | Base Body - Devin (986) | Dylan Default (다이내믹 헤드 945) | Pal Hair |
-  | 민트 | Woman (239) | Freckles | Black Ponytail |
-  | 하늘 | ROBLOX Boy (109) | Silly Fun | True Blue Hair |
-  | 분홍 | ROBLOX Girl (108) | Makeup Minimalist (다이내믹 헤드 948) | Black Trendy Messy Buns |
-  | 노랑 | Man (238) | Dylan Default (다이내믹 헤드 945) | Black Curly Hair For Amazing People |
+  | 민트 | Base Body - Devin (986) | Freckles | Black Ponytail |
+  | 하늘 | Robloxian 2.0 (311) | Silly Fun | True Blue Hair |
+  | 분홍 | Base Body - Devin (986) | Makeup Minimalist (다이내믹 헤드 948) | Black Trendy Messy Buns |
+  | 노랑 | Base Body - Devin (986) | Dylan Default (다이내믹 헤드 945) | Black Curly Hair For Amazing People |
   | 주황 | Robloxian 2.0 (311) | Check It | (부품 머리띠) |
-  | 보라 | Woman (239) | Chill | Lavender Updo |
+  | 보라 | Base Body - Devin (986) | Chill | Lavender Updo |
+  몸은 옷 그림이 없는 몸만 쓴다 (그림이 있는 몸은 윗옷 색이 가려져 이름과 안 맞는다).
   번호는 검색으로 찾은 것이라, 서버가 켜질 때 번호마다 로블록스에 진짜 이름을 물어보고 이름이 맞을 때만 입힌다.
   안 맞거나 못 불러온 부품은 출력 창에 경고를 남기고, 직접 만든 모습(둥근 몸·부품 머리카락·기본 얼굴)으로 채운다.
   (직접 만든 몸) 몸은 둥글고 한 덩어리처럼 이어진다 : 네모난 R15 몸을 숨기고, 몸통(윗옷+바지)·팔·다리를 마디 사이 홈 없이 이어진 원기둥으로 덮는다.
