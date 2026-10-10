@@ -212,34 +212,35 @@ local function upright(folder, base, offset, diameter, length, color, material)
 	return part
 end
 
--- 팔다리 한 마디를 캡슐(원기둥 + 양 끝 공) 모양으로 덮는다.
-local function capsule(folder, base, color, material)
-	local size = base.Size
-	local diameter = math.min(size.X, size.Z) * L.Body.LimbRoundness
-	local length = math.max(size.Y - diameter, L.Body.MinLength)
-	upright(folder, base, CFrame.identity, diameter, length, color, material)
+-- 모서리가 둥근 원기둥 : 가운데 원기둥 + 위아래 납작한 타원(모서리를 둥글게). 가운데 원기둥을 돌려준다.
+local function roundedCylinder(folder, base, offset, diameter, length, color, material)
+	local edge = math.min(diameter * L.Body.EdgeRatio, length / 2)
+	local core = upright(folder, base, offset, diameter, math.max(length - edge * 2, L.Body.MinLength), color, material)
 	for _, side in { -1, 1 } do
-		local ball = piece(folder, base, CFrame.new(0, side * length / 2, 0), Vector3.one * diameter, color, "ball")
-		ball.Material = material
-	end
-end
-
--- 몸통을 옆이 둥근 모양으로 덮는다 (가운데 상자 + 양옆 원기둥). 가운데 상자를 돌려준다.
-local function roundedTorso(folder, base, color, material)
-	local size = base.Size
-	local depth = size.Z * L.Body.TorsoRoundness
-	local core = piece(folder, base, CFrame.identity, Vector3.new(size.X - depth, size.Y, depth), color, "block")
-	core.Material = material
-	for _, side in { -1, 1 } do
-		upright(folder, base, CFrame.new(side * (size.X - depth) / 2, 0, 0), depth, size.Y, color, material)
+		local cap = piece(folder, base, offset * CFrame.new(0, side * (length / 2 - edge), 0), Vector3.new(diameter, edge * 2, diameter), color, "ball")
+		cap.Material = material
 	end
 	return core
 end
 
--- 손은 공, 신발은 앞으로 길쭉한 타원으로 덮는다.
-local function roundedEnd(folder, base, ratio, forward, color, material)
+-- 팔다리 한 마디 : 모서리 둥근 원기둥. 이웃 마디·손·발과 이어지게 위아래로 조금씩 길게.
+local function limb(folder, base, color, material)
 	local size = base.Size
-	local part = piece(folder, base, CFrame.new(0, 0, -size.Z * forward), Vector3.new(size.X * ratio.X, size.Y * ratio.Y, size.Z * ratio.Z), color, "ball")
+	local diameter = math.min(size.X, size.Z) * L.Body.LimbRoundness
+	roundedCylinder(folder, base, CFrame.identity, diameter, size.Y + L.Body.JointOverlap * 2, color, material)
+end
+
+-- 몸통 : 모서리 둥근 원기둥 (지름은 몸 너비에 대한 비율). 등번호 붙일 가운데 원기둥을 돌려준다.
+local function torso(folder, base, color, material)
+	local size = base.Size
+	return roundedCylinder(folder, base, CFrame.identity, size.X * L.Body.TorsoDiameterRatio, size.Y, color, material)
+end
+
+-- 손과 신발 : 둥근 타원 (신발은 앞으로 조금 나온다).
+local function roundedEnd(folder, base, ratio, forward, lift, color, material)
+	local size = base.Size
+	local offset = CFrame.new(0, size.Y * lift, -size.Z * forward)
+	local part = piece(folder, base, offset, Vector3.new(size.X * ratio.X, size.Y * ratio.Y, size.Z * ratio.Z), color, "ball")
 	part.Material = material
 end
 
@@ -258,11 +259,11 @@ local function roundBody(folder, model, persona)
 	local torsoCover
 	local upper = hide("UpperTorso")
 	if upper then
-		torsoCover = roundedTorso(folder, upper, persona.shirt, clothes)
+		torsoCover = torso(folder, upper, persona.shirt, clothes)
 	end
 	local lower = hide("LowerTorso")
 	if lower then
-		roundedTorso(folder, lower, persona.pants, clothes)
+		torso(folder, lower, persona.pants, clothes)
 	end
 	for _, side in { "Left", "Right" } do
 		local limbs = {
@@ -271,19 +272,19 @@ local function roundBody(folder, model, persona)
 			{ side .. "UpperLeg", persona.pants, clothes },
 			{ side .. "LowerLeg", lowerLeg, clothes },
 		}
-		for _, limb in limbs do
-			local part = hide(limb[1])
+		for _, info in limbs do
+			local part = hide(info[1])
 			if part then
-				capsule(folder, part, limb[2], limb[3])
+				limb(folder, part, info[2], info[3])
 			end
 		end
 		local hand = hide(side .. "Hand")
 		if hand then
-			roundedEnd(folder, hand, L.Body.HandRatio, 0, persona.skin, skin)
+			roundedEnd(folder, hand, L.Body.HandRatio, 0, 0, persona.skin, skin)
 		end
 		local foot = hide(side .. "Foot")
 		if foot then
-			roundedEnd(folder, foot, L.Body.ShoeRatio, L.Body.ShoeForward, persona.shoes, skin)
+			roundedEnd(folder, foot, L.Body.ShoeRatio, L.Body.ShoeForward, L.Body.ShoeLift, persona.shoes, skin)
 		end
 	end
 	local head = model:FindFirstChild("Head")

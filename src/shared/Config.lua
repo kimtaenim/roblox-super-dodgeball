@@ -299,17 +299,20 @@ Config.Looks = {
 	LayerStep = 0.02, -- 겹치는 부품을 앞으로 조금씩 내미는 정도 (깜빡이지 않게)
 	-- 둥근 몸 : 네모난 R15 몸 위에 덮는 둥근 조각
 	Body = {
-		LimbRoundness = 0.92, -- 팔다리 굵기 (원래 굵기에 대한 비율)
-		MinLength = 0.05, -- 팔다리 원기둥 최소 길이
-		TorsoRoundness = 1.05, -- 몸통 옆 둥근 기둥 지름 (몸 두께에 대한 비율)
-		HandRatio = Vector3.new(0.85, 2.8, 0.85), -- 손 공 크기 (손 크기에 대한 비율)
-		ShoeRatio = Vector3.new(1.0, 2.0, 1.4), -- 신발 크기 (발 크기에 대한 비율)
+		LimbRoundness = 0.85, -- 팔다리 굵기 (원래 굵기에 대한 비율)
+		EdgeRatio = 0.22, -- 원기둥 모서리를 둥글게 하는 정도 (지름에 대한 비율)
+		JointOverlap = 0.15, -- 팔다리 마디가 이웃 마디·손·발과 겹치는 길이 (이어져 보이게)
+		MinLength = 0.05, -- 원기둥 최소 길이
+		TorsoDiameterRatio = 0.8, -- 몸통 원기둥 지름 (몸 너비에 대한 비율)
+		HandRatio = Vector3.new(0.75, 3.2, 0.85), -- 손 타원 크기 (손 크기에 대한 비율)
+		ShoeRatio = Vector3.new(1.0, 2.0, 1.4), -- 신발 타원 크기 (발 크기에 대한 비율)
 		ShoeForward = 0.15, -- 신발이 앞으로 나온 정도
+		ShoeLift = 0.5, -- 신발을 위로 올리는 정도 (발 높이에 대한 비율, 바닥에 묻히지 않게)
 	},
 	Blush = { size = Vector3.new(0.14, 0.07, 0.03), gapX = 0.3, y = -0.08, color = Color3.fromRGB(255, 130, 150), transparency = 0.35 },
 	Freckles = { size = 0.025, color = Color3.fromRGB(150, 90, 60), y = -0.07, gapX = 0.28, spread = 0.05 },
 	Glasses = {
-		lens = Vector3.new(0.27, 0.24, 0.02), gapX = 0.2, y = 0.1, front = 0.08, -- y : 기본 얼굴 눈 높이
+		lens = Vector3.new(0.22, 0.24, 0.02), gapX = 0.12, y = 0.1, front = 0.08, -- 기본 얼굴 눈 위치에 맞춤
 		lensColor = Color3.fromRGB(200, 230, 255), lensTransparency = 0.6,
 		bridge = Vector3.new(0.1, 0.025, 0.02), frameColor = Color3.fromRGB(30, 30, 35), rim = 0.03,
 	},
