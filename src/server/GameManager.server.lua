@@ -140,6 +140,7 @@ local function runCountdown()
 	-- 이번 판 경기장 : 튜토리얼은 체육관, 아니면 무작위
 	ArenaService.build(ArenaService.pick(tutorial))
 	gameState:SetAttribute("ArenaName", ArenaService.currentName())
+	gameState:SetAttribute("ArenaQuiet", ArenaService.isQuiet())
 	CourtService.setRadius(if tutorial then Config.Tutorial.CourtRadius else C.StartRadius, false)
 	local target = if tutorial then Config.Tutorial.TargetTotal else Config.Npc.TargetTotal
 	local npcCount = math.max(target - humans, R.MinParticipants - humans, 0)

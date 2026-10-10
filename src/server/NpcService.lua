@@ -14,6 +14,7 @@ local AbilityService = require(script.Parent.AbilityService)
 local AbilityBoxService = require(script.Parent.AbilityBoxService)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local NpcLooks = require(script.Parent.NpcLooks)
+local ArenaService = require(script.Parent.ArenaService)
 
 local N = Config.Npc
 local Anim = Config.Animation
@@ -152,9 +153,17 @@ local function say(model, text, force)
 	end)
 end
 
+-- 대사 목록을 고른다 : 조용한 경기장(도서관·박물관)에서는 속삭이는 대사.
+local function linesFor(kind)
+	if ArenaService.isQuiet() and N.QuietLines[kind] then
+		return N.QuietLines[kind]
+	end
+	return N.Lines[kind]
+end
+
 -- 사건이 생기면 NPC가 가끔 한마디 한다.
 local function onReaction(p, kind)
-	local lines = N.Lines[kind]
+	local lines = linesFor(kind)
 	if brains[p] and lines and p.character and math.random() < N.SpeechChance then
 		say(p.character, pick(lines))
 	end
@@ -428,7 +437,7 @@ local function chat(p, brain, now)
 		return
 	end
 	brain.chatAt = now + randomBetween(N.ChatIntervalMin, N.ChatIntervalMax)
-	local lines = if p.state.status == "Sitting" then N.Lines.sittingChat else N.Lines.chat
+	local lines = linesFor(if p.state.status == "Sitting" then "sittingChat" else "chat")
 	say(p.character, pick(lines))
 end
 

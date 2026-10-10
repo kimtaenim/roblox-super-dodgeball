@@ -1,4 +1,5 @@
--- 경기장 : 판마다 무작위로 장소가 바뀐다 (운동장, 체육관, 교실, 거인 교실, 안방, 식당, 침실). 튜토리얼은 체육관.
+-- 경기장 : 판마다 무작위로 장소가 바뀐다 (운동장, 체육관, 교실, 거인 교실, 안방, 식당, 침실, 도서관, 박물관).
+-- 튜토리얼은 체육관. 도서관·박물관은 "조용한 곳"이라 NPC가 속삭인다.
 -- 장소마다 방(바닥·벽·천장·전등), 가구, 조명이 다르다. 규칙과 코트는 어디서나 같다.
 -- 모양 정보는 전부 Config.Arenas(장소)와 Config.Prefabs(가구 조립법)에 있고, 여기서는 그대로 짓기만 한다.
 
@@ -248,6 +249,11 @@ function ArenaService.pick(tutorial)
 		end
 	end
 	return choices[math.random(1, #choices)]
+end
+
+-- 지금 경기장이 조용해야 하는 곳(도서관·박물관)인지 알려준다.
+function ArenaService.isQuiet()
+	return current ~= nil and current.quiet == true
 end
 
 -- 지금 경기장 이름 (화면 표시용).
