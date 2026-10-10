@@ -164,6 +164,13 @@ local function say(model, text, force)
 	end)
 end
 
+-- 능력(최면 등)이 NPC에게 꼭 한마디 하게 한다.
+function NpcService.say(p, text)
+	if p.character then
+		say(p.character, text, true)
+	end
+end
+
 -- 대사 목록을 고른다 : 조용해야 하는 경기장(도서관·박물관)에서는 오히려 시끄럽게 떠드는 대사.
 local function linesFor(kind)
 	if ArenaService.isQuiet() and N.LoudLines[kind] then

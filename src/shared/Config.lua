@@ -116,6 +116,7 @@ Config.AbilityBox = {
 		invisible = 3,
 		slow = 3,
 		revive = 9, -- 부활은 아주 많이 나온다 (다른 능력 셋을 합친 만큼)
+		hypnosis = 3,
 	},
 }
 
@@ -141,6 +142,13 @@ Config.Abilities = {
 	Homing = { Seconds = 2, TurnDegreesPerSecond = 240 }, -- 추적 시간, 1초에 꺾는 최대 각도
 	Invisible = { Seconds = 4, Transparency = 0.9, SelfTransparency = 0.5 }, -- 남이 볼 때, 내 화면에서 볼 때
 	Slow = { Radius = 30, Seconds = 3, SpeedFactor = 0.5 },
+	Hypnosis = { -- 최면 : 공 든 NPC가 나에게 공을 건넨다
+		FlySeconds = 0.8, -- 공이 NPC 손에서 내 손까지 날아오는 시간
+		ArcHeight = 6, -- 날아올 때 위로 휘는 높이
+		GlowSeconds = 1.5, -- NPC가 보라색으로 빛나는 시간
+		Color = Color3.fromRGB(190, 110, 255), -- 최면 빛 색
+		Line = "네… 공 드릴게요…", -- 최면 걸린 NPC가 하는 말
+	},
 }
 
 -- 복수 대상 (설계서 1.6장) : 같은 상대에게 자꾸 아웃되면 그 상대 머리 위에 표시 (당한 사람 화면에만)

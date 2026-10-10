@@ -13,6 +13,7 @@ local list = {
 	require(script:WaitForChild("Invisible")),
 	require(script:WaitForChild("Slow")),
 	require(script:WaitForChild("Revive")),
+	require(script:WaitForChild("Hypnosis")),
 }
 
 local Abilities = {}
