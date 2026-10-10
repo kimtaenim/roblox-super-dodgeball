@@ -91,6 +91,9 @@ Config.AbilityBox = {
 	SpawnRadiusRatio = 0.8, -- 떨어지는 위치 : 반지름의 몇 배 안쪽
 	Height = 2, -- 바닥에서 떠 있는 높이
 	SpinDegreesPerSecond = 90, -- 빙글빙글 도는 빠르기
+	LabelWidth = 160, LabelHeight = 36, -- 상자 위 능력 이름표 크기 (픽셀)
+	LabelOffset = 2.5, -- 이름표가 상자 위로 뜨는 높이
+	LabelMaxDistance = 150, -- 이보다 멀면 이름표가 안 보인다
 	-- 능력이 나올 비율 (숫자가 클수록 자주 나온다)
 	Weights = {
 		superwings = 3,

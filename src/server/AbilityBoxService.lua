@@ -23,6 +23,7 @@ local nextSpawnAt = math.huge -- 다음 상자가 떨어지는 시각
 
 -- 코트 안 아무 곳에 상자를 하나 떨어뜨린다.
 local function spawnBox()
+	local id = AbilityBoxService.randomId() -- 상자에 든 능력은 떨어질 때 정해진다 (미리 보인다)
 	local box = Instance.new("Part")
 	box.Name = "AbilityBox"
 	box.Size = Vector3.one * X.Size
@@ -34,10 +35,14 @@ local function spawnBox()
 	box.CanTouch = false
 	box.CFrame = CFrame.new(CourtService.randomPointInside(X.SpawnRadiusRatio, X.Height))
 
-	-- 상자 위에 "?" 표시
+	box:SetAttribute("Ability", id)
+
+	-- 상자 위에 든 능력 이름을 띄운다 (멀리서도 보이게)
 	local mark = Instance.new("BillboardGui")
-	mark.Size = UDim2.fromScale(X.Size, X.Size)
-	mark.AlwaysOnTop = false
+	mark.Size = UDim2.fromOffset(X.LabelWidth, X.LabelHeight)
+	mark.StudsOffset = Vector3.new(0, X.LabelOffset, 0)
+	mark.AlwaysOnTop = true
+	mark.MaxDistance = X.LabelMaxDistance
 	mark.Parent = box
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.fromScale(1, 1)
@@ -46,7 +51,7 @@ local function spawnBox()
 	label.TextScaled = true
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextStrokeTransparency = 0
-	label.Text = "?"
+	label.Text = Abilities.get(id).name
 	label.Parent = mark
 
 	box.Parent = folder
@@ -80,9 +85,9 @@ function AbilityBoxService.startAbilities()
 	return ids
 end
 
--- 상자를 주운 참가자에게 아무 능력이나 하나 더 준다.
-local function giveAbility(p)
-	local id = AbilityBoxService.randomId()
+-- 상자를 주운 참가자에게 그 상자에 든 능력을 준다.
+local function giveAbility(p, box)
+	local id = box:GetAttribute("Ability")
 	table.insert(p.state.abilities, id)
 	PlayerStateService.notify(p, "능력 상자! " .. Abilities.get(id).name)
 	SoundFx.playAt("Box", Participants.getRoot(p))
@@ -98,7 +103,7 @@ local function update(dt)
 		for _, p in Participants.all() do
 			local root = Participants.getRoot(p)
 			if root and canPickUp(p) and (root.Position - box.Position).Magnitude <= X.PickupRadius then
-				giveAbility(p)
+				giveAbility(p, box)
 				box:Destroy()
 				table.remove(boxes, index)
 				break
