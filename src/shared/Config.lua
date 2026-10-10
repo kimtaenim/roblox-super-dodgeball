@@ -22,11 +22,8 @@ Config.Round = {
 -- 코트 (설계서 4장)
 Config.Court = {
 	Center = Vector3.new(0, 0, 0), -- 코트 한가운데 (바닥 높이)
-	StartRadius = 55, -- 처음 코트 반지름 (스터드)
-	ShrinkInterval = 90, -- 이 시간마다 코트가 줄어든다 (초)
-	ShrinkStep = 10, -- 한 번에 줄어드는 반지름
-	MinRadius = 24, -- 이보다 작아지지는 않는다
-	ShrinkTweenSeconds = 2, -- 줄어드는 모습이 보이는 시간
+	StartRadius = 55, -- 코트 반지름 (스터드, 판 내내 그대로)
+	ShrinkTweenSeconds = 2, -- 코트 크기가 바뀔 때 부드럽게 바뀌는 시간 (지금은 크기가 안 바뀐다)
 	Thickness = 1, -- 코트 바닥 두께
 	RaiseHeight = 0.1, -- 바닥판 위로 살짝 띄우는 높이 (겹쳐서 깜빡이지 않게)
 	GroundSize = 600, -- 바깥 평지 크기 (Baseplate가 없을 때만 만든다)
@@ -296,7 +293,6 @@ Config.Tutorial = {
 	TargetTotal = 3, -- 튜토리얼 판 참가자 수 (나 + NPC 2명)
 	AimDelayScale = 2, -- NPC가 공을 들고 던지기까지 이 배수만큼 더 기다린다
 	CatchChance = 0, -- 튜토리얼 NPC는 캐치를 안 한다 (맞히는 재미를 먼저)
-	CourtRadius = 38, -- 튜토리얼 판 코트 반지름 (3명이라 더 작게)
 	-- 캐치 시범 : 판이 시작되면 NPC 둘이 "공을 잡히면 던진 사람이 아웃"을 보여준다
 	DemoGap = 14, -- 시범하는 NPC 둘 사이 거리
 	DemoViewDistance = 16, -- 구경하는 사람이 시범 한가운데에서 떨어져 서는 거리

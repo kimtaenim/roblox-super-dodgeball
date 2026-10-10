@@ -144,7 +144,7 @@ local function runCountdown()
 	ArenaService.build(ArenaService.pick(tutorial))
 	gameState:SetAttribute("ArenaName", ArenaService.currentName())
 	gameState:SetAttribute("ArenaQuiet", ArenaService.isQuiet())
-	CourtService.setRadius(if tutorial then Config.Tutorial.CourtRadius else C.StartRadius, false)
+	CourtService.setRadius(C.StartRadius, false) -- 코트 크기는 늘 같다
 	local target = if tutorial then Config.Tutorial.TargetTotal else Config.Npc.TargetTotal
 	local npcCount = math.max(target - humans, R.MinParticipants - humans, 0)
 	NpcService.spawn(npcCount, tutorial)
@@ -181,7 +181,7 @@ local function runDemo()
 	NpcService.playCatchDemo(viewers)
 end
 
--- 플레이 : 한 명만 남거나 시간이 끝날 때까지. 90초마다 코트가 줄어든다.
+-- 플레이 : 한 명만 남거나 시간이 끝날 때까지. 코트 크기는 바뀌지 않는다.
 local function runPlaying()
 	setRoundActive(true)
 	if gameState:GetAttribute("Tutorial") then
@@ -190,21 +190,12 @@ local function runPlaying()
 	setPhase("Playing", R.PlaySeconds)
 	SoundFx.setMusic(true)
 	local startTime = os.clock()
-	local nextShrink = startTime + C.ShrinkInterval
 	while true do
 		local now = os.clock()
 		local alive = aliveParticipants()
 		gameState:SetAttribute("AliveCount", #alive)
 		if #alive <= 1 or now - startTime >= R.PlaySeconds then
 			break
-		end
-		if now >= nextShrink then
-			nextShrink += C.ShrinkInterval
-			local newRadius = math.max(C.MinRadius, CourtService.getRadius() - C.ShrinkStep)
-			if newRadius < CourtService.getRadius() then
-				CourtService.setRadius(newRadius, true)
-				PlayerStateService.notifyAll("코트가 줄어들어요!")
-			end
 		end
 		task.wait(R.TickSeconds)
 	end
@@ -243,7 +234,7 @@ local function cleanupRound()
 		end
 		PlayerStateService.resetForLobby(p)
 	end
-	CourtService.setRadius(C.StartRadius, true)
+	CourtService.setRadius(C.StartRadius, false)
 	BallService.setBallCount(B.Count)
 	BallService.resetAll()
 	gameState:SetAttribute("Winner", "")
