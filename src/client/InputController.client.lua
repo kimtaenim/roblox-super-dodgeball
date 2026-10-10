@@ -105,7 +105,14 @@ end
 
 -- 입력을 연결한다. 세 번째 값 true = 모바일 화면 버튼도 만든다.
 ContextActionService:BindAction("Throw", onThrow, true, Enum.UserInputType.MouseButton1)
-ContextActionService:BindAction("Catch", onCatch, true, Enum.KeyCode.F, Enum.UserInputType.MouseButton2)
+ContextActionService:BindAction("Catch", onCatch, true, Enum.KeyCode.F)
+
+-- 오른쪽 클릭 캐치는 카메라 돌리기(오른쪽 버튼 끌기)를 방해하지 않게 따로 듣는다.
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton2 then
+		catchRemote:FireServer()
+	end
+end)
 ContextActionService:BindAction("Ability", onAbility, true, Enum.KeyCode.Q)
 ContextActionService:BindAction(
 	"AbilitySlot",
