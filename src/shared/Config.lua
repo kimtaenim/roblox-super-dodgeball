@@ -164,13 +164,14 @@ Config.Npc = {
 	-- name = 이름 (윗옷 색 이름), shirt = 윗옷 색 (이름은 쉬운 색, 실제 색은 눈이 편한 색)
 	-- face = 로블록스 얼굴 에셋 번호 (넣지 않으면 로블록스 기본 웃는 얼굴)
 	-- body = 체형 (키, 어깨 너비, 몸 두께, 머리 크기), skin = 피부색
+	--   로블록스 허용 범위 : 키 0.9~1.05, 너비 0.7~1.0, 머리 0.95~1.0 (어린이라 어깨는 좁게)
 	-- hair = 머리 모양, hairColor = 머리 색 (Config.Looks에 있는 이름)
 	-- extras = 덧붙이는 것 (blush 볼터치, freckles 주근깨, glasses 안경, hairclip 별 핀)
 	-- legs = "pants" 긴바지 / "shorts" 반바지, pants = 바지 색, shoes = 신발 색, number = 등번호
 	Personas = {
 		{
 			name = "빨강", shirt = Color3.fromRGB(240, 95, 70), -- 다홍 : 키 크고 듬직한 대장, 삐죽머리
-			body = { height = 1.08, width = 1.12, depth = 1.05, head = 1.0 },
+			body = { height = 1.05, width = 0.84, depth = 0.85, head = 1.0 },
 			skin = Color3.fromRGB(241, 194, 125),
 			hair = "spiky", hairColor = Color3.fromRGB(35, 30, 30),
 			extras = {},
@@ -178,7 +179,7 @@ Config.Npc = {
 		},
 		{
 			name = "청록", shirt = Color3.fromRGB(40, 180, 170), -- 터콰즈 : 키 크고 마른 안경잡이
-			body = { height = 1.1, width = 0.88, depth = 0.9, head = 0.98 },
+			body = { height = 1.05, width = 0.72, depth = 0.75, head = 0.97 },
 			skin = Color3.fromRGB(255, 224, 189),
 			hair = "sidepart", hairColor = Color3.fromRGB(90, 60, 40),
 			extras = { "glasses" },
@@ -186,7 +187,7 @@ Config.Npc = {
 		},
 		{
 			name = "민트", shirt = Color3.fromRGB(130, 220, 180), -- 민트 : 주근깨 포니테일
-			body = { height = 0.98, width = 0.95, depth = 0.95, head = 1.02 },
+			body = { height = 0.98, width = 0.76, depth = 0.78, head = 1.0 },
 			skin = Color3.fromRGB(250, 214, 175),
 			hair = "ponytail", hairColor = Color3.fromRGB(150, 90, 50),
 			extras = { "freckles" },
@@ -194,7 +195,7 @@ Config.Npc = {
 		},
 		{
 			name = "하늘", shirt = Color3.fromRGB(120, 190, 240), -- 하늘 : 작은 체구, 야구모자
-			body = { height = 0.9, width = 0.95, depth = 0.95, head = 1.08 },
+			body = { height = 0.9, width = 0.74, depth = 0.76, head = 1.0 },
 			skin = Color3.fromRGB(224, 172, 105),
 			hair = "cap", hairColor = Color3.fromRGB(40, 50, 90),
 			extras = {},
@@ -202,7 +203,7 @@ Config.Npc = {
 		},
 		{
 			name = "분홍", shirt = Color3.fromRGB(250, 130, 130), -- 코랄핑크 : 양갈래 똥머리, 볼이 발그레
-			body = { height = 0.95, width = 0.94, depth = 0.95, head = 1.04 },
+			body = { height = 0.95, width = 0.75, depth = 0.77, head = 1.0 },
 			skin = Color3.fromRGB(255, 228, 205),
 			hair = "buns", hairColor = Color3.fromRGB(30, 25, 30),
 			extras = { "blush" },
@@ -210,7 +211,7 @@ Config.Npc = {
 		},
 		{
 			name = "노랑", shirt = Color3.fromRGB(255, 240, 100), -- 레몬옐로우 : 통통한 곱슬머리
-			body = { height = 0.96, width = 1.22, depth = 1.18, head = 1.05 },
+			body = { height = 0.96, width = 0.92, depth = 0.95, head = 1.0 },
 			skin = Color3.fromRGB(198, 134, 66),
 			hair = "curly", hairColor = Color3.fromRGB(60, 35, 20),
 			extras = { "blush" },
@@ -218,7 +219,7 @@ Config.Npc = {
 		},
 		{
 			name = "주황", shirt = Color3.fromRGB(255, 180, 120), -- 피치 오렌지 : 머리띠 한 운동 선수
-			body = { height = 1.02, width = 1.02, depth = 1.0, head = 0.97 },
+			body = { height = 1.0, width = 0.8, depth = 0.8, head = 0.97 },
 			skin = Color3.fromRGB(141, 85, 36),
 			hair = "headband", hairColor = Color3.fromRGB(25, 20, 20),
 			extras = {},
@@ -226,7 +227,7 @@ Config.Npc = {
 		},
 		{
 			name = "보라", shirt = Color3.fromRGB(170, 140, 220), -- 라벤더 : 긴 머리, 별 핀
-			body = { height = 1.03, width = 0.92, depth = 0.92, head = 1.0 },
+			body = { height = 1.02, width = 0.73, depth = 0.75, head = 0.98 },
 			skin = Color3.fromRGB(255, 220, 200),
 			hair = "long", hairColor = Color3.fromRGB(45, 30, 55),
 			extras = { "hairclip" },
