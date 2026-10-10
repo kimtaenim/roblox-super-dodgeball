@@ -62,6 +62,13 @@ function CourtService.build()
 	floorDisc.Parent = folder
 end
 
+-- 코트 바닥 색을 바꾼다 (경기장마다 다르다).
+function CourtService.setFloorColor(color)
+	if floorDisc then
+		floorDisc.Color = color
+	end
+end
+
 -- 지금 코트 반지름을 알려준다.
 function CourtService.getRadius()
 	return radius

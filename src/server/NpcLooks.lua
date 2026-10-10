@@ -93,7 +93,7 @@ local function addBrows(folder, head, style, hairColor)
 	local tilt = math.rad(B.tiltDegrees[style] or 0)
 	for _, side in { -1, 1 } do
 		local offset = at(size, side * B.gapX, B.y, L.FaceDepth - L.LayerStep) * CFrame.Angles(0, 0, side * tilt)
-		piece(folder, head, offset, scaled(size, B.size), hairColor, "block")
+		piece(folder, head, offset, scaled(size, B.size), hairColor:Lerp(Color3.new(0, 0, 0), B.darken), "block")
 	end
 end
 

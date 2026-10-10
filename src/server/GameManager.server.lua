@@ -19,6 +19,7 @@ local AbilityService = require(script.Parent.AbilityService)
 local AbilityBoxService = require(script.Parent.AbilityBoxService)
 local RevengeService = require(script.Parent.RevengeService)
 local Scenery = require(script.Parent.Scenery)
+local ArenaService = require(script.Parent.ArenaService)
 local NpcService = require(script.Parent.NpcService)
 
 local R = Config.Round
@@ -136,6 +137,9 @@ local function runCountdown()
 	end
 	local tutorial = humans > 0 and allNew
 	gameState:SetAttribute("Tutorial", tutorial)
+	-- 이번 판 경기장 : 튜토리얼은 체육관, 아니면 무작위
+	ArenaService.build(ArenaService.pick(tutorial))
+	gameState:SetAttribute("ArenaName", ArenaService.currentName())
 	CourtService.setRadius(if tutorial then Config.Tutorial.CourtRadius else C.StartRadius, false)
 	local target = if tutorial then Config.Tutorial.TargetTotal else Config.Npc.TargetTotal
 	local npcCount = math.max(target - humans, R.MinParticipants - humans, 0)
@@ -238,6 +242,7 @@ end
 -- 시작 : 서비스를 켜고 플레이어 이벤트를 연결한다.
 CourtService.start()
 Scenery.build()
+ArenaService.build(Config.Arena.FirstArena)
 BallService.start()
 AbilityService.start(services)
 AbilityBoxService.start()

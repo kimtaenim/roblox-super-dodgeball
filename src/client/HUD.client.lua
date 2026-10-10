@@ -120,7 +120,7 @@ local function updateTop(phaseName, remaining)
 	if phaseName == "Lobby" then
 		topLabel.Text = "곧 시작해요! " .. math.ceil(remaining) .. "초"
 	elseif phaseName == "Countdown" then
-		topLabel.Text = "준비!"
+		topLabel.Text = "준비! 이번 경기장은 " .. (gameState:GetAttribute("ArenaName") or "")
 		bigLabel.Text = tostring(math.max(1, math.ceil(remaining)))
 	elseif phaseName == "Demo" then
 		topLabel.Text = "잘 봐요!"

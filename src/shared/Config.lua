@@ -295,7 +295,7 @@ Config.Looks = {
 	PupilColor = Color3.fromRGB(35, 25, 20),
 	EyeWhiteColor = Color3.fromRGB(255, 255, 255),
 	Brows = {
-		size = Vector3.new(0.17, 0.04, 0.04), y = 0.22, gapX = 0.2,
+		size = Vector3.new(0.17, 0.04, 0.04), y = 0.2, gapX = 0.2, darken = 0.35, -- 눈썹은 머리색보다 진하게
 		tiltDegrees = { brave = 18, calm = 0, happy = -10 }, -- + 면 안쪽이 내려간다 (씩씩한 눈썹)
 	},
 	NoseSize = Vector3.new(0.08, 0.07, 0.06), NoseY = -0.06, NoseDarken = 0.12,
@@ -316,7 +316,7 @@ Config.Looks = {
 		bridge = Vector3.new(0.1, 0.025, 0.02), frameColor = Color3.fromRGB(30, 30, 35), rim = 0.03,
 	},
 	-- 머리카락 : 모든 머리 모양은 정수리를 덮는 "모자" 부분을 먼저 깔고 모양마다 덧붙인다
-	HairCap = { size = Vector3.new(1.1, 0.78, 1.1), offset = Vector3.new(0, 0.28, 0.06) },
+	HairCap = { size = Vector3.new(1.1, 0.78, 1.1), offset = Vector3.new(0, 0.36, 0.06) }, -- 이마가 보이게 조금 위로
 	Hair = {
 		spiky = { count = 6, spike = Vector3.new(0.16, 0.32, 0.16), radius = 0.3, y = 0.6, tiltDegrees = 25 },
 		sidepart = { fringe = Vector3.new(0.55, 0.2, 0.3), offset = Vector3.new(-0.15, 0.4, -0.36), tiltDegrees = 12 },
@@ -336,17 +336,8 @@ Config.Looks = {
 	NumberStrokeTransparency = 0.5, -- 등번호 테두리 진하기
 }
 
--- 경기장 꾸미기 (server/Scenery.lua가 쓴다)
+-- 코트 무늬와 공 꼬리 (server/Scenery.lua, BallService가 쓴다)
 Config.Scenery = {
-	-- 조명
-	ClockTime = 14.5, -- 오후 2시 반 (해가 높고 그림자가 짧다)
-	Brightness = 2.5,
-	OutdoorAmbient = Color3.fromRGB(140, 140, 150),
-	AtmosphereDensity = 0.28, AtmosphereHaze = 1.2, AtmosphereColor = Color3.fromRGB(200, 220, 255),
-	BloomIntensity = 0.4, BloomSize = 24, BloomThreshold = 1.4,
-	Saturation = 0.15, Contrast = 0.08, -- 색을 조금 더 진하고 또렷하게
-	SunRaysIntensity = 0.06,
-	-- 코트 무늬
 	MarkThickness = 0.05, -- 바닥 무늬 두께
 	CenterCircleRadius = 6, -- 가운데 원 반지름
 	CenterLineWidth = 0.6, -- 가운데 원 선 두께
@@ -354,27 +345,391 @@ Config.Scenery = {
 	LogoSize = Vector2.new(26, 5), -- 글자판 크기 (스터드)
 	LogoColor = Color3.fromRGB(255, 255, 255),
 	LogoTransparency = 0.25,
-	-- 둘레
-	Distance = 58, -- 코트 가운데에서 관중석·나무가 놓이는 거리
-	StandCount = 4, -- 관중석 수 (둘레에 고르게)
-	StandWidth = 24, StandStepDepth = 3, StandStepHeight = 1.4, StandSteps = 4,
-	StandColor = Color3.fromRGB(200, 200, 210),
-	SeatHeight = 0.4, SeatDepthRatio = 0.6, -- 계단 위 의자 줄 높이, 계단 깊이에 대한 비율
-	SeatColors = { -- 관중석 의자 색 (줄마다 바뀐다)
-		Color3.fromRGB(240, 95, 70), Color3.fromRGB(40, 180, 170), Color3.fromRGB(255, 240, 100), Color3.fromRGB(170, 140, 220),
-	},
-	TreeCount = 12, TreeTrunk = Vector3.new(1.4, 7, 1.4), TreeLeaves = 8, TreeExtraDistance = 6,
-	LeafOffsets = { Vector3.new(0, 2, 0), Vector3.new(2, 0, 1), Vector3.new(-1.5, 0.5, -1.5) }, -- 잎 덩이 위치 (줄기 꼭대기 기준)
-	LeafScales = { 1, 0.75, 0.7 }, -- 잎 덩이 크기 (TreeLeaves에 곱한다)
-	TrunkColor = Color3.fromRGB(110, 75, 50), LeafColors = { Color3.fromRGB(80, 160, 80), Color3.fromRGB(110, 180, 90), Color3.fromRGB(70, 140, 100) },
-	FlagCount = 8, FlagPoleHeight = 12, FlagSize = Vector3.new(0.2, 2.2, 3.5), PoleColor = Color3.fromRGB(230, 230, 235),
-	PoleThickness = 0.4,
-	FlagDistance = 50, -- 깃대가 놓이는 거리
 	-- 공 꼬리 (날아갈 때만)
 	BallTrailLifetime = 0.25,
 	BallTrailWidth = 0.8, -- 꼬리 굵기 (스터드)
 	BallTrailColor = Color3.fromRGB(255, 255, 255),
 	BallTrailTransparency = NumberSequence.new(0.3, 1),
+}
+
+-- 경기장 (server/ArenaService.lua) : 판마다 무작위로 바뀌는 장소. 튜토리얼은 체육관.
+local V = Vector3.new
+local RGB = Color3.fromRGB
+local M = Enum.Material
+
+-- 경기장 공통
+Config.Arena = {
+	TutorialArena = "gym", -- 튜토리얼 판 장소
+	FirstArena = "playground", -- 서버를 켰을 때 로비 장소
+	WallThickness = 2, -- 벽·바닥·천장 두께
+	FloorLift = 0.05, -- 방 바닥 높이 (코트 테두리보다 조금 낮게)
+	TrimHeight = 1.5, TrimDepth = 0.4, -- 걸레받이 높이·두께
+	LampSize = V(8, 0.4, 8), LampRange = 60, -- 천장 전등 크기, 빛이 닿는 거리
+	DefaultColor = RGB(200, 200, 200),
+	TextColor = RGB(255, 255, 255), TextPixelsPerStud = 20,
+	AtmosphereHaze = 1.2, AtmosphereColor = RGB(200, 220, 255),
+	BloomIntensity = 0.4, BloomSize = 24, BloomThreshold = 1.4,
+	Saturation = 0.15, Contrast = 0.08, -- 색을 조금 더 진하고 또렷하게
+	SunRaysIntensity = 0.06,
+}
+
+-- 가구 조립법 : 부품 목록. 크기 1 = 보통 사람(키 5) 기준. 앞(-Z)이 코트 쪽을 본다.
+-- kind = block(상자) / ball(공·타원) / column(세운 원기둥, size = 지름·높이·지름)
+-- at = 놓는 자리 바닥 가운데에서 부품 가운데까지, rot = 돌리기(도), tint = 경기장에서 정한 색으로 칠함
+local WOOD, DARKWOOD, METAL, WHITE = RGB(205, 160, 110), RGB(120, 80, 50), RGB(150, 155, 165), RGB(250, 250, 250)
+Config.Prefabs = {
+	-- 운동장
+	stand = { -- 계단식 관중석 (줄마다 의자 색)
+		{ kind = "block", size = V(24, 1.4, 3), at = V(0, 0.7, 1.5), color = RGB(200, 200, 210), mat = M.Concrete },
+		{ kind = "block", size = V(24, 2.8, 3), at = V(0, 1.4, 4.5), color = RGB(200, 200, 210), mat = M.Concrete },
+		{ kind = "block", size = V(24, 4.2, 3), at = V(0, 2.1, 7.5), color = RGB(200, 200, 210), mat = M.Concrete },
+		{ kind = "block", size = V(24, 5.6, 3), at = V(0, 2.8, 10.5), color = RGB(200, 200, 210), mat = M.Concrete },
+		{ kind = "block", size = V(24, 0.4, 1.8), at = V(0, 1.6, 1.5), color = RGB(240, 95, 70) },
+		{ kind = "block", size = V(24, 0.4, 1.8), at = V(0, 3.0, 4.5), color = RGB(40, 180, 170) },
+		{ kind = "block", size = V(24, 0.4, 1.8), at = V(0, 4.4, 7.5), color = RGB(255, 240, 100) },
+		{ kind = "block", size = V(24, 0.4, 1.8), at = V(0, 5.8, 10.5), color = RGB(170, 140, 220) },
+	},
+	tree = {
+		{ kind = "column", size = V(1.4, 7, 1.4), at = V(0, 3.5, 0), color = RGB(110, 75, 50), mat = M.Wood },
+		{ kind = "ball", size = V(8, 8, 8), at = V(0, 9, 0), color = RGB(80, 160, 80), mat = M.Grass },
+		{ kind = "ball", size = V(6, 6, 6), at = V(2, 7, 1), color = RGB(110, 180, 90), mat = M.Grass },
+		{ kind = "ball", size = V(5.6, 5.6, 5.6), at = V(-1.5, 7.5, -1.5), color = RGB(70, 140, 100), mat = M.Grass },
+	},
+	flag = {
+		{ kind = "column", size = V(0.4, 12, 0.4), at = V(0, 6, 0), color = RGB(230, 230, 235), mat = M.Metal },
+		{ kind = "block", size = V(0.2, 2.2, 3.5), at = V(0, 10.9, 1.75), tint = true, mat = M.Fabric },
+	},
+	-- 학교
+	deskSet = { -- 책상 + 뒤에 의자 (의자 색은 tint)
+		{ kind = "block", size = V(4, 0.3, 2.6), at = V(0, 2.6, 0), color = WOOD },
+		{ kind = "block", size = V(3.6, 0.15, 2.2), at = V(0, 2.0, 0.1), color = METAL },
+		{ kind = "block", size = V(0.25, 2.45, 0.25), at = V(1.8, 1.225, 1.1), color = METAL },
+		{ kind = "block", size = V(0.25, 2.45, 0.25), at = V(-1.8, 1.225, 1.1), color = METAL },
+		{ kind = "block", size = V(0.25, 2.45, 0.25), at = V(1.8, 1.225, -1.1), color = METAL },
+		{ kind = "block", size = V(0.25, 2.45, 0.25), at = V(-1.8, 1.225, -1.1), color = METAL },
+		{ kind = "block", size = V(1.8, 0.25, 1.8), at = V(0, 1.6, 2.4), tint = true },
+		{ kind = "block", size = V(1.8, 1.6, 0.25), at = V(0, 2.6, 3.2), tint = true },
+		{ kind = "block", size = V(0.2, 1.5, 0.2), at = V(0.75, 0.75, 1.65), color = METAL },
+		{ kind = "block", size = V(0.2, 1.5, 0.2), at = V(-0.75, 0.75, 1.65), color = METAL },
+		{ kind = "block", size = V(0.2, 1.5, 0.2), at = V(0.75, 0.75, 3.15), color = METAL },
+		{ kind = "block", size = V(0.2, 1.5, 0.2), at = V(-0.75, 0.75, 3.15), color = METAL },
+	},
+	teacherDesk = {
+		{ kind = "block", size = V(7, 0.35, 3.5), at = V(0, 2.8, 0), color = WOOD },
+		{ kind = "block", size = V(6.8, 2.6, 0.3), at = V(0, 1.3, -1.6), color = DARKWOOD },
+		{ kind = "block", size = V(0.3, 2.6, 3.2), at = V(3.3, 1.3, 0), color = DARKWOOD },
+		{ kind = "block", size = V(0.3, 2.6, 3.2), at = V(-3.3, 1.3, 0), color = DARKWOOD },
+		{ kind = "ball", size = V(0.7, 0.7, 0.7), at = V(2, 3.32, 0), color = RGB(220, 40, 40) }, -- 사과
+		{ kind = "block", size = V(1.4, 0.4, 1), at = V(-2, 3.17, 0), color = RGB(60, 100, 200) }, -- 책
+	},
+	chalkboard = {
+		{ kind = "block", size = V(30, 11, 0.4), at = V(0, 9.5, 0), color = DARKWOOD },
+		{ kind = "block", size = V(29, 10, 0.5), at = V(0, 9.5, -0.05), color = RGB(40, 85, 60), text = { text = "오늘은 피구 시합!" } },
+		{ kind = "block", size = V(30, 0.3, 0.9), at = V(0, 3.9, -0.4), color = DARKWOOD },
+		{ kind = "block", size = V(0.8, 0.2, 0.2), at = V(5, 4.15, -0.5), color = WHITE },
+		{ kind = "block", size = V(0.8, 0.2, 0.2), at = V(6.2, 4.15, -0.5), color = RGB(255, 170, 200) },
+	},
+	locker = { -- 사물함 한 칸 (색은 tint)
+		{ kind = "block", size = V(3, 8, 2.5), at = V(0, 4, 0), tint = true, mat = M.Metal },
+		{ kind = "block", size = V(2, 0.15, 0.05), at = V(0, 7, -1.27), color = RGB(60, 60, 70) },
+		{ kind = "block", size = V(2, 0.15, 0.05), at = V(0, 6.6, -1.27), color = RGB(60, 60, 70) },
+		{ kind = "block", size = V(0.15, 0.6, 0.15), at = V(0.9, 4, -1.3), color = METAL, mat = M.Metal },
+	},
+	window = {
+		{ kind = "block", size = V(12, 9, 0.4), at = V(0, 10, 0), color = WHITE },
+		{ kind = "block", size = V(11, 8, 0.5), at = V(0, 10, 0), color = RGB(170, 215, 255), transparency = 0.45, reflectance = 0.2, mat = M.Glass },
+		{ kind = "block", size = V(0.3, 8, 0.6), at = V(0, 10, 0), color = WHITE },
+		{ kind = "block", size = V(11, 0.3, 0.6), at = V(0, 10, 0), color = WHITE },
+		{ kind = "block", size = V(12.5, 0.4, 1.2), at = V(0, 5.4, -0.5), color = WHITE },
+	},
+	clock = { -- 벽시계
+		{ kind = "column", size = V(3.4, 0.25, 3.4), at = V(0, 14, 0.1), rot = V(90, 0, 0), color = RGB(30, 30, 35) },
+		{ kind = "column", size = V(3, 0.3, 3), at = V(0, 14, 0), rot = V(90, 0, 0), color = WHITE },
+		{ kind = "block", size = V(0.15, 1.1, 0.1), at = V(0, 14.5, -0.2), color = RGB(30, 30, 35) },
+		{ kind = "block", size = V(0.8, 0.15, 0.1), at = V(0.35, 14, -0.2), color = RGB(30, 30, 35) },
+	},
+	hoop = { -- 농구 골대 (벽에 붙임)
+		{ kind = "block", size = V(6, 4, 0.3), at = V(0, 13, 0), color = WHITE },
+		{ kind = "block", size = V(2, 0.15, 0.05), at = V(0, 12.5, -0.18), color = RGB(220, 50, 40) },
+		{ kind = "block", size = V(0.15, 1.4, 0.05), at = V(1, 11.8, -0.18), color = RGB(220, 50, 40) },
+		{ kind = "block", size = V(0.15, 1.4, 0.05), at = V(-1, 11.8, -0.18), color = RGB(220, 50, 40) },
+		{ kind = "block", size = V(0.3, 0.3, 1.2), at = V(0, 11, -0.75), color = METAL },
+		{ kind = "block", size = V(1.05, 0.15, 0.15), at = V(1, 11, -1.4), rot = V(0, -90, 0), color = RGB(255, 120, 30) },
+		{ kind = "block", size = V(1.05, 0.15, 0.15), at = V(0.5, 11, -0.534), rot = V(0, -150, 0), color = RGB(255, 120, 30) },
+		{ kind = "block", size = V(1.05, 0.15, 0.15), at = V(-0.5, 11, -0.534), rot = V(0, -210, 0), color = RGB(255, 120, 30) },
+		{ kind = "block", size = V(1.05, 0.15, 0.15), at = V(-1, 11, -1.4), rot = V(0, -270, 0), color = RGB(255, 120, 30) },
+		{ kind = "block", size = V(1.05, 0.15, 0.15), at = V(-0.5, 11, -2.266), rot = V(0, -330, 0), color = RGB(255, 120, 30) },
+		{ kind = "block", size = V(1.05, 0.15, 0.15), at = V(0.5, 11, -2.266), rot = V(0, -390, 0), color = RGB(255, 120, 30) },
+		{ kind = "column", size = V(1.6, 1.4, 1.6), at = V(0, 10.2, -1.4), color = WHITE, transparency = 0.5, collide = false },
+	},
+	banner = { -- 벽에 거는 학교 깃발 (색은 tint)
+		{ kind = "block", size = V(8, 5, 0.2), at = V(0, 16, 0), tint = true, mat = M.Fabric, text = { text = "SUPER 피구왕" } },
+		{ kind = "block", size = V(8.4, 0.3, 0.3), at = V(0, 18.6, 0), color = DARKWOOD },
+	},
+	plant = { -- 화분
+		{ kind = "column", size = V(1.6, 1.6, 1.6), at = V(0, 0.8, 0), color = RGB(190, 100, 60) },
+		{ kind = "ball", size = V(2.4, 2.6, 2.4), at = V(0, 2.6, 0), color = RGB(80, 160, 80), mat = M.Grass },
+		{ kind = "ball", size = V(1.6, 1.6, 1.6), at = V(0.7, 3.4, 0.3), color = RGB(110, 180, 90), mat = M.Grass },
+	},
+	-- 문구 (거인 교실)
+	pencil = { -- 바닥에 누운 연필 (몸통 색은 tint)
+		{ kind = "block", size = V(0.6, 0.6, 8), at = V(0, 0.3, 0), tint = true },
+		{ kind = "ball", size = V(0.6, 0.6, 1.4), at = V(0, 0.3, -4.4), color = RGB(235, 200, 150) },
+		{ kind = "ball", size = V(0.2, 0.2, 0.4), at = V(0, 0.3, -5.05), color = RGB(50, 50, 55) },
+		{ kind = "block", size = V(0.64, 0.64, 0.5), at = V(0, 0.3, 4.25), color = METAL, mat = M.Metal },
+		{ kind = "block", size = V(0.6, 0.6, 0.8), at = V(0, 0.3, 4.9), color = RGB(250, 150, 170) },
+	},
+	eraser = {
+		{ kind = "block", size = V(3, 1.2, 1.8), at = V(0, 0.6, 0), color = WHITE },
+		{ kind = "block", size = V(3.04, 1.24, 1), at = V(0, 0.6, 0.5), tint = true },
+	},
+	ruler = {
+		{ kind = "block", size = V(14, 0.15, 1.6), at = V(0, 0.075, 0), color = RGB(255, 240, 160), transparency = 0.3,
+			text = { text = "0  1  2  3  4  5  6  7  8  9  10", face = Enum.NormalId.Top, color = RGB(60, 60, 60) } },
+	},
+	bookStack = {
+		{ kind = "block", size = V(3, 0.6, 2.2), at = V(0, 0.3, 0), color = RGB(220, 80, 70) },
+		{ kind = "block", size = V(2.8, 0.6, 2), at = V(0.1, 0.9, 0.05), rot = V(0, 8, 0), color = RGB(60, 120, 200) },
+		{ kind = "block", size = V(2.9, 0.6, 2.1), at = V(-0.1, 1.5, 0), rot = V(0, -6, 0), color = RGB(250, 200, 60) },
+	},
+	-- 집 (안방·식당·침실)
+	wardrobe = { -- 장롱
+		{ kind = "block", size = V(9, 11, 3.5), at = V(0, 5.5, 0), color = RGB(160, 110, 70), mat = M.Wood },
+		{ kind = "block", size = V(9.4, 0.5, 3.8), at = V(0, 11.25, 0), color = DARKWOOD, mat = M.Wood },
+		{ kind = "block", size = V(0.08, 10.5, 0.05), at = V(0, 5.5, -1.77), color = DARKWOOD },
+		{ kind = "block", size = V(0.08, 10.5, 0.05), at = V(2.25, 5.5, -1.77), color = DARKWOOD },
+		{ kind = "block", size = V(0.08, 10.5, 0.05), at = V(-2.25, 5.5, -1.77), color = DARKWOOD },
+		{ kind = "block", size = V(0.15, 0.8, 0.15), at = V(0.35, 5.5, -1.8), color = RGB(230, 190, 80), mat = M.Metal },
+		{ kind = "block", size = V(0.15, 0.8, 0.15), at = V(-0.35, 5.5, -1.8), color = RGB(230, 190, 80), mat = M.Metal },
+	},
+	vanity = { -- 화장대 + 거울 + 의자
+		{ kind = "block", size = V(5, 3, 2.4), at = V(0, 1.5, 0), color = RGB(245, 240, 235) },
+		{ kind = "block", size = V(3.8, 4.6, 0.25), at = V(0, 5.6, 0.9), color = RGB(160, 110, 70) },
+		{ kind = "block", size = V(3.4, 4.2, 0.3), at = V(0, 5.6, 0.85), color = RGB(200, 215, 225), reflectance = 0.6 },
+		{ kind = "column", size = V(1.6, 1.8, 1.6), at = V(0, 0.9, -2.2), color = RGB(250, 170, 190) },
+		{ kind = "column", size = V(0.4, 0.8, 0.4), at = V(1.5, 3.4, 0.3), color = RGB(240, 120, 160) },
+		{ kind = "ball", size = V(0.5, 0.5, 0.5), at = V(1, 3.25, 0.4), color = RGB(150, 200, 240) },
+	},
+	futonStack = { -- 개어 둔 이불
+		{ kind = "block", size = V(6, 0.7, 4), at = V(0, 0.35, 0), color = RGB(250, 170, 190), mat = M.Fabric },
+		{ kind = "block", size = V(6, 0.7, 4), at = V(0, 1.05, 0), color = RGB(150, 220, 200), mat = M.Fabric },
+		{ kind = "block", size = V(6, 0.7, 4), at = V(0, 1.75, 0), color = RGB(255, 235, 140), mat = M.Fabric },
+		{ kind = "ball", size = V(2.6, 0.8, 1.4), at = V(0, 2.5, 0), color = WHITE, mat = M.Fabric },
+	},
+	cushion = { -- 방석 (색은 tint)
+		{ kind = "block", size = V(2.4, 0.35, 2.4), at = V(0, 0.175, 0), tint = true, mat = M.Fabric },
+	},
+	lowTable = { -- 좌식 상
+		{ kind = "block", size = V(6, 0.4, 3.5), at = V(0, 1.6, 0), color = RGB(170, 115, 70), mat = M.Wood },
+		{ kind = "block", size = V(0.4, 1.4, 0.4), at = V(2.6, 0.7, 1.4), color = DARKWOOD },
+		{ kind = "block", size = V(0.4, 1.4, 0.4), at = V(-2.6, 0.7, 1.4), color = DARKWOOD },
+		{ kind = "block", size = V(0.4, 1.4, 0.4), at = V(2.6, 0.7, -1.4), color = DARKWOOD },
+		{ kind = "block", size = V(0.4, 1.4, 0.4), at = V(-2.6, 0.7, -1.4), color = DARKWOOD },
+	},
+	diningTable = {
+		{ kind = "block", size = V(9, 0.4, 5), at = V(0, 2.8, 0), color = WOOD, mat = M.Wood },
+		{ kind = "block", size = V(8, 0.05, 1.6), at = V(0, 3.03, 0), tint = true, mat = M.Fabric },
+		{ kind = "block", size = V(0.45, 2.6, 0.45), at = V(4, 1.3, 2.1), color = DARKWOOD },
+		{ kind = "block", size = V(0.45, 2.6, 0.45), at = V(-4, 1.3, 2.1), color = DARKWOOD },
+		{ kind = "block", size = V(0.45, 2.6, 0.45), at = V(4, 1.3, -2.1), color = DARKWOOD },
+		{ kind = "block", size = V(0.45, 2.6, 0.45), at = V(-4, 1.3, -2.1), color = DARKWOOD },
+	},
+	diningChair = { -- 등받이가 뒤(+Z)에 있다 (방석 색은 tint)
+		{ kind = "block", size = V(1.9, 0.3, 1.9), at = V(0, 1.7, 0), color = WOOD },
+		{ kind = "block", size = V(1.9, 2.4, 0.3), at = V(0, 3.05, 0.85), color = WOOD },
+		{ kind = "block", size = V(1.7, 0.15, 1.7), at = V(0, 1.92, 0), tint = true, mat = M.Fabric },
+		{ kind = "block", size = V(0.22, 1.6, 0.22), at = V(0.8, 0.8, 0.8), color = DARKWOOD },
+		{ kind = "block", size = V(0.22, 1.6, 0.22), at = V(-0.8, 0.8, 0.8), color = DARKWOOD },
+		{ kind = "block", size = V(0.22, 1.6, 0.22), at = V(0.8, 0.8, -0.8), color = DARKWOOD },
+		{ kind = "block", size = V(0.22, 1.6, 0.22), at = V(-0.8, 0.8, -0.8), color = DARKWOOD },
+	},
+	riceBowl = { -- 밥그릇
+		{ kind = "column", size = V(1.4, 0.8, 1.4), at = V(0, 0.4, 0), color = WHITE },
+		{ kind = "column", size = V(1.45, 0.12, 1.45), at = V(0, 0.55, 0), color = RGB(60, 110, 200) },
+		{ kind = "ball", size = V(1.3, 0.7, 1.3), at = V(0, 0.85, 0), color = WHITE },
+	},
+	spoon = {
+		{ kind = "block", size = V(0.18, 0.08, 2), at = V(0, 0.04, 0), color = METAL, mat = M.Metal },
+		{ kind = "ball", size = V(0.55, 0.12, 0.75), at = V(0, 0.06, -1.25), color = METAL, mat = M.Metal },
+	},
+	chopsticks = {
+		{ kind = "block", size = V(0.1, 0.1, 2.4), at = V(0.12, 0.05, 0), color = METAL, mat = M.Metal },
+		{ kind = "block", size = V(0.1, 0.1, 2.4), at = V(-0.12, 0.05, 0), color = METAL, mat = M.Metal },
+	},
+	plate = { -- 접시 + 음식 (음식 색은 tint)
+		{ kind = "column", size = V(2, 0.15, 2), at = V(0, 0.075, 0), color = WHITE },
+		{ kind = "ball", size = V(1, 0.5, 1), at = V(0, 0.3, 0), tint = true },
+	},
+	fridge = {
+		{ kind = "block", size = V(4.4, 9, 3.6), at = V(0, 4.5, 0), color = RGB(240, 242, 245), mat = M.Metal },
+		{ kind = "block", size = V(4.3, 0.08, 0.05), at = V(0, 6, -1.82), color = RGB(170, 170, 180) },
+		{ kind = "block", size = V(0.2, 1.6, 0.2), at = V(1.8, 7.5, -1.9), color = RGB(170, 170, 180) },
+		{ kind = "block", size = V(0.2, 1.6, 0.2), at = V(1.8, 3.5, -1.9), color = RGB(170, 170, 180) },
+		{ kind = "ball", size = V(0.4, 0.4, 0.15), at = V(-1, 7, -1.82), color = RGB(230, 70, 60) },
+		{ kind = "ball", size = V(0.4, 0.4, 0.15), at = V(-0.5, 4, -1.82), color = RGB(250, 210, 60) },
+	},
+	jar = { -- 장독
+		{ kind = "ball", size = V(3.2, 3.6, 3.2), at = V(0, 1.8, 0), color = RGB(90, 55, 35) },
+		{ kind = "column", size = V(2, 0.4, 2), at = V(0, 3.4, 0), color = RGB(70, 40, 25) },
+		{ kind = "ball", size = V(2.2, 0.7, 2.2), at = V(0, 3.65, 0), color = RGB(110, 70, 45) },
+	},
+	bed = { -- 침대 (머리 쪽이 -Z, 이불 색은 tint)
+		{ kind = "block", size = V(6, 1.2, 8), at = V(0, 0.6, 0), color = WOOD, mat = M.Wood },
+		{ kind = "block", size = V(5.8, 1, 7.6), at = V(0, 1.7, 0), color = WHITE, mat = M.Fabric },
+		{ kind = "block", size = V(5.9, 0.5, 5), at = V(0, 2.35, 1.3), tint = true, mat = M.Fabric },
+		{ kind = "ball", size = V(3.6, 0.9, 1.8), at = V(0, 2.5, -2.7), color = WHITE, mat = M.Fabric },
+		{ kind = "block", size = V(6, 3.4, 0.4), at = V(0, 1.7, -4), color = DARKWOOD, mat = M.Wood },
+		{ kind = "block", size = V(6, 1.8, 0.3), at = V(0, 0.9, 4), color = DARKWOOD, mat = M.Wood },
+	},
+	teddy = { -- 곰 인형 (리본 색은 tint)
+		{ kind = "ball", size = V(2.2, 2.4, 2), at = V(0, 1.2, 0), color = RGB(170, 115, 70), mat = M.Fabric },
+		{ kind = "ball", size = V(1.7, 1.6, 1.6), at = V(0, 2.9, 0), color = RGB(170, 115, 70), mat = M.Fabric },
+		{ kind = "ball", size = V(0.6, 0.6, 0.4), at = V(0.65, 3.6, 0), color = RGB(150, 100, 60), mat = M.Fabric },
+		{ kind = "ball", size = V(0.6, 0.6, 0.4), at = V(-0.65, 3.6, 0), color = RGB(150, 100, 60), mat = M.Fabric },
+		{ kind = "ball", size = V(0.7, 0.5, 0.4), at = V(0, 2.75, -0.75), color = RGB(225, 190, 150), mat = M.Fabric },
+		{ kind = "ball", size = V(0.25, 0.18, 0.15), at = V(0, 2.9, -0.95), color = RGB(40, 30, 30) },
+		{ kind = "ball", size = V(0.2, 0.2, 0.1), at = V(0.32, 3.15, -0.78), color = RGB(40, 30, 30) },
+		{ kind = "ball", size = V(0.2, 0.2, 0.1), at = V(-0.32, 3.15, -0.78), color = RGB(40, 30, 30) },
+		{ kind = "ball", size = V(0.8, 1.2, 0.8), at = V(1.2, 1.5, -0.1), color = RGB(170, 115, 70), mat = M.Fabric },
+		{ kind = "ball", size = V(0.8, 1.2, 0.8), at = V(-1.2, 1.5, -0.1), color = RGB(170, 115, 70), mat = M.Fabric },
+		{ kind = "ball", size = V(0.9, 0.8, 1.1), at = V(0.6, 0.4, -0.6), color = RGB(170, 115, 70), mat = M.Fabric },
+		{ kind = "ball", size = V(0.9, 0.8, 1.1), at = V(-0.6, 0.4, -0.6), color = RGB(170, 115, 70), mat = M.Fabric },
+		{ kind = "ball", size = V(0.8, 0.35, 0.3), at = V(0, 2.15, -0.85), tint = true },
+	},
+	toyBlock = { -- 장난감 블록 (색은 tint)
+		{ kind = "block", size = V(2, 2, 2), at = V(0, 1, 0), tint = true, text = { text = "★" } },
+	},
+	floorLamp = { -- 스탠드 (불이 켜져 있다)
+		{ kind = "column", size = V(1.6, 0.3, 1.6), at = V(0, 0.15, 0), color = RGB(60, 60, 70) },
+		{ kind = "column", size = V(0.25, 6, 0.25), at = V(0, 3, 0), color = RGB(60, 60, 70), mat = M.Metal },
+		{ kind = "column", size = V(2.4, 1.8, 2.4), at = V(0, 6.6, 0), color = RGB(255, 240, 210),
+			light = { brightness = 1.5, range = 30, color = RGB(255, 220, 170) } },
+	},
+}
+
+-- 경기장 7곳. room = 방 (없으면 바깥), items = 놓을 가구 목록.
+-- item : prefab(조립법 이름) 또는 parts(부품 목록), scale(크기 배), pos(바닥 자리), rotY(돌리기, 0이면 앞이 -Z),
+--        repeatCount + step(줄지어 여러 개), ring(코트를 둘러싼 원 : count, radius, startDeg), colors(tint 색, 차례로)
+-- 방 크기 : half = 가운데에서 벽까지, height = 천장 높이. 집과 거인 교실은 내가 작아진 것처럼 가구가 거대하다.
+local SHIRTS = { RGB(240, 95, 70), RGB(40, 180, 170), RGB(130, 220, 180), RGB(120, 190, 240), RGB(250, 130, 130), RGB(255, 240, 100), RGB(255, 180, 120), RGB(170, 140, 220) }
+local OUTDOOR = { clockTime = 14.5, brightness = 2.5, ambient = RGB(90, 90, 100), outdoorAmbient = RGB(140, 140, 150), atmosphereDensity = 0.28, tint = RGB(255, 255, 255) }
+local INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(150, 150, 158), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 255, 255) }
+local WARM_INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(160, 150, 140), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 245, 230) }
+Config.Arenas = {
+	{
+		id = "playground", name = "학교 운동장", light = OUTDOOR,
+		items = {
+			{ prefab = "stand", ring = { count = 4, radius = 58, startDeg = 45 } },
+			{ prefab = "tree", ring = { count = 12, radius = 76 } },
+			{ prefab = "flag", ring = { count = 8, radius = 50, startDeg = 22.5 }, colors = SHIRTS },
+		},
+	},
+	{
+		id = "gym", name = "체육관", light = INDOOR, courtColor = RGB(70, 140, 220),
+		room = {
+			half = 70, height = 44, floorColor = RGB(215, 170, 115), floorMat = M.WoodPlanks,
+			wallColor = RGB(225, 230, 240), trimColor = RGB(60, 90, 160), ceilingColor = RGB(240, 240, 245),
+			lightGrid = 3, lampColor = RGB(255, 250, 235), lampBrightness = 2,
+		},
+		items = {
+			{ prefab = "hoop", pos = V(0, 0, 69.8) },
+			{ prefab = "hoop", pos = V(0, 0, -69.8), rotY = 180 },
+			{ prefab = "stand", pos = V(56, 0, 0), rotY = 90 },
+			{ prefab = "stand", pos = V(-56, 0, 0), rotY = -90 },
+			{ prefab = "banner", pos = V(69.8, 0, -30), rotY = 90, repeatCount = 2, step = V(0, 0, 60), colors = { RGB(240, 95, 70), RGB(40, 180, 170) } },
+			{ prefab = "banner", pos = V(-69.8, 0, -30), rotY = -90, repeatCount = 2, step = V(0, 0, 60), colors = { RGB(255, 240, 100), RGB(170, 140, 220) } },
+			{ prefab = "clock", pos = V(25, 0, -69.8), rotY = 180 },
+		},
+	},
+	{
+		id = "classroom", name = "넓은 교실", light = INDOOR, courtColor = RGB(110, 170, 120),
+		room = {
+			half = 70, height = 40, floorColor = RGB(200, 175, 140), floorMat = M.WoodPlanks,
+			wallColor = RGB(250, 242, 222), trimColor = RGB(120, 90, 60), ceilingColor = RGB(250, 250, 250),
+			lightGrid = 3, lampColor = RGB(255, 255, 245), lampBrightness = 2,
+		},
+		items = {
+			{ prefab = "chalkboard", scale = 1.5, pos = V(0, 0, 69.6) },
+			{ prefab = "teacherDesk", pos = V(0, 0, 60) },
+			{ prefab = "clock", pos = V(32, 0, 69.8) },
+			{ prefab = "deskSet", pos = V(62, 0, 40), rotY = 90, repeatCount = 7, step = V(0, 0, -12), colors = SHIRTS },
+			{ prefab = "deskSet", pos = V(-62, 0, 40), rotY = -90, repeatCount = 7, step = V(0, 0, -12), colors = SHIRTS },
+			{ prefab = "locker", pos = V(-31, 0, -68.6), rotY = 180, repeatCount = 21, step = V(3.1, 0, 0), colors = SHIRTS },
+			{ prefab = "window", pos = V(69.8, 0, -40), rotY = 90, repeatCount = 5, step = V(0, 0, 20) },
+			{ prefab = "plant", pos = V(60, 0, 60), scale = 1.5 },
+			{ prefab = "plant", pos = V(-60, 0, 60), scale = 1.5 },
+		},
+	},
+	{
+		id = "giantClassroom", name = "거인 교실", light = INDOOR, courtColor = RGB(240, 240, 232),
+		room = {
+			half = 70, height = 64, floorColor = RGB(200, 175, 140), floorMat = M.WoodPlanks,
+			wallColor = RGB(250, 242, 222), trimColor = RGB(120, 90, 60), ceilingColor = RGB(250, 250, 250),
+			lightGrid = 2, lampColor = RGB(255, 255, 245), lampBrightness = 3,
+		},
+		items = {
+			{ prefab = "chalkboard", scale = 4, pos = V(0, 0, 69.6) },
+			{ prefab = "deskSet", scale = 5, pos = V(52, 0, -48), rotY = 45, colors = { RGB(120, 190, 240) } },
+			{ prefab = "deskSet", scale = 5, pos = V(-52, 0, -48), rotY = -45, colors = { RGB(250, 130, 130) } },
+			{ prefab = "pencil", scale = 4, pos = V(-10, 0, 56), rotY = 90, colors = { RGB(255, 220, 60) } },
+			{ prefab = "pencil", scale = 4, pos = V(56, 0, 14), rotY = 10, colors = { RGB(240, 95, 70) } },
+			{ prefab = "eraser", scale = 5, pos = V(-58, 0, 10), rotY = 70, colors = { RGB(60, 110, 200) } },
+			{ prefab = "ruler", scale = 4, pos = V(0, 0, -60) },
+			{ prefab = "bookStack", scale = 5, pos = V(55, 0, 52) },
+		},
+	},
+	{
+		id = "anbang", name = "안방", light = WARM_INDOOR, courtColor = RGB(120, 170, 220),
+		room = {
+			half = 70, height = 56, floorColor = RGB(232, 190, 120), floorMat = M.SmoothPlastic, -- 노란 장판
+			wallColor = RGB(245, 235, 215), trimColor = RGB(150, 110, 70), ceilingColor = RGB(250, 245, 235),
+			lightGrid = 2, lampColor = RGB(255, 245, 225), lampBrightness = 3,
+		},
+		items = {
+			{ prefab = "wardrobe", scale = 4, pos = V(0, 0, 62) },
+			{ prefab = "vanity", scale = 4, pos = V(-54, 0, -54), rotY = -135 },
+			{ prefab = "futonStack", scale = 4, pos = V(56, 0, -54), rotY = 135 },
+			{ prefab = "lowTable", scale = 4, pos = V(-56, 0, 30), rotY = -90 },
+			{ prefab = "cushion", scale = 4, pos = V(56, 0, 20), repeatCount = 3, step = V(0, 0, 12), colors = { RGB(240, 95, 70), RGB(130, 220, 180), RGB(255, 240, 100) } },
+			{ prefab = "clock", scale = 2, pos = V(-40, 0, 69.8) },
+		},
+	},
+	{
+		id = "dining", name = "식당", light = WARM_INDOOR, courtColor = RGB(240, 150, 120),
+		room = {
+			half = 70, height = 56, floorColor = RGB(235, 230, 220), floorMat = M.Marble,
+			wallColor = RGB(255, 245, 230), trimColor = RGB(180, 120, 80), ceilingColor = RGB(255, 250, 245),
+			lightGrid = 2, lampColor = RGB(255, 240, 215), lampBrightness = 3,
+		},
+		items = {
+			{ prefab = "diningTable", scale = 4, pos = V(0, 0, 58), colors = { RGB(240, 95, 70) } },
+			{ prefab = "diningChair", scale = 4, pos = V(-12, 0, 46), rotY = 180, colors = { RGB(255, 240, 100) } },
+			{ prefab = "diningChair", scale = 4, pos = V(12, 0, 46), rotY = 180, colors = { RGB(130, 220, 180) } },
+			{ prefab = "fridge", scale = 4, pos = V(-62, 0, -40), rotY = -90 },
+			{ prefab = "jar", scale = 4, pos = V(58, 0, -56), repeatCount = 2, step = V(-14, 0, -4) },
+			{ prefab = "riceBowl", scale = 6, pos = V(50, 0, 30) },
+			{ prefab = "spoon", scale = 6, pos = V(-50, 0, 30), rotY = 30 },
+			{ prefab = "chopsticks", scale = 6, pos = V(-42, 0, -55), rotY = -20 },
+			{ prefab = "plate", scale = 6, pos = V(56, 0, 2), colors = { RGB(250, 200, 60) } },
+		},
+	},
+	{
+		id = "bedroom", name = "침실", light = WARM_INDOOR, courtColor = RGB(170, 140, 220),
+		room = {
+			half = 70, height = 56, floorColor = RGB(190, 150, 110), floorMat = M.WoodPlanks,
+			wallColor = RGB(220, 235, 250), trimColor = RGB(250, 250, 250), ceilingColor = RGB(250, 250, 255),
+			lightGrid = 2, lampColor = RGB(255, 250, 240), lampBrightness = 3,
+		},
+		items = {
+			{ parts = { { kind = "column", size = V(100, 0.04, 100), at = V(0, 0.06, 0), color = RGB(250, 180, 200), mat = M.Fabric, collide = false } }, pos = V(0, 0, 0) }, -- 동그란 러그
+			{ prefab = "bed", scale = 4, pos = V(-42, 0, 52), rotY = 180, colors = { RGB(120, 190, 240) } },
+			{ prefab = "teddy", scale = 5, pos = V(50, 0, 50), rotY = 45, colors = { RGB(240, 95, 70) } },
+			{ prefab = "toyBlock", scale = 4, pos = V(40, 0, -60), repeatCount = 3, step = V(9, 0, 2), colors = { RGB(240, 95, 70), RGB(255, 240, 100), RGB(40, 180, 170) } },
+			{ prefab = "floorLamp", scale = 4, pos = V(-60, 0, -60) },
+			{ prefab = "window", scale = 2, pos = V(69.8, 0, 0), rotY = 90 },
+			{ prefab = "bookStack", scale = 4, pos = V(-58, 0, 10), rotY = 20 },
+		},
+	},
 }
 
 -- NPC·분신 애니메이션 (로블록스 기본 R15 애니메이션)
