@@ -1,16 +1,17 @@
 -- 능력 목록 : id → 능력 모듈.
 -- 새 능력을 추가하려면 파일 하나를 만들고 아래 목록에 한 줄을 넣는다.
+-- script.Clone 처럼 쓰면 로블록스 기능 이름(Clone)과 겹치므로 꼭 WaitForChild("이름")으로 찾는다.
 
 local list = {
-	require(script.SuperWings),
-	require(script.DoubleBall),
-	require(script.Clone),
-	require(script.Shield),
-	require(script.SuperCatch),
-	require(script.SuperFastball),
-	require(script.Homing),
-	require(script.Invisible),
-	require(script.Slow),
+	require(script:WaitForChild("SuperWings")),
+	require(script:WaitForChild("DoubleBall")),
+	require(script:WaitForChild("Clone")),
+	require(script:WaitForChild("Shield")),
+	require(script:WaitForChild("SuperCatch")),
+	require(script:WaitForChild("SuperFastball")),
+	require(script:WaitForChild("Homing")),
+	require(script:WaitForChild("Invisible")),
+	require(script:WaitForChild("Slow")),
 }
 
 local Abilities = {}

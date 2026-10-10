@@ -3,14 +3,47 @@
   "tree": {
     "$className": "DataModel",
     "ServerScriptService": {
-      "Server": { "$path": "src/server" }
+      "Server": {
+        "$path": "src/server"
+      }
     },
     "ReplicatedStorage": {
-      "Shared": { "$path": "src/shared" }
+      "Shared": {
+        "$path": "src/shared"
+      }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "Client": { "$path": "src/client" }
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "Baseplate": {
+        "$className": "Part",
+        "$properties": {
+          "Anchored": true,
+          "Locked": true,
+          "Size": [
+            600,
+            1,
+            600
+          ],
+          "Position": [
+            0,
+            -0.5,
+            0
+          ],
+          "Color": [
+            0.43,
+            0.67,
+            0.35
+          ],
+          "Material": "Grass",
+          "TopSurface": "Smooth"
+        }
       }
     }
   }
