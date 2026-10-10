@@ -11,6 +11,12 @@ local PlayerStateService = {}
 
 local notifyRemote = Remotes.get("Notify")
 local reactionHandler = nil -- 사건이 생기면 부를 함수 (NPC 말풍선용)
+local knockOutListeners = {} -- 누가 아웃될 때마다 부를 함수들 (복수 대상용)
+
+-- 누가 아웃될 때마다 부를 함수를 더한다. 함수는 (아웃된 사람, 아웃시킨 사람, "hit" 또는 "catch")를 받는다.
+function PlayerStateService.addKnockOutListener(listener)
+	table.insert(knockOutListeners, listener)
+end
 
 -- 사건(아웃·캐치·부활 등)이 생기면 부를 함수를 정한다.
 function PlayerStateService.setReactionHandler(handler)
@@ -137,6 +143,9 @@ function PlayerStateService.knockOut(victim, by, how)
 	-- 내가 앉으면 내가 아웃시킨 사람들은 일어난다
 	reviveKillsOf(victim)
 	PlayerStateService.sync(victim)
+	for _, listener in knockOutListeners do
+		listener(victim, by, how)
+	end
 	return true
 end
 

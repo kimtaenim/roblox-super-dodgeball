@@ -127,6 +127,17 @@ Config.Abilities = {
 	Slow = { Radius = 30, Seconds = 3, SpeedFactor = 0.5 },
 }
 
+-- 복수 대상 (설계서 1.6장) : 같은 상대에게 자꾸 아웃되면 그 상대 머리 위에 표시 (당한 사람 화면에만)
+Config.Revenge = {
+	OutsToMark = 2, -- 이 횟수만큼 같은 상대 공에 맞아 아웃되면 복수 대상이 된다
+	WindowSeconds = 90, -- 이 시간 안에 맞은 것만 센다 (초)
+	MarkText = "😠 복수 대상!", -- 머리 위 글자
+	MarkColor = Color3.fromRGB(255, 80, 60), -- 글자 색
+	MarkTextSize = 22, -- 글자 크기
+	MarkWidth = 200, -- 표시 너비 (픽셀)
+	MarkHeight = 4.5, -- 머리 위로 뜨는 높이 (이름표보다 위)
+}
+
 -- NPC (설계서 9장)
 Config.Npc = {
 	TargetTotal = 6, -- 한 판 참가자가 이 수가 되도록 NPC를 채운다 (너무 많으면 정신없다)

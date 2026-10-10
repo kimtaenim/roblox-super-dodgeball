@@ -17,6 +17,7 @@ local CourtService = require(script.Parent.CourtService)
 local BallService = require(script.Parent.BallService)
 local AbilityService = require(script.Parent.AbilityService)
 local AbilityBoxService = require(script.Parent.AbilityBoxService)
+local RevengeService = require(script.Parent.RevengeService)
 local NpcService = require(script.Parent.NpcService)
 
 local R = Config.Round
@@ -218,6 +219,7 @@ end
 -- 판 정리 : 능력 효과·NPC를 치우고, 모두 로비 상태로 되돌린다.
 local function cleanupRound()
 	AbilityService.cleanup()
+	RevengeService.reset()
 	NpcService.despawnAll()
 	for _, p in Participants.all() do
 		if p.inRound and not p.isNpc then
@@ -237,6 +239,7 @@ CourtService.start()
 BallService.start()
 AbilityService.start(services)
 AbilityBoxService.start()
+RevengeService.start()
 NpcService.start()
 CourtService.setRadius(C.StartRadius, false)
 BallService.setBallCount(B.MinCount)
