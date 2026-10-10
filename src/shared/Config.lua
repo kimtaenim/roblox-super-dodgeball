@@ -122,7 +122,7 @@ Config.Abilities = {
 		Seconds = 5, BounceSpeed = 30, BounceUp = 15, -- 지속 시간, 튕겨 나가는 속도
 		BubbleSize = 7, BubbleColor = Color3.fromRGB(90, 180, 255), BubbleTransparency = 0.65, -- 방패 공 크기·색·투명도
 	},
-	SuperCatch = { Seconds = 5, Color = Color3.fromRGB(120, 255, 160) }, -- 자동으로 잡는 시간, 몸이 빛나는 색
+	SuperCatch = { Seconds = 10, Color = Color3.fromRGB(120, 255, 160) }, -- 자동으로 잡는 시간 (넉넉하게), 몸이 빛나는 색
 	SuperFastball = { SpeedMultiplier = 3, FireSize = 4 }, -- 속도 몇 배, 불꽃 크기
 	Homing = { Seconds = 2, TurnDegreesPerSecond = 240 }, -- 추적 시간, 1초에 꺾는 최대 각도
 	Invisible = { Seconds = 4, Transparency = 0.9, SelfTransparency = 0.5 }, -- 남이 볼 때, 내 화면에서 볼 때

@@ -1,4 +1,4 @@
--- 슈퍼캐치 : 5초 동안 몸에 닿는 공을 버튼 없이 저절로 잡는다. 몸이 초록빛으로 빛난다.
+-- 슈퍼캐치 : 10초 동안 몸에 닿는 공을 버튼 없이 저절로 잡는다. 몸이 초록빛으로 빛난다.
 -- (잡는 판정은 BallService가 superCatchUntil을 보고 한다)
 
 local Config = require(script.Parent.Parent.Config)
