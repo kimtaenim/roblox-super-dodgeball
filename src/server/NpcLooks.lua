@@ -415,6 +415,7 @@ local function paintCatalogBody(model, persona)
 				end
 			end
 			part.Color = color
+			part.Material = Enum.Material.SmoothPlastic -- 매끈한 재질이라 색이 탁하지 않고 또렷하다
 		end
 	end
 end

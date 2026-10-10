@@ -197,7 +197,7 @@ Config.Npc = {
 	-- legs = "pants" 긴바지 / "shorts" 반바지, pants = 바지 색, shoes = 신발 색, number = 등번호
 	Personas = {
 		{
-			name = "빨강", shirt = Color3.fromRGB(240, 95, 70), -- 다홍 : 키 크고 듬직한 대장, 삐죽머리
+			name = "빨강", shirt = Color3.fromRGB(235, 30, 35), -- 새빨강 : 키 크고 듬직한 대장, 삐죽머리
 			catalog = { body = { id = 986, name = "Base Body - Devin" }, head = { id = 949, name = "Chiseled Good Looks" }, hair = { id = 376548738, name = "Brown Charmer Hair" } },
 			body = { height = 1.05, width = 0.84, depth = 0.85, head = 1.0 },
 			skin = Color3.fromRGB(241, 194, 125),
@@ -206,7 +206,7 @@ Config.Npc = {
 			legs = "shorts", pants = Color3.fromRGB(40, 45, 60), shoes = Color3.fromRGB(230, 60, 50), number = 7,
 		},
 		{
-			name = "청록", shirt = Color3.fromRGB(40, 180, 170), -- 터콰즈 : 키 크고 마른 안경잡이
+			name = "청록", shirt = Color3.fromRGB(0, 160, 165), -- 진한 청록 : 키 크고 마른 안경잡이
 			catalog = { body = { id = 986, name = "Base Body - Devin" }, head = { id = 945, name = "Dylan Default" }, hair = { id = 63690008, name = "Pal Hair" } },
 			body = { height = 1.05, width = 0.72, depth = 0.75, head = 0.97 },
 			skin = Color3.fromRGB(255, 224, 189),
@@ -215,7 +215,7 @@ Config.Npc = {
 			legs = "pants", pants = Color3.fromRGB(60, 70, 110), shoes = Color3.fromRGB(245, 245, 245), number = 4,
 		},
 		{
-			name = "민트", shirt = Color3.fromRGB(130, 220, 180), -- 민트 : 주근깨 포니테일
+			name = "민트", shirt = Color3.fromRGB(70, 240, 170), -- 밝은 민트 : 주근깨 포니테일
 			catalog = { body = { id = 986, name = "Base Body - Devin" }, face = { id = 12145366, name = "Freckles" }, hair = { id = 376527350, name = "Black Ponytail" } },
 			body = { height = 0.98, width = 0.76, depth = 0.78, head = 1.0 },
 			skin = Color3.fromRGB(250, 214, 175),
@@ -224,7 +224,7 @@ Config.Npc = {
 			legs = "shorts", pants = Color3.fromRGB(70, 90, 140), shoes = Color3.fromRGB(255, 255, 255), number = 11,
 		},
 		{
-			name = "하늘", shirt = Color3.fromRGB(120, 190, 240), -- 하늘 : 작은 체구, 야구모자
+			name = "하늘", shirt = Color3.fromRGB(60, 180, 255), -- 맑은 하늘색 : 작은 체구, 야구모자
 			catalog = { body = { id = 311, name = "Robloxian 2.0" }, face = { id = 7699174, name = "Silly Fun" }, hair = { id = 451221329, name = "True Blue Hair" } },
 			body = { height = 0.9, width = 0.74, depth = 0.76, head = 1.0 },
 			skin = Color3.fromRGB(224, 172, 105),
@@ -233,7 +233,7 @@ Config.Npc = {
 			legs = "shorts", pants = Color3.fromRGB(230, 230, 230), shoes = Color3.fromRGB(40, 50, 90), number = 2,
 		},
 		{
-			name = "분홍", shirt = Color3.fromRGB(250, 130, 130), -- 코랄핑크 : 양갈래 똥머리, 볼이 발그레
+			name = "분홍", shirt = Color3.fromRGB(255, 90, 180), -- 진분홍 : 양갈래 똥머리, 볼이 발그레
 			catalog = { body = { id = 986, name = "Base Body - Devin" }, head = { id = 948, name = "Makeup Minimalist" }, hair = { id = 5314006793, name = "Black Trendy Messy Buns" } },
 			body = { height = 0.95, width = 0.75, depth = 0.77, head = 1.0 },
 			skin = Color3.fromRGB(255, 228, 205),
@@ -242,7 +242,7 @@ Config.Npc = {
 			legs = "pants", pants = Color3.fromRGB(250, 240, 245), shoes = Color3.fromRGB(240, 110, 150), number = 9,
 		},
 		{
-			name = "노랑", shirt = Color3.fromRGB(255, 240, 100), -- 레몬옐로우 : 통통한 곱슬머리
+			name = "노랑", shirt = Color3.fromRGB(255, 225, 0), -- 샛노랑 : 통통한 곱슬머리
 			catalog = { body = { id = 986, name = "Base Body - Devin" }, head = { id = 945, name = "Dylan Default" }, hair = { id = 5703037305, name = "Black Curly Hair For Amazing People" } },
 			body = { height = 0.96, width = 0.92, depth = 0.95, head = 1.0 },
 			skin = Color3.fromRGB(198, 134, 66),
@@ -251,7 +251,7 @@ Config.Npc = {
 			legs = "pants", pants = Color3.fromRGB(90, 70, 50), shoes = Color3.fromRGB(250, 200, 60), number = 5,
 		},
 		{
-			name = "주황", shirt = Color3.fromRGB(255, 180, 120), -- 피치 오렌지 : 머리띠 한 운동 선수
+			name = "주황", shirt = Color3.fromRGB(255, 125, 0), -- 귤색 주황 : 머리띠 한 운동 선수
 			catalog = { body = { id = 311, name = "Robloxian 2.0" }, face = { id = 7074786, name = "Check It" } },
 			body = { height = 1.0, width = 0.8, depth = 0.8, head = 0.97 },
 			skin = Color3.fromRGB(141, 85, 36),
@@ -260,7 +260,7 @@ Config.Npc = {
 			legs = "shorts", pants = Color3.fromRGB(35, 35, 40), shoes = Color3.fromRGB(255, 140, 40), number = 23,
 		},
 		{
-			name = "보라", shirt = Color3.fromRGB(170, 140, 220), -- 라벤더 : 긴 머리, 별 핀
+			name = "보라", shirt = Color3.fromRGB(140, 50, 230), -- 진보라 : 긴 머리, 별 핀
 			catalog = { body = { id = 986, name = "Base Body - Devin" }, face = { id = 7074764, name = "Chill" }, hair = { id = 451220849, name = "Lavender Updo" } },
 			body = { height = 1.02, width = 0.73, depth = 0.75, head = 0.98 },
 			skin = Color3.fromRGB(255, 220, 200),
@@ -771,8 +771,8 @@ Config.Prefabs = {
 -- y = 바닥에서 띄우는 높이 (식탁 위 그릇처럼)
 local SHIRTS = { RGB(240, 95, 70), RGB(40, 180, 170), RGB(130, 220, 180), RGB(120, 190, 240), RGB(250, 130, 130), RGB(255, 240, 100), RGB(255, 180, 120), RGB(170, 140, 220) }
 local OUTDOOR = { clockTime = 14.5, brightness = 2.5, ambient = RGB(90, 90, 100), outdoorAmbient = RGB(140, 140, 150), atmosphereDensity = 0.28, tint = RGB(255, 255, 255) }
-local INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(150, 150, 158), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 255, 255) }
-local WARM_INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(160, 150, 140), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 245, 230) }
+local INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(180, 180, 186), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 255, 255) }
+local WARM_INDOOR = { clockTime = 14, brightness = 1, ambient = RGB(190, 180, 170), outdoorAmbient = RGB(120, 120, 130), atmosphereDensity = 0, tint = RGB(255, 245, 230) }
 Config.Arenas = {
 	{
 		id = "playground", name = "학교 운동장", light = OUTDOOR,
