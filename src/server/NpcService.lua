@@ -335,6 +335,15 @@ local function walkTo(humanoid, position)
 	humanoid:MoveTo(CourtService.clampInside(position, N.MoveMargin))
 end
 
+-- NPC가 지금 노리는 사람을 몸에 적어 둔다 (그 사람 화면에 "나를 노려요!" 경고가 뜬다). 사람이 아니면 지운다.
+local function setAiming(p, target)
+	local userId = nil
+	if target and typeof(target) ~= "Instance" and target.player then
+		userId = target.player.UserId
+	end
+	Participants.setAttribute(p, "AimingAt", userId)
+end
+
 -- 공을 들고 있을 때 : 상대를 골라 다가가서 잠깐 뒤 던진다.
 local function thinkWithBall(p, brain, root, humanoid, now)
 	if not isGoodTarget(brain.target) then
@@ -342,6 +351,7 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 	end
 	brain.throwAt = brain.throwAt or now + randomBetween(N.AimDelayMin, N.AimDelayMax) * aimDelayScale
 	local target = brain.target
+	setAiming(p, target)
 	if not target then
 		return
 	end
@@ -364,6 +374,7 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 		brain.lastTarget = target
 		brain.throwAt = nil
 		brain.target = nil
+		setAiming(p, nil)
 	end
 end
 
@@ -371,6 +382,7 @@ end
 local function thinkEmptyHanded(p, brain, root, humanoid, now)
 	brain.throwAt = nil
 	brain.target = nil
+	setAiming(p, nil)
 	local ball = BallService.nearestFreeBall(root.Position)
 	local box = #p.state.abilities < Config.AbilityBox.MaxSlots and AbilityBoxService.nearestBox(root.Position)
 	local boxDistance = box and (box.Position - root.Position).Magnitude
@@ -395,6 +407,7 @@ local function think(p, brain, now)
 		return -- 시범 중인 NPC는 시범 순서대로만 움직인다
 	end
 	if p.state.status ~= "Alive" then
+		setAiming(p, nil)
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
 		return
 	end

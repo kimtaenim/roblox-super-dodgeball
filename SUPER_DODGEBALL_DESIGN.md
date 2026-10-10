@@ -156,6 +156,8 @@ src/
   client/
     InputController.client.lua -- 조작 입력 → RemoteEvent
     HUD.client.lua             -- 능력 칸(누르면 사용), 상태, 남은 인원, 타이머
+    AimWarning.client.lua      -- NPC가 나를 노리면 경고
+    SoundPlayer.client.lua     -- 효과음·배경 음악 재생
     ThrowCamera.client.lua     -- 던지기 조준
   shared/
     Config.lua                 -- 모든 숫자 (속도, 시간, 반지름)
@@ -209,6 +211,7 @@ return {
 - 한 판의 참가자가 6명이 되도록 NPC를 채운다 (사람 6명 이상이면 NPC 없음). 튜토리얼 판은 3명 (5장).
 - NPC는 사람과 똑같은 규칙 : 맞으면 앉고, 캐치하면 부활, kills·능력 상자 모두 같다.
 - NPC 행동 : 빈손이면 가까운 죽은 공으로 간다 → 공을 들면 사거리(50) 안 상대를 골라 잠깐 뒤 던진다 (조준 오차 있음).
+- 노림 경고 : NPC가 공을 들고 나를 노리면 내 화면에만 그 NPC 머리 위 빨간 ❗, 몸 둘레 빨간 테두리, "⚠ 빨강 나를 노려요!", 경고음 한 번 (`client/AimWarning.client.lua`).
 - 한 사람만 집중 공격하지 않는다 : 최근 20초 동안 NPC 공을 덜 받은 상대를 먼저 노리고, 방금 던진 상대는 피한다 (사람·NPC 똑같이).
 - 날아오는 공은 25% 확률로 캐치한다.
 - 능력 상자에는 큰 관심이 없다 : 바로 옆(6스터드 안)에 있고 공보다 가까울 때만 줍는다.

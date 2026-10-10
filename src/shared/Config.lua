@@ -952,6 +952,18 @@ Config.Sounds = {
 	MusicSpeed = 1.05, -- 조금 빠르게 (더 신나게)
 }
 
+-- 노림 경고 (client/AimWarning.client.lua) : NPC가 나를 노리면 내 화면에만 알려준다
+Config.AimWarning = {
+	Mark = "❗", -- NPC 머리 위에 뜨는 표시
+	MarkColor = Color3.fromRGB(255, 60, 50),
+	MarkSize = 60, -- 표시 크기 (픽셀)
+	MarkHeight = 3.5, -- 머리 위로 뜨는 높이
+	OutlineColor = Color3.fromRGB(255, 60, 50), -- NPC 몸 둘레 테두리 색
+	TextColor = Color3.fromRGB(255, 90, 80), -- 화면 경고 글자 색
+	TextSize = 30,
+	SoundId = "rbxasset://sounds/electronicpingshort.wav", SoundVolume = 0.8, SoundPitch = 1.3, -- 경고음 (노리기 시작할 때 한 번)
+}
+
 -- 화면 표시
 Config.Hud = {
 	MessageSeconds = 2.5, -- 알림 글자가 떠 있는 시간
