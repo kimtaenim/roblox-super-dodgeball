@@ -9,9 +9,9 @@ return {
 	name = "슈퍼캐치",
 	duration = C.Seconds, -- 효과가 이어지는 시간 (이 동안은 다른 능력을 못 쓴다)
 
-	-- 살아 있을 때만 쓸 수 있다.
-	canUse = function(_who, state)
-		return state.status == "Alive"
+	-- 언제든 쓸 수 있다 (아웃돼서 앉아 있을 때도).
+	canUse = function(_who, _state)
+		return true
 	end,
 
 	-- 슈퍼캐치 시간을 적고, 몸을 빛나게 한다.

@@ -25,9 +25,9 @@ return {
 	name = "분신술",
 	duration = C.Seconds, -- 효과가 이어지는 시간 (이 동안은 다른 능력을 못 쓴다)
 
-	-- 살아 있을 때만 쓸 수 있다.
-	canUse = function(_who, state)
-		return state.status == "Alive"
+	-- 언제든 쓸 수 있다 (아웃돼서 앉아 있을 때도).
+	canUse = function(_who, _state)
+		return true
 	end,
 
 	-- 내 몸을 복사해서 분신을 만든다.
@@ -49,6 +49,11 @@ return {
 				end
 			end
 			decoy:SetAttribute("DecoyOf", who.name) -- 누구 분신인지 (NPC가 자기 분신은 안 노리게)
+			local decoyHumanoid = decoy:FindFirstChildOfClass("Humanoid")
+			if decoyHumanoid then
+				decoyHumanoid.Sit = false -- 앉아서 써도 분신은 서서 돌아다닌다
+				decoyHumanoid.WalkSpeed = Config.Player.WalkSpeed
+			end
 			decoy.Parent = services.Balls.getDecoyFolder()
 			local root = decoy:FindFirstChild("HumanoidRootPart")
 			if root then

@@ -401,8 +401,8 @@ local function judgeContact(ball, state, part)
 	local now = os.clock()
 	local thrower = state.thrower
 
-	-- ① 닿기 전 0.5초 안에 캐치 버튼을 눌렀거나 슈퍼캐치 중이면 캐치 (Alive·Sitting 모두)
-	local superCatch = p.state.superCatchUntil > now and p.state.status == "Alive"
+	-- ① 닿기 전 캐치 시간 안에 캐치 버튼을 눌렀거나 슈퍼캐치 중이면 캐치 (Alive·Sitting 모두, 앉아서 잡으면 부활)
+	local superCatch = p.state.superCatchUntil > now
 	if superCatch or now - p.state.lastCatchPress <= Config.Catch.Window then
 		p.state.lastCatchPress = -math.huge
 		PlayerStateService.catch(p, thrower)
