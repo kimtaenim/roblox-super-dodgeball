@@ -71,8 +71,17 @@ Config.Throw = {
 
 -- 캐치 (설계서 1.4장)
 Config.Catch = {
-	Window = 0.8, -- 공이 닿기 전 이 시간 안에 눌렀으면 캐치 (넉넉하게, 쉬운 난이도)
-	Cooldown = 1.0, -- 캐치 버튼은 이 시간에 한 번만
+	Window = 1.2, -- 공이 닿기 전 이 시간 안에 눌렀으면 캐치 (넉넉하게, 쉬운 난이도)
+	Cooldown = 1.8, -- 캐치 버튼은 이 시간에 한 번만 (마구 눌러서 늘 잡지는 못하게)
+	-- 화면 도우미 (client/CatchHelper.client.lua)
+	PromptSeconds = 1.2, -- 공이 이 시간 안에 나에게 올 것 같으면 "지금 잡아!"를 띄운다
+	PromptMinSpeed = 8, -- 공이 이보다 빠르게 나에게 다가올 때만 띄운다
+	PromptText = "지금 잡아!  F 또는 마우스 오른쪽",
+	PromptColor = Color3.fromRGB(255, 230, 60),
+	ReadyText = "캐치 준비!",
+	ReadyColor = Color3.fromRGB(120, 255, 160),
+	TextSize = 46, -- 화면 가운데 글자 크기
+	TextHeight = 0.62, -- 화면 위에서 몇 % 아래에 글자를 띄울지 (0~1)
 }
 
 -- 능력 상자 (설계서 2.1장) : 판 시작 때 능력 몇 개를 갖고, 판 도중 상자를 주우면 하나 더 생긴다

@@ -17,6 +17,17 @@ local catchRemote = Remotes.get("Catch")
 local abilityRemote = Remotes.get("UseAbility")
 
 local pressStartTime = nil -- 던지기 버튼을 누르기 시작한 시각
+local lastCatchPress = -math.huge -- 캐치 버튼을 마지막으로 (쿨다운이 지나서) 누른 시각
+
+-- 캐치 버튼을 누르면 서버에 알리고, 화면 "캐치 준비!"용으로 누른 시각을 적어 둔다.
+local function pressCatch()
+	catchRemote:FireServer()
+	local now = os.clock()
+	if now - lastCatchPress >= Config.Catch.Cooldown then
+		lastCatchPress = now
+		player:SetAttribute("CatchPressedAt", now) -- 내 화면에만 (CatchHelper가 읽는다)
+	end
+end
 
 -- 내 캐릭터는 넘어지거나 늘어지지 않게 한다 (공에 맞으면 눕지 않고 앉아야 한다).
 -- 내 몸의 움직임은 내 컴퓨터가 계산하므로 여기서 꺼야 한다.
@@ -81,7 +92,7 @@ end
 -- 캐치 : 누르는 순간 서버에 알린다. (오른쪽 버튼은 카메라 돌리기에도 쓰이게 넘겨준다)
 local function onCatch(_actionName, inputState, _input)
 	if inputState == Enum.UserInputState.Begin then
-		catchRemote:FireServer()
+		pressCatch()
 	end
 	return Enum.ContextActionResult.Pass
 end
@@ -110,7 +121,7 @@ ContextActionService:BindAction("Catch", onCatch, true, Enum.KeyCode.F)
 -- 오른쪽 클릭 캐치는 카메라 돌리기(오른쪽 버튼 끌기)를 방해하지 않게 따로 듣는다.
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton2 then
-		catchRemote:FireServer()
+		pressCatch()
 	end
 end)
 ContextActionService:BindAction("Ability", onAbility, true, Enum.KeyCode.Q)

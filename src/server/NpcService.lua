@@ -52,6 +52,7 @@ function NpcService.setupAnimation(model)
 		animation.AnimationId = id
 		local track = animator:LoadAnimation(animation)
 		track.Looped = true
+		track.Priority = Enum.AnimationPriority.Action -- 다른 기본 동작보다 앞선다
 		return track
 	end
 	local idle, walk, sit = load(Anim.Idle), load(Anim.Walk), load(Anim.Sit)
@@ -69,15 +70,23 @@ function NpcService.setupAnimation(model)
 		track:Play(Anim.FadeSeconds)
 	end
 
+	-- 앉아 있어야 하는지 : 아웃 상태(Status)를 먼저 본다 (몸이 잠깐 일어서도 앉는 동작 유지)
+	local function shouldSit()
+		return humanoid.Sit or model:GetAttribute("Status") == "Sitting"
+	end
+	-- 지금 상태에 맞는 동작으로 바꾼다
+	local function refresh()
+		play(if shouldSit() then sit else idle)
+	end
+
 	humanoid.Running:Connect(function(speed)
-		if humanoid.Sit then
+		if shouldSit() then
 			return
 		end
 		play(if speed > Anim.WalkThreshold then walk else idle)
 	end)
-	humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
-		play(if humanoid.Sit then sit else idle)
-	end)
+	humanoid:GetPropertyChangedSignal("Sit"):Connect(refresh)
+	model:GetAttributeChangedSignal("Status"):Connect(refresh)
 	play(idle)
 end
 

@@ -72,6 +72,7 @@ local function makeDead(ball)
 	end
 	state.live = false
 	state.thrower = nil
+	ball:SetAttribute("Live", nil) -- 화면 캐치 도우미가 읽는다
 	state.flags = {}
 	setLift(ball, 0)
 	ball.FlyTrail.Enabled = false
@@ -276,6 +277,7 @@ local function launch(ball, p, start, velocity, flags, lift)
 	ball.AssemblyLinearVelocity = velocity
 	state.thrower = p
 	state.live = true
+	ball:SetAttribute("Live", true)
 	state.flags = flags
 	state.thrownAt = os.clock()
 	setLift(ball, lift)
