@@ -72,6 +72,7 @@ local function makeDead(ball)
 	state.thrower = nil
 	state.flags = {}
 	setLift(ball, 0)
+	ball.FlyTrail.Enabled = false
 	local fire = ball:FindFirstChild("SuperFire")
 	if fire then
 		fire:Destroy()
@@ -133,6 +134,25 @@ local function createBall(temporary)
 	lift.ApplyAtCenterOfMass = true
 	lift.Enabled = false
 	lift.Parent = ball
+
+	-- 날아갈 때 뒤에 남는 하얀 꼬리 (죽은 공이 되면 꺼진다)
+	local S = Config.Scenery
+	local trailTop = Instance.new("Attachment")
+	trailTop.Position = Vector3.new(0, S.BallTrailWidth / 2, 0)
+	trailTop.Parent = ball
+	local trailBottom = Instance.new("Attachment")
+	trailBottom.Position = Vector3.new(0, -S.BallTrailWidth / 2, 0)
+	trailBottom.Parent = ball
+	local trail = Instance.new("Trail")
+	trail.Name = "FlyTrail"
+	trail.Attachment0 = trailTop
+	trail.Attachment1 = trailBottom
+	trail.Lifetime = S.BallTrailLifetime
+	trail.Color = ColorSequence.new(S.BallTrailColor)
+	trail.Transparency = S.BallTrailTransparency
+	trail.FaceCamera = true
+	trail.Enabled = false
+	trail.Parent = ball
 
 	ball.Parent = folder
 	ball:SetNetworkOwner(nil) -- 공의 물리는 서버가 계산한다
@@ -244,6 +264,7 @@ local function launch(ball, p, start, velocity, flags, lift)
 	state.flags = flags
 	state.thrownAt = os.clock()
 	setLift(ball, lift)
+	ball.FlyTrail.Enabled = true
 end
 
 -- 참가자가 조준점을 향해 공을 던진다. 능력(슈퍼강속구·유도탄·공 두 개)도 여기서 붙는다.
