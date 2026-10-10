@@ -20,6 +20,7 @@ local AbilityBoxService = require(script.Parent.AbilityBoxService)
 local RevengeService = require(script.Parent.RevengeService)
 local Scenery = require(script.Parent.Scenery)
 local ArenaService = require(script.Parent.ArenaService)
+local AvatarCatalog = require(script.Parent.AvatarCatalog)
 local NpcService = require(script.Parent.NpcService)
 
 local R = Config.Round
@@ -243,6 +244,7 @@ end
 -- 시작 : 서비스를 켜고 플레이어 이벤트를 연결한다.
 CourtService.start()
 Scenery.build()
+task.spawn(AvatarCatalog.prepare, Config.Npc.Personas) -- NPC 카탈로그 부품을 미리 확인 (로비 동안)
 ArenaService.build(Config.Arena.FirstArena)
 BallService.start()
 AbilityService.start(services)

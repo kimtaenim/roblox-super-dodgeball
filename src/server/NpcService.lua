@@ -192,8 +192,9 @@ function NpcService.spawn(count, tutorial)
 		local persona = personas[(index - 1) % #personas + 1]
 		local round = math.floor((index - 1) / #personas)
 		local name = if round > 0 then persona.name .. tostring(round + 1) else persona.name
+		local description, used = NpcLooks.describe(persona)
 		local ok, model = pcall(function()
-			return Players:CreateHumanoidModelFromDescription(NpcLooks.describe(persona), Enum.HumanoidRigType.R15)
+			return Players:CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15)
 		end)
 		if not ok then
 			warn("NPC를 만들지 못했어요: " .. tostring(model))
@@ -204,7 +205,7 @@ function NpcService.spawn(count, tutorial)
 		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 이름표로 보여준다
 		humanoid.BreakJointsOnDeath = false
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- NPC는 죽지 않는다
-		NpcLooks.dress(model, persona)
+		NpcLooks.dress(model, persona, used)
 		addNameTag(model, name)
 
 		model.Parent = folder

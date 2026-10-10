@@ -147,6 +147,7 @@ src/
     RevengeService.lua         -- 복수 대상 표시와 보너스
     NpcService.lua             -- NPC 생성·AI·애니메이션
     NpcLooks.lua               -- NPC 8명 생김새 (얼굴·머리·옷·체형)
+    AvatarCatalog.lua          -- NPC 카탈로그 부품 번호 확인·불러오기
     Scenery.lua                -- 코트 가운데 원과 로고
     ArenaService.lua           -- 경기장 7곳 (판마다 무작위) : 방·가구·조명
   client/
@@ -222,8 +223,20 @@ return {
   | 노랑 | 레몬옐로우 | 통통한 곱슬머리, 볼터치, 5번 |
   | 주황 | 피치 오렌지 | 머리띠 한 운동 선수, 반바지, 23번 |
   | 보라 | 라벤더 | 긴 머리, 별 핀, 3번 |
-  얼굴은 로블록스 기본 얼굴 그림 (persona.face에 얼굴 에셋 번호를 넣으면 그 얼굴).
-  몸은 둥글고 한 덩어리처럼 이어진다 : 네모난 R15 몸을 숨기고, 몸통(윗옷+바지)·팔·다리를 마디 사이 홈 없이 이어진 원기둥으로 덮는다.
+  요즘 아바타 느낌 : 로블록스 카탈로그 부품을 입힌다 (`persona.catalog`, 코드는 `server/AvatarCatalog.lua`).
+  | 이름 | 몸 번들 | 얼굴 | 머리카락 |
+  |---|---|---|---|
+  | 빨강 | Man (238) | Chiseled Good Looks (다이내믹 헤드 949) | Brown Charmer Hair |
+  | 청록 | Base Body - Devin (986) | Dylan Default (다이내믹 헤드 945) | Pal Hair |
+  | 민트 | Woman (239) | Freckles | Black Ponytail |
+  | 하늘 | ROBLOX Boy (109) | Silly Fun | True Blue Hair |
+  | 분홍 | ROBLOX Girl (108) | Makeup Minimalist (다이내믹 헤드 948) | Black Trendy Messy Buns |
+  | 노랑 | Man (238) | Dylan Default (다이내믹 헤드 945) | Black Curly Hair For Amazing People |
+  | 주황 | Robloxian 2.0 (311) | Check It | (부품 머리띠) |
+  | 보라 | Woman (239) | Chill | Lavender Updo |
+  번호는 검색으로 찾은 것이라, 서버가 켜질 때 번호마다 로블록스에 진짜 이름을 물어보고 이름이 맞을 때만 입힌다.
+  안 맞거나 못 불러온 부품은 출력 창에 경고를 남기고, 직접 만든 모습(둥근 몸·부품 머리카락·기본 얼굴)으로 채운다.
+  (직접 만든 몸) 몸은 둥글고 한 덩어리처럼 이어진다 : 네모난 R15 몸을 숨기고, 몸통(윗옷+바지)·팔·다리를 마디 사이 홈 없이 이어진 원기둥으로 덮는다.
   어깨와 몸통 맨 위·아래만 둥글고, 팔꿈치·무릎에는 숨긴 관절 공이 있어 굽혀도 틈이 없다. 손·신발은 둥근 타원.
   체형(키·어깨·두께·머리 크기), 피부색, 머리 모양·색, 반팔 윗옷 + 목둘레 + 등번호, 바지(긴바지/반바지), 신발 색이 다 다르다.
   덧붙인 부품은 공 판정에 안 걸린다 (공 판정은 숨긴 R15 몸으로).

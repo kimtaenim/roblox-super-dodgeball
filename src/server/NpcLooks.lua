@@ -1,11 +1,13 @@
--- NPC 한 명 한 명의 생김새를 만든다 : 체형, 둥근 몸, 머리 모양, 볼터치·안경 같은 꾸밈, 옷, 등번호 (설계서 9장).
--- 얼굴은 로블록스 기본 얼굴 그림을 쓴다 (persona.face에 얼굴 에셋 번호를 넣으면 그 얼굴).
+-- NPC 한 명 한 명의 생김새를 만든다 : 체형, 몸, 얼굴, 머리 모양, 꾸밈, 옷, 등번호 (설계서 9장).
+-- 요즘 아바타처럼 보이게 로블록스 카탈로그 부품(몸 번들, 다이내믹 헤드, 머리카락, 얼굴)을 먼저 쓰고,
+-- 확인되지 않은 부품만 직접 만든 모습(둥근 몸, 부품 머리카락, 기본 얼굴)으로 채운다.
 -- 생김새 정보는 Config.Npc.Personas, 부품 크기·위치 비율은 Config.Looks에 있다.
 -- 덧붙인 부품은 모두 공 판정에 안 걸린다 (공 판정은 원래 R15 몸으로만 한다).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local AvatarCatalog = require(script.Parent.AvatarCatalog)
 
 local L = Config.Looks
 
@@ -340,13 +342,17 @@ local function roundBody(folder, model, persona)
 end
 
 -- 윗옷 목둘레와 등번호를 단다. 등번호는 등에 붙인 투명한 판에 쓴다 (둥근 몸통에서도 똑바로 보이게).
-local function addJersey(folder, upperTorso, persona)
-	local diameter = torsoDiameter(upperTorso)
-	local round = Vector3.new(diameter, upperTorso.Size.Y, diameter)
-	local collar = persona.shirt:Lerp(Color3.new(0, 0, 0), L.CollarDarken)
-	piece(folder, upperTorso, CFrame.new(0, upperTorso.Size.Y / 2, 0), scaled(round, L.CollarSize), collar, "ball")
+-- catalogBody : 카탈로그 몸이면 목둘레는 빼고, 등번호 판은 그 몸통 등판에 맞춘다.
+local function addJersey(folder, upperTorso, persona, catalogBody)
+	local width = if catalogBody then upperTorso.Size.X * L.CatalogJerseyWidth else torsoDiameter(upperTorso)
+	local depth = if catalogBody then upperTorso.Size.Z else width
+	local round = Vector3.new(width, upperTorso.Size.Y, width)
+	if not catalogBody then
+		local collar = persona.shirt:Lerp(Color3.new(0, 0, 0), L.CollarDarken)
+		piece(folder, upperTorso, CFrame.new(0, upperTorso.Size.Y / 2, 0), scaled(round, L.CollarSize), collar, "ball")
+	end
 
-	local card = piece(folder, upperTorso, CFrame.new(0, 0, diameter / 2 + L.NumberCardGap), scaled(round, L.NumberCardSize), persona.shirt, "block")
+	local card = piece(folder, upperTorso, CFrame.new(0, 0, depth / 2 + L.NumberCardGap), scaled(round, L.NumberCardSize), persona.shirt, "block")
 	card.Name = "NumberCard"
 	card.Transparency = 1
 	local gui = Instance.new("SurfaceGui")
@@ -366,56 +372,95 @@ local function addJersey(folder, upperTorso, persona)
 	label.Parent = gui
 end
 
--- 생김새 정보로 HumanoidDescription(체형·피부색)을 만든다.
+-- 카탈로그 번들 차림에서 몸 부위(몸통·팔·다리)나 머리(다이내믹 헤드·표정)를 옮겨 온다.
+local BODY_FIELDS = { "Torso", "LeftArm", "RightArm", "LeftLeg", "RightLeg" }
+local HEAD_FIELDS = { "Head", "Face", "MoodAnimation" }
+local function copyFields(target, source, fields)
+	for _, field in fields do
+		target[field] = source[field]
+	end
+end
+
+-- 생김새 정보로 HumanoidDescription(체형·색·카탈로그 부품)을 만든다.
+-- 실제로 쓴 카탈로그 부품을 used 표로 함께 돌려준다 (body, head, hair, face).
 function NpcLooks.describe(persona)
 	local description = Instance.new("HumanoidDescription")
+	local catalog = persona.catalog or {}
+	local used = {}
+
+	local body = AvatarCatalog.bundle(catalog.body)
+	if body then
+		copyFields(description, body, BODY_FIELDS)
+		used.body = true
+	end
+	local head = AvatarCatalog.bundle(catalog.head)
+	if head then
+		copyFields(description, head, HEAD_FIELDS)
+		used.head = true
+	end
+	if AvatarCatalog.hasAsset(catalog.hair) then
+		description.HairAccessory = tostring(catalog.hair.id)
+		used.hair = true
+	end
+	if not used.head and AvatarCatalog.hasAsset(catalog.face) then
+		description.Face = catalog.face.id
+		used.face = true
+	end
+
 	description.HeightScale = persona.body.height
 	description.WidthScale = persona.body.width
 	description.DepthScale = persona.body.depth
 	description.HeadScale = persona.body.head
-	if persona.face then
-		description.Face = persona.face -- 로블록스 얼굴 에셋 번호 (없으면 기본 얼굴)
-	end
 	description.HeadColor = persona.skin
 	description.LeftArmColor = persona.skin
 	description.RightArmColor = persona.skin
 	description.TorsoColor = persona.shirt
 	description.LeftLegColor = persona.pants
 	description.RightLegColor = persona.pants
-	return description
+	return description, used
 end
 
--- 만들어진 몸을 둥글게 덮고, 머리 모양·꾸밈·옷을 입힌다. 얼굴은 로블록스 기본 얼굴 그림 그대로.
-function NpcLooks.dress(model, persona)
+-- 만들어진 몸에 부족한 부분을 채운다 : 카탈로그 몸이 아니면 둥근 몸, 카탈로그 머리카락이 아니면 부품 머리카락,
+-- 다이내믹 헤드가 아니면 볼터치·주근깨·안경. 등번호는 늘 단다.
+function NpcLooks.dress(model, persona, used)
+	used = used or {}
 	local head = model:FindFirstChild("Head")
 	if not head then
 		return
-	end
-	-- 몸 색 고정을 치운다 (직접 칠한 색을 쓴다)
-	local bodyColors = model:FindFirstChildOfClass("BodyColors")
-	if bodyColors then
-		bodyColors:Destroy()
 	end
 
 	local folder = Instance.new("Folder")
 	folder.Name = "Looks"
 	folder.Parent = model
-	roundBody(folder, model, persona)
-	HAIR[persona.hair](folder, head, persona.hairColor)
+	if not used.body then
+		-- 몸 색 고정을 치운다 (둥근 몸에 직접 칠한 색을 쓴다)
+		local bodyColors = model:FindFirstChildOfClass("BodyColors")
+		if bodyColors then
+			bodyColors:Destroy()
+		end
+		roundBody(folder, model, persona)
+	end
+	if not used.hair then
+		HAIR[persona.hair](folder, head, persona.hairColor)
+	end
 	for _, extra in persona.extras do
+		local onFace = extra == "blush" or extra == "freckles" or extra == "glasses"
+		if onFace and used.head then
+			continue -- 다이내믹 헤드는 얼굴 모양이 달라서 얼굴 꾸밈을 붙이지 않는다
+		end
 		if extra == "blush" then
 			addBlush(folder, head)
 		elseif extra == "freckles" then
 			addFreckles(folder, head)
 		elseif extra == "glasses" then
 			addGlasses(folder, head)
-		elseif extra == "hairclip" then
+		elseif extra == "hairclip" and not used.hair then
 			addHairClip(folder, head)
 		end
 	end
 	local upperTorso = model:FindFirstChild("UpperTorso")
 	if upperTorso then
-		addJersey(folder, upperTorso, persona)
+		addJersey(folder, upperTorso, persona, used.body)
 	end
 end
 
