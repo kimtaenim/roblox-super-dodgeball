@@ -6,7 +6,6 @@ local list = {
 	require(script:WaitForChild("SuperWings")),
 	require(script:WaitForChild("DoubleBall")),
 	require(script:WaitForChild("Clone")),
-	require(script:WaitForChild("Shield")),
 	require(script:WaitForChild("SuperCatch")),
 	require(script:WaitForChild("SuperFastball")),
 	require(script:WaitForChild("Homing")),

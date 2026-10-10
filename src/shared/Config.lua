@@ -109,8 +109,7 @@ Config.AbilityBox = {
 		superwings = 3,
 		doubleball = 3,
 		clone = 3,
-		shield = 3,
-		supercatch = 3,
+		supercatch = 7, -- 슈퍼캐치는 자주 나온다
 		superfastball = 2,
 		homing = 2,
 		invisible = 3,
@@ -124,6 +123,7 @@ Config.AbilityBox = {
 Config.Abilities = {
 	SuperWings = { -- 슈퍼날개
 		Seconds = 15, -- 날아다니는 시간 (이 동안은 맞아도 아웃 안 됨)
+		BounceSpeed = 30, BounceUp = 15, -- 나는 동안 맞은 공이 튕겨 나가는 속도
 		Height = 12, -- 코트 바닥에서 떠오르는 높이
 		Responsiveness = 15, -- 그 높이로 올라가는 빠르기
 		WingSize = Vector3.new(2.4, 1.2, 0.2), -- 날개 한 쪽 크기
@@ -133,10 +133,6 @@ Config.Abilities = {
 	},
 	DoubleBall = { SpreadDegrees = 15 }, -- 두 번째 공이 벌어지는 각도
 	Clone = { Count = 3, Seconds = 5, WanderRadius = 15, WanderInterval = 1, EdgeMargin = 2 },
-	Shield = { -- 방패 : 몸 둘레 푸른 공 모양 방패, 공을 튕겨 낸다
-		Seconds = 5, BounceSpeed = 30, BounceUp = 15, -- 지속 시간, 튕겨 나가는 속도
-		BubbleSize = 7, BubbleColor = Color3.fromRGB(90, 180, 255), BubbleTransparency = 0.65, -- 방패 공 크기·색·투명도
-	},
 	SuperCatch = { Seconds = 20, Color = Color3.fromRGB(120, 255, 160) }, -- 자동으로 잡는 시간 (넉넉하게), 몸이 빛나는 색
 	SuperFastball = { SpeedMultiplier = 3, FireSize = 4 }, -- 속도 몇 배, 불꽃 크기
 	Homing = { Seconds = 2, TurnDegreesPerSecond = 240 }, -- 추적 시간, 1초에 꺾는 최대 각도
@@ -961,7 +957,7 @@ Config.Sounds = {
 		Catch = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.8 }, -- 캐치 띵
 		Ability = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.7, pitch = 1.6 }, -- 능력 쓰기
 		Box = { id = "rbxasset://sounds/clickfast.wav", volume = 0.8 }, -- 능력 상자 줍기
-		Block = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.9, pitch = 0.6 }, -- 방패로 막기
+		Block = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.9, pitch = 0.6 }, -- 날개로 막기
 		Beep = { id = "rbxasset://sounds/button.wav", volume = 0.7 }, -- 카운트다운 삑
 		Start = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.9, pitch = 0.8 }, -- 시작!
 		Win = { id = "rbxasset://sounds/victory.wav", volume = 0.9 }, -- 승리

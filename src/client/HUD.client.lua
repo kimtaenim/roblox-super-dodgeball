@@ -153,7 +153,7 @@ local function updateStatus(phaseName)
 	end
 end
 
--- 내가 갖고 있는 능력 id 목록을 읽는다 (서버가 "superwings,shield"처럼 적어 둔다).
+-- 내가 갖고 있는 능력 id 목록을 읽는다 (서버가 "superwings,slow"처럼 적어 둔다).
 local function myAbilityIds()
 	local text = player:GetAttribute("Abilities") or ""
 	if text == "" then

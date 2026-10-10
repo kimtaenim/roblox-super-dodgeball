@@ -47,7 +47,7 @@ end
 function PlayerStateService.sync(p)
 	local state = p.state
 	Participants.setAttribute(p, "Status", state.status)
-	Participants.setAttribute(p, "Abilities", table.concat(state.abilities, ",")) -- 예: "superwings,shield"
+	Participants.setAttribute(p, "Abilities", table.concat(state.abilities, ",")) -- 예: "superwings,slow"
 	Participants.setAttribute(p, "Kills", state.totalKills)
 	Participants.setAttribute(p, "InRound", p.inRound)
 end

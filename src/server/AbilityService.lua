@@ -59,7 +59,7 @@ end
 function AbilityService.cleanup()
 	services.Balls.getDecoyFolder():ClearAllChildren()
 	for _, p in Participants.all() do
-		for _, name in { "ShieldEffect", "SuperCatchEffect", "SuperWingsEffect", "SuperWingsAttachment" } do
+		for _, name in { "SuperCatchEffect", "SuperWingsEffect", "SuperWingsAttachment" } do
 			local effect = p.character and p.character:FindFirstChild(name, true)
 			if effect then
 				effect:Destroy()

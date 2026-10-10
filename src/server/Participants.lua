@@ -23,7 +23,6 @@ function Participants.newState()
 		kills = {}, -- 내가 아웃시킨 참가자 목록 (부활 연쇄용)
 		totalKills = 0, -- 이번 판에 아웃시킨 총 횟수 (순위용)
 		abilities = {}, -- 갖고 있는 능력 id 목록 (쓰면 목록에서 빠진다)
-		shieldUntil = 0, -- 방패가 끝나는 시각
 		superCatchUntil = 0, -- 슈퍼캐치가 끝나는 시각
 		wingsUntil = 0, -- 슈퍼날개가 끝나는 시각 (나는 동안은 맞아도 아웃 안 됨)
 		abilityBusyUntil = 0, -- 지금 쓰는 능력의 효과가 끝나는 시각 (그 전엔 다른 능력 못 씀)

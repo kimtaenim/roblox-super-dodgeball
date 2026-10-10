@@ -493,18 +493,16 @@ local function judgeContact(ball, state, part)
 		return true
 	end
 
-	-- 방패·슈퍼날개 : 아웃 안 되고 공은 튕겨 나간다
-	local shielded = p.state.shieldUntil > now
-	local flying = p.state.wingsUntil > now
-	if shielded or flying then
+	-- 슈퍼날개 : 나는 동안은 아웃 안 되고 공은 튕겨 나간다
+	if p.state.wingsUntil > now then
 		local back = -ball.AssemblyLinearVelocity
 		if back.Magnitude > 1e-3 then
 			back = back.Unit
 		end
 		makeDead(ball)
-		ball.AssemblyLinearVelocity = back * A.Shield.BounceSpeed + Vector3.new(0, A.Shield.BounceUp, 0)
+		ball.AssemblyLinearVelocity = back * A.SuperWings.BounceSpeed + Vector3.new(0, A.SuperWings.BounceUp, 0)
 		SoundFx.playAt("Block", ball)
-		PlayerStateService.notify(p, if flying and not shielded then "날개 덕분에 무사!" else "방패로 막았어요!")
+		PlayerStateService.notify(p, "날개 덕분에 무사!")
 		return true
 	end
 
