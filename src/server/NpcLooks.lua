@@ -225,12 +225,15 @@ end
 
 -- 팔다리 한 마디 : 모서리 둥근 원기둥. 이웃 마디·손·발과 이어지게 위아래로 조금씩 길게.
 -- inset : 몸통 쪽으로 붙이는 거리 (팔만, 몸통에서 떨어져 보이지 않게)
+-- shoulder : 윗팔이면 위로는 늘리지 않는다 (어깨가 목 옆으로 솟지 않게)
 local function limbDiameter(base)
 	return math.min(base.Size.X, base.Size.Z) * L.Body.LimbRoundness
 end
-local function limb(folder, base, inset, color, material)
-	local offset = CFrame.new(inset, 0, 0)
-	roundedCylinder(folder, base, offset, limbDiameter(base), base.Size.Y + L.Body.JointOverlap * 2, color, material)
+local function limb(folder, base, inset, shoulder, color, material)
+	local overlap = L.Body.JointOverlap
+	local top = if shoulder then 0 else overlap
+	local offset = CFrame.new(inset, (top - overlap) / 2, 0)
+	roundedCylinder(folder, base, offset, limbDiameter(base), base.Size.Y + top + overlap, color, material)
 end
 
 -- 몸통 원기둥 지름 (몸 너비에 대한 비율).
@@ -282,15 +285,15 @@ local function roundBody(folder, model, persona)
 		local upperArm = model:FindFirstChild(side .. "UpperArm")
 		local inset = if upper and upperArm then armInset(upper, upperArm) else 0
 		local limbs = {
-			{ side .. "UpperArm", persona.shirt, clothes, inset },
-			{ side .. "LowerArm", persona.skin, skin, inset },
-			{ side .. "UpperLeg", persona.pants, clothes, 0 },
-			{ side .. "LowerLeg", lowerLeg, clothes, 0 },
+			{ side .. "UpperArm", persona.shirt, clothes, inset, true },
+			{ side .. "LowerArm", persona.skin, skin, inset, false },
+			{ side .. "UpperLeg", persona.pants, clothes, 0, false },
+			{ side .. "LowerLeg", lowerLeg, clothes, 0, false },
 		}
 		for _, info in limbs do
 			local part = hide(info[1])
 			if part then
-				limb(folder, part, info[4], info[2], info[3])
+				limb(folder, part, info[4], info[5], info[2], info[3])
 			end
 		end
 		local hand = hide(side .. "Hand")
