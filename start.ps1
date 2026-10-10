@@ -57,9 +57,13 @@ if ($already) {
 }
 
 Step '[4/4] Roblox Studio 여는 중...'
-if (-not (Test-Path $PlaceFile)) {
-    Write-Host '  처음 실행이라 place 파일을 만들어요...'
-    rojo build default.project.json -o $PlaceFile
+# 매번 최신 코드로 place 파일을 새로 만들어요 (Rojo 연결을 깜빡해도 새 코드로 열리게). 전 파일은 .bak 으로 남겨요.
+if (Test-Path $PlaceFile) { Copy-Item $PlaceFile "$PlaceFile.bak" -Force }
+rojo build default.project.json -o $PlaceFile
+if ($LASTEXITCODE -eq 0) {
+    Write-Host '  최신 코드로 place 파일을 새로 만들었어요.' -ForegroundColor Green
+} else {
+    Problem 'place 파일을 만들지 못했어요. Studio 가 그 파일을 열어 둔 채면 닫고 다시 해 보세요.'
 }
 try {
     Start-Process (Join-Path $PSScriptRoot $PlaceFile) -ErrorAction Stop
