@@ -25,6 +25,7 @@ local active = false -- 판이 진행 중일 때만 움직인다
 local aimDelayScale = 1 -- 공을 들고 던지기까지 기다리는 시간 배수 (튜토리얼은 더 느리다)
 local catchChance = N.CatchChance -- 날아오는 공을 잡을 확률 (튜토리얼은 0)
 local nextSpeechAt = 0 -- 이 시각 전에는 어느 NPC도 말하지 않는다 (한 번에 한 명만)
+local thrownAt = {} -- 대상 → NPC들이 그 대상에게 던진 시각 목록 (집중 공격 막기용)
 
 -- 두 숫자 사이의 아무 숫자를 고른다.
 local function randomBetween(low, high)
@@ -234,6 +235,7 @@ function NpcService.despawnAll()
 		end
 	end
 	brains = {}
+	thrownAt = {}
 end
 
 -- NPC 움직임 여부를 바꾼다.
@@ -263,8 +265,22 @@ local function isGoodTarget(target)
 		and Participants.getRoot(target) ~= nil
 end
 
--- 노릴 상대를 고른다 : 사거리 안에 보이는 상대 중 아무나. 분신도 진짜인 줄 알고 노린다 (내 분신은 빼고).
-local function chooseTarget(p, myRoot)
+-- 최근에 NPC들이 이 대상에게 공을 몇 번 던졌는지 센다 (오래된 기록은 지운다).
+local function recentThrowsAt(target)
+	local list = thrownAt[target]
+	if not list then
+		return 0
+	end
+	local since = os.clock() - N.FocusMemorySeconds
+	while list[1] and list[1] < since do
+		table.remove(list, 1)
+	end
+	return #list
+end
+
+-- 노릴 상대를 고른다 : 사거리 안에 보이는 상대 중 최근에 공을 덜 받은 상대 (방금 던진 상대는 피한다).
+-- 한 사람만 계속 노리지 않게 골고루 돌아간다. 분신도 진짜인 줄 알고 노린다 (내 분신은 빼고).
+local function chooseTarget(p, brain, myRoot)
 	local candidates = {}
 	for _, other in Participants.all() do
 		if other ~= p then
@@ -289,10 +305,24 @@ local function chooseTarget(p, myRoot)
 			end
 		end
 	end
-	if #inRange > 0 then
-		return inRange[math.random(1, #inRange)]
+	if #inRange == 0 then
+		return nearest
 	end
-	return nearest
+
+	-- 공을 덜 받은 상대일수록 점수가 낮다. 점수가 가장 낮은 상대들 중 아무나
+	local best, bestScore = {}, math.huge
+	for _, target in inRange do
+		local score = recentThrowsAt(target)
+		if target == brain.lastTarget then
+			score += N.SameTargetPenalty
+		end
+		if score < bestScore then
+			best, bestScore = { target }, score
+		elseif score == bestScore then
+			table.insert(best, target)
+		end
+	end
+	return best[math.random(1, #best)]
 end
 
 -- 코트 안쪽으로 걸어가게 한다.
@@ -303,7 +333,7 @@ end
 -- 공을 들고 있을 때 : 상대를 골라 다가가서 잠깐 뒤 던진다.
 local function thinkWithBall(p, brain, root, humanoid, now)
 	if not isGoodTarget(brain.target) then
-		brain.target = chooseTarget(p, root)
+		brain.target = chooseTarget(p, brain, root)
 	end
 	brain.throwAt = brain.throwAt or now + randomBetween(N.AimDelayMin, N.AimDelayMax) * aimDelayScale
 	local target = brain.target
@@ -324,6 +354,9 @@ local function thinkWithBall(p, brain, root, humanoid, now)
 		local miss = Vector3.new(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)) * N.AimError
 		BallService.throw(p, aimRoot.Position + lead + miss, randomBetween(N.HoldMin, N.HoldMax))
 		onReaction(p, "throw")
+		thrownAt[target] = thrownAt[target] or {}
+		table.insert(thrownAt[target], now)
+		brain.lastTarget = target
 		brain.throwAt = nil
 		brain.target = nil
 	end
