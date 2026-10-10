@@ -102,6 +102,7 @@ Config.AbilityBox = {
 		homing = 2,
 		invisible = 3,
 		slow = 3,
+		revive = 9, -- 부활은 아주 많이 나온다 (다른 능력 셋을 합친 만큼)
 	},
 }
 
@@ -157,6 +158,8 @@ Config.Npc = {
 	CatchChance = 0.12, -- 캐치 시도가 성공할 확률 (쉬운 난이도 : 잘 못 잡는다)
 	AbilityDelayMin = 20, -- 능력을 한 번 쓰고 다음에 쓰기까지 최소 시간 (초, 아주 가끔만 쓴다)
 	AbilityDelayMax = 40, -- 능력을 한 번 쓰고 다음에 쓰기까지 최대 시간 (초)
+	ReviveDelayMin = 6, -- 앉은 NPC가 부활 능력을 쓰기까지 최소 시간 (초, 바로 일어나지 않게)
+	ReviveDelayMax = 12, -- 앉은 NPC가 부활 능력을 쓰기까지 최대 시간 (초)
 	BoxInterestDistance = 6, -- 능력 상자가 이 거리 안에 있을 때만 주우러 간다 (상자에 큰 관심 없음)
 	WanderRadius = 12, -- 할 일이 없을 때 돌아다니는 거리
 	WanderInterval = 2, -- 돌아다닐 곳을 새로 고르는 간격

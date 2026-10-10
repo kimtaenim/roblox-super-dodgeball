@@ -172,6 +172,20 @@ function PlayerStateService.catch(catcher, thrower)
 	PlayerStateService.sync(catcher)
 end
 
+-- 부활 능력 : 앉아 있던 참가자가 그 자리에서 일어난다 (나를 아웃시킨 사람 목록에서도 빠진다).
+function PlayerStateService.revive(p)
+	local state = p.state
+	if state.status ~= "Sitting" then
+		return
+	end
+	local killer = state.killedBy
+	if killer then
+		removeFrom(killer.state.kills, p)
+	end
+	standUp(p)
+	PlayerStateService.react(p, "revive")
+end
+
 -- 새 판을 위해 상태를 처음으로 되돌리고, 시작 능력 목록을 준다.
 function PlayerStateService.resetForRound(p, abilityIds)
 	p.state = Participants.newState()

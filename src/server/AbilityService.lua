@@ -32,7 +32,13 @@ function AbilityService.use(p, slot)
 	end
 	local state = p.state
 	local ability = Abilities.get(state.abilities[slot])
-	if not ability or not ability.canUse(p, state) then
+	if not ability then
+		return false
+	end
+	if not ability.canUse(p, state) then
+		if ability.cantUseText and not p.isNpc then
+			PlayerStateService.notify(p, ability.cantUseText) -- 왜 안 되는지 알려 준다
+		end
 		return false
 	end
 	if isBusy(state) then

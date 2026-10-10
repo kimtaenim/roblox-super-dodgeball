@@ -400,6 +400,19 @@ local function thinkEmptyHanded(p, brain, root, humanoid, now)
 end
 
 -- NPC 한 명이 다음에 할 일을 고른다.
+-- 앉아 있는 NPC : 부활 능력이 있으면 잠깐 기다렸다가 쓴다.
+local function thinkRevive(p, brain, now)
+	local slot = table.find(p.state.abilities, "revive")
+	if not slot then
+		brain.reviveAt = nil
+	elseif not brain.reviveAt then
+		brain.reviveAt = now + randomBetween(N.ReviveDelayMin, N.ReviveDelayMax)
+	elseif now >= brain.reviveAt then
+		brain.reviveAt = nil
+		AbilityService.use(p, slot)
+	end
+end
+
 local function think(p, brain, now)
 	local root = Participants.getRoot(p)
 	local humanoid = Participants.getHumanoid(p)
@@ -409,8 +422,10 @@ local function think(p, brain, now)
 	if p.state.status ~= "Alive" then
 		setAiming(p, nil)
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
+		thinkRevive(p, brain, now)
 		return
 	end
+	brain.reviveAt = nil
 	-- 능력은 아주 가끔만 하나씩 쓴다 (20-40초에 한 번)
 	if #p.state.abilities == 0 then
 		brain.abilityAt = nil
