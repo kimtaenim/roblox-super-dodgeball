@@ -18,6 +18,18 @@ local abilityRemote = Remotes.get("UseAbility")
 
 local pressStartTime = nil -- 던지기 버튼을 누르기 시작한 시각
 
+-- 내 캐릭터는 넘어지거나 늘어지지 않게 한다 (공에 맞으면 눕지 않고 앉아야 한다).
+-- 내 몸의 움직임은 내 컴퓨터가 계산하므로 여기서 꺼야 한다.
+local function keepUpright(character)
+	local humanoid = character:WaitForChild("Humanoid")
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+end
+player.CharacterAdded:Connect(keepUpright)
+if player.Character then
+	task.spawn(keepUpright, player.Character)
+end
+
 -- 카메라에서 마우스 커서 쪽으로 쏜 선이 닿는 곳(조준점)을 구한다.
 local function getMouseAimPoint()
 	local camera = workspace.CurrentCamera

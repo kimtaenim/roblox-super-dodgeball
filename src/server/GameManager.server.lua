@@ -72,6 +72,7 @@ local function onCharacterAdded(p, character)
 	p.character = character
 	local humanoid = character:WaitForChild("Humanoid")
 	character:WaitForChild("HumanoidRootPart")
+	BallService.protectBody(character) -- 공이 몸을 밀어 넘어뜨리지 않게
 	if phase ~= "Lobby" and not p.inRound then
 		CourtService.placeOutside(character)
 	else

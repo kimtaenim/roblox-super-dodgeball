@@ -17,6 +17,7 @@ local T = Config.Throw
 local A = Config.Abilities
 
 local BALL_GROUP = "Balls" -- 공끼리는 서로 부딪히지 않게 하는 충돌 그룹 이름
+local BODY_GROUP = "Bodies" -- 사람·NPC 몸 충돌 그룹 (공이 몸을 밀어 넘어뜨리지 않게)
 
 local BallService = {}
 
@@ -218,6 +219,19 @@ end
 -- 들고 있던 공을 그 자리에 떨어뜨린다 (아웃되거나 몸이 사라질 때).
 function BallService.dropBall(p)
 	detachFromHand(p)
+end
+
+-- 몸(캐릭터)의 모든 부품을 몸 충돌 그룹에 넣는다. 공이 몸에 부딪혀도 밀지 않아서 넘어지지 않는다.
+function BallService.protectBody(model)
+	local function join(part)
+		if part:IsA("BasePart") then
+			part.CollisionGroup = BODY_GROUP
+		end
+	end
+	for _, part in model:GetDescendants() do
+		join(part)
+	end
+	model.DescendantAdded:Connect(join) -- 나중에 붙는 머리카락·장식도
 end
 
 -- 참가자가 공을 들고 있는지 알려준다.
@@ -627,6 +641,8 @@ end
 function BallService.start()
 	PhysicsService:RegisterCollisionGroup(BALL_GROUP)
 	PhysicsService:CollisionGroupSetCollidable(BALL_GROUP, BALL_GROUP, false)
+	PhysicsService:RegisterCollisionGroup(BODY_GROUP)
+	PhysicsService:CollisionGroupSetCollidable(BALL_GROUP, BODY_GROUP, false) -- 맞았는지는 따로 검사하니 공이 몸을 밀 필요가 없다
 
 	folder = Instance.new("Folder")
 	folder.Name = "Balls"

@@ -205,10 +205,13 @@ function NpcService.spawn(count, tutorial)
 		humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- 이름은 이름표로 보여준다
 		humanoid.BreakJointsOnDeath = false
 		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) -- NPC는 죽지 않는다
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false) -- 맞아도 눕지 않고 앉는다
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 		NpcLooks.dress(model, persona, used)
 		addNameTag(model, name)
 
 		model.Parent = folder
+		BallService.protectBody(model)
 		model.HumanoidRootPart:SetNetworkOwner(nil) -- NPC 움직임은 서버가 계산한다
 		CourtService.placeInside(model)
 		NpcService.setupAnimation(model)
