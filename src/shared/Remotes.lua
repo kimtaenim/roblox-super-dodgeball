@@ -14,6 +14,7 @@ Remotes.Names = {
 	Catch = "Catch", -- 클라이언트 → 서버 : 캐치 버튼 눌림
 	UseAbility = "UseAbility", -- 클라이언트 → 서버 : 능력 버튼 눌림 (몇 번째 칸인지)
 	Notify = "Notify", -- 서버 → 클라이언트 : 화면에 띄울 알림 글자
+	Sound = "Sound", -- 서버 → 클라이언트 : 효과음 내기 (소리 이름, 위치)
 }
 
 -- 이름으로 RemoteEvent를 찾는다. 서버에서는 없으면 새로 만든다.

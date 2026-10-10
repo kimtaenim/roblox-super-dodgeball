@@ -930,7 +930,8 @@ Config.Animation = {
 	FadeSeconds = 0.2, -- 동작이 바뀔 때 부드럽게 섞는 시간
 }
 
--- 소리 (server/SoundFx.lua) : 효과음은 로블록스 기본 소리, 배경 음악은 목록의 곡을 차례로 시도
+-- 소리 (서버 SoundFx.lua가 신호를 보내고, 화면 SoundPlayer.client.lua가 튼다)
+-- 효과음은 로블록스 기본 소리, 배경 음악은 목록의 곡을 차례로 시도
 Config.Sounds = {
 	Effects = {
 		Throw = { id = "rbxasset://sounds/swoosh.wav", volume = 0.7 }, -- 던질 때 휙

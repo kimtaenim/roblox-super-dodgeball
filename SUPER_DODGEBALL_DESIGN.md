@@ -147,7 +147,7 @@ src/
     AbilityBoxService.lua      -- 능력 상자 떨어뜨리기·줍기
     CourtService.lua           -- 코트 축소, 경계
     RevengeService.lua         -- 복수 대상 표시와 보너스
-    SoundFx.lua                -- 효과음과 배경 음악
+    SoundFx.lua                -- 효과음 신호 보내기 (소리는 client/SoundPlayer가 튼다)
     NpcService.lua             -- NPC 생성·AI·애니메이션
     NpcLooks.lua               -- NPC 8명 생김새 (얼굴·머리·옷·체형)
     AvatarCatalog.lua          -- NPC 카탈로그 부품 번호 확인·불러오기
@@ -281,7 +281,8 @@ NPC는 오히려 "간다아아!!", "쉿은 무슨 쉿이야!!"처럼 시끄럽�
 
 - 효과음 (로블록스 기본 소리) : 던지기 휙, 맞아서 아웃 "oof", 캐치 띵, 능력 쓰기, 능력 상자 줍기, 카운트다운 삑삑삑 + 시작, 승리.
 - 배경 음악 : 판 도중에만 나온다. `Config.Sounds.MusicIds`의 곡을 차례로 시도해서 불러와지는 첫 곡을 쓴다.
-- 코드는 `server/SoundFx.lua`, 숫자와 소리 주소는 `Config.Sounds`.
+- 소리는 각자 화면이 튼다 : 서버(`server/SoundFx.lua`)는 신호만 보내고 `client/SoundPlayer.client.lua`가 효과음과 배경 음악을 튼다
+  (로블록스 서버는 소리를 불러오지 않는다). 숫자와 소리 주소는 `Config.Sounds`.
 
 ## 12. 난이도 (쉬움)
 

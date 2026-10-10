@@ -188,7 +188,6 @@ local function runPlaying()
 		runDemo() -- 판정이 켜져 있어야 캐치가 되므로 판을 켠 뒤에 한다
 	end
 	setPhase("Playing", R.PlaySeconds)
-	SoundFx.setMusic(true)
 	local startTime = os.clock()
 	while true do
 		local now = os.clock()
@@ -217,7 +216,6 @@ end
 local function runResult()
 	local winner = pickWinner()
 	gameState:SetAttribute("Winner", winner and winner.name or "")
-	SoundFx.setMusic(false)
 	SoundFx.playGlobal("Win")
 	setPhase("Result", R.ResultSeconds)
 	task.wait(R.ResultSeconds)
@@ -244,7 +242,6 @@ end
 -- 시작 : 서비스를 켜고 플레이어 이벤트를 연결한다.
 CourtService.start()
 Scenery.build()
-SoundFx.start()
 task.spawn(AvatarCatalog.prepare, Config.Npc.Personas) -- NPC 카탈로그 부품을 미리 확인 (로비 동안)
 ArenaService.build(Config.Arena.FirstArena)
 BallService.start()
