@@ -53,8 +53,12 @@ Config.Ball = {
 	RespawnSpread = 8, -- 리스폰할 때 중앙에서 흩어지는 거리
 	FallLimitY = -50, -- 이보다 아래로 떨어진 공은 바로 리스폰
 	Density = 0.3, -- 공 무게 (가벼울수록 잘 튄다)
-	Friction = 0.5, -- 공 마찰
-	Elasticity = 0.5, -- 공 탄성 (튀는 정도)
+	Friction = 0.3, -- 공 마찰
+	Elasticity = 0.85, -- 공 탄성 (튀는 정도, 1이면 떨어진 높이만큼 다시 튄다)
+	ElasticityWeight = 100, -- 바닥과 부딪칠 때 공의 탄성을 따른다 (바닥이 안 튀는 재질이어도 잘 튄다)
+	FrictionWeight = 1, -- 마찰은 바닥과 반반
+	HitBounceSpeed = 30, -- 사람·분신을 맞힌 공이 던진 사람 쪽으로 튀는 빠르기
+	HitBounceUp = 18, -- 그때 위로 튀어 오르는 빠르기
 }
 
 -- 던지기 (설계서 3장)
@@ -132,7 +136,7 @@ Config.Abilities = {
 		Seconds = 5, BounceSpeed = 30, BounceUp = 15, -- 지속 시간, 튕겨 나가는 속도
 		BubbleSize = 7, BubbleColor = Color3.fromRGB(90, 180, 255), BubbleTransparency = 0.65, -- 방패 공 크기·색·투명도
 	},
-	SuperCatch = { Seconds = 10, Color = Color3.fromRGB(120, 255, 160) }, -- 자동으로 잡는 시간 (넉넉하게), 몸이 빛나는 색
+	SuperCatch = { Seconds = 20, Color = Color3.fromRGB(120, 255, 160) }, -- 자동으로 잡는 시간 (넉넉하게), 몸이 빛나는 색
 	SuperFastball = { SpeedMultiplier = 3, FireSize = 4 }, -- 속도 몇 배, 불꽃 크기
 	Homing = { Seconds = 2, TurnDegreesPerSecond = 240 }, -- 추적 시간, 1초에 꺾는 최대 각도
 	Invisible = { Seconds = 4, Transparency = 0.9, SelfTransparency = 0.5 }, -- 남이 볼 때, 내 화면에서 볼 때
@@ -167,8 +171,6 @@ Config.Npc = {
 	CatchChance = 0.12, -- 캐치 시도가 성공할 확률 (쉬운 난이도 : 잘 못 잡는다)
 	AbilityDelayMin = 20, -- 능력을 한 번 쓰고 다음에 쓰기까지 최소 시간 (초, 아주 가끔만 쓴다)
 	AbilityDelayMax = 40, -- 능력을 한 번 쓰고 다음에 쓰기까지 최대 시간 (초)
-	ReviveDelayMin = 6, -- 앉은 NPC가 부활 능력을 쓰기까지 최소 시간 (초, 바로 일어나지 않게)
-	ReviveDelayMax = 12, -- 앉은 NPC가 부활 능력을 쓰기까지 최대 시간 (초)
 	BoxInterestDistance = 6, -- 능력 상자가 이 거리 안에 있을 때만 주우러 간다 (상자에 큰 관심 없음)
 	WanderRadius = 12, -- 할 일이 없을 때 돌아다니는 거리
 	WanderInterval = 2, -- 돌아다닐 곳을 새로 고르는 간격

@@ -124,7 +124,7 @@ local function createBall(temporary)
 	ball.Size = Vector3.one * B.Diameter
 	ball.Color = B.Color
 	ball.Material = Enum.Material.SmoothPlastic
-	ball.CustomPhysicalProperties = PhysicalProperties.new(B.Density, B.Friction, B.Elasticity)
+	ball.CustomPhysicalProperties = PhysicalProperties.new(B.Density, B.Friction, B.Elasticity, B.FrictionWeight, B.ElasticityWeight)
 	ball.CollisionGroup = BALL_GROUP
 
 	-- 중력을 줄이는 힘 (날아갈 때만 켠다)
@@ -384,11 +384,30 @@ local function popDecoy(part)
 	decoy:Destroy()
 end
 
+-- 맞힌 공을 죽은 공으로 만들고, 던진 사람 쪽으로 (모르면 온 방향 반대로) 튀게 한다.
+local function bounceBack(ball, thrower)
+	local velocity = ball.AssemblyLinearVelocity
+	makeDead(ball)
+	if not ball.Parent then
+		return -- 복제 공은 없어졌다
+	end
+	local back = -velocity
+	local root = thrower and Participants.getRoot(thrower)
+	if root then
+		back = root.Position - ball.Position
+	end
+	back = Vector3.new(back.X, 0, back.Z)
+	if back.Magnitude > 1e-3 then
+		back = back.Unit
+	end
+	ball.AssemblyLinearVelocity = back * B.HitBounceSpeed + Vector3.new(0, B.HitBounceUp, 0)
+end
+
 -- 날아가는 공이 참가자에게 닿았을 때 판정한다 (설계서 1.4장). 공이 멈추면 true.
 local function judgeContact(ball, state, part)
 	if part:IsDescendantOf(decoyFolder) then
 		popDecoy(part)
-		makeDead(ball)
+		bounceBack(ball, state.thrower)
 		return true
 	end
 
@@ -426,7 +445,7 @@ local function judgeContact(ball, state, part)
 
 	-- 머리에 맞으면 아웃 아님. 공은 튕겨서 죽은 공
 	if part.Name == "Head" then
-		makeDead(ball)
+		bounceBack(ball, thrower)
 		return true
 	end
 
@@ -448,7 +467,7 @@ local function judgeContact(ball, state, part)
 	-- ② 피격 : 아웃
 	PlayerStateService.knockOut(p, thrower, "hit")
 	BallService.dropBall(p)
-	makeDead(ball)
+	bounceBack(ball, thrower)
 	return true
 end
 
