@@ -1,5 +1,5 @@
 ﻿# 슈퍼 피구 개발 시작 스크립트 (start.bat 이 이 파일을 실행해요)
-# git pull → rokit install → rojo serve (포트 34873) → Roblox Studio 열기
+# git pull → rokit install → rojo serve (포트 34874) → Roblox Studio 열기
 $Port = 34874
 $PlaceFile = 'SuperDodgeball.rbxlx'
 
@@ -15,8 +15,19 @@ Write-Host '============================================'
 Write-Host "  폴더: $PSScriptRoot"
 
 Step '[1/4] 최신 코드 받아오는 중 (git pull)...'
+# 이 컴퓨터에서 고친 파일이 있으면 지우지 않고 옆에 보관한 다음 받아와요 (나중에 git stash list 로 볼 수 있어요)
+$changed = git status --porcelain --untracked-files=no
+if ($changed) {
+    Write-Host '  이 컴퓨터에서 고친 파일이 있어서 옆에 보관해 둘게요 (git stash).' -ForegroundColor Yellow
+    git stash push -m "start.bat 자동 보관 $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+}
 git pull
-if ($LASTEXITCODE -ne 0) { Problem 'git pull 에 실패했어요. 인터넷 연결을 확인해 주세요. 그래도 계속 진행할게요.' }
+if ($LASTEXITCODE -ne 0) {
+    Problem 'git pull 에 실패했어요. 위에 나온 영어 오류를 Claude 에게 보여 주세요. 그래도 계속 진행할게요.'
+} else {
+    $head = git log --oneline -1
+    Write-Host "  지금 코드: $head" -ForegroundColor Green
+}
 
 Step '[2/4] 도구 확인 중 (rokit install)...'
 rokit install
