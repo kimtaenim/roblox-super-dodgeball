@@ -138,12 +138,16 @@ Config.Abilities = {
 	Homing = { Seconds = 2, TurnDegreesPerSecond = 240 }, -- 추적 시간, 1초에 꺾는 최대 각도
 	Invisible = { Seconds = 4, Transparency = 0.9, SelfTransparency = 0.5 }, -- 남이 볼 때, 내 화면에서 볼 때
 	Slow = { Radius = 30, Seconds = 3, SpeedFactor = 0.5 },
-	Hypnosis = { -- 최면 : 공 든 NPC가 나에게 공을 건넨다
-		FlySeconds = 0.8, -- 공이 NPC 손에서 내 손까지 날아오는 시간
-		ArcHeight = 6, -- 날아올 때 위로 휘는 높이
-		GlowSeconds = 1.5, -- NPC가 보라색으로 빛나는 시간
+	Hypnosis = { -- 최면 : 공 든 NPC가 걸어와서 내 앞에 공을 내려놓고 간다
+		WalkSeconds = 6, -- 이 시간 안에 못 오면 그냥 내 앞에 공을 내려놓는다
+		DropDistance = 6, -- 내 앞 몇 스터드에 내려놓을지 (줍는 거리보다 조금 멀어서 한 걸음 걸어가 줍는다)
+		ReachDistance = 3, -- 내려놓을 자리에 이만큼 가까워지면 내려놓는다
+		LeaveSeconds = 3, -- 내려놓은 뒤 멀어지며 걷는 시간
+		LeaveDistance = 20, -- 그때 나에게서 멀어지는 거리
+		NoPickupSeconds = 4, -- 내려놓은 NPC는 이 시간 동안 공을 다시 줍지 않는다
 		Color = Color3.fromRGB(190, 110, 255), -- 최면 빛 색
-		Line = "네… 공 드릴게요…", -- 최면 걸린 NPC가 하는 말
+		Line = "네… 공 갖다 드릴게요…", -- 최면 걸렸을 때 하는 말
+		DropLine = "여기요…", -- 공을 내려놓을 때 하는 말
 	},
 }
 

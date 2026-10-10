@@ -26,6 +26,7 @@ local decoyFolder -- 분신들을 넣어 두는 폴더
 local balls = {} -- 공 Part → BallState
 local holding = {} -- 참가자 → 들고 있는 공 Part
 local lastThrowTime = {} -- 참가자 → 마지막으로 던진 시각
+local pickupBlockedUntil = {} -- 참가자 → 이 시각까지 공을 줍지 않는다 (최면으로 내려놓은 NPC)
 local roundActive = false -- 판이 진행 중이면 true (그때만 아웃 판정)
 local overlapParams = OverlapParams.new()
 overlapParams.FilterType = Enum.RaycastFilterType.Include
@@ -40,7 +41,6 @@ local function newBallState(temporary)
 		outsideSince = nil, -- 코트 밖에 나간 시각
 		thrownAt = 0, -- 던진 시각
 		temporary = temporary, -- "공 두 개"로 생긴 복제 공이면 true (바닥에 닿으면 사라짐)
-		handingTo = nil, -- 최면으로 이 참가자에게 날아가는 중
 	}
 end
 
@@ -95,11 +95,6 @@ local function respawnBall(ball)
 		return
 	end
 	state.outsideSince = nil
-	if state.handingTo then -- 최면으로 날아가던 공이면 멈춘다
-		state.handingTo = nil
-		state.holder = nil
-		ball.Anchored = false
-	end
 	ball.AssemblyLinearVelocity = Vector3.zero
 	ball.AssemblyAngularVelocity = Vector3.zero
 	local ratio = math.min(1, B.RespawnSpread / CourtService.getRadius())
@@ -241,42 +236,16 @@ function BallService.protectBody(model)
 	model.DescendantAdded:Connect(join) -- 나중에 붙는 머리카락·장식도
 end
 
--- from이 든 공을 to에게 살살 날려 보낸다 (최면 능력). 날아오는 동안은 아무도 못 줍고, 도착하면 to의 손에 들어간다.
-function BallService.handOver(from, to, seconds, arcHeight)
-	local ball = detachFromHand(from)
+-- 참가자가 든 공을 position에 내려놓는다 (최면 능력). 그 참가자는 seconds 동안 공을 다시 줍지 않는다.
+function BallService.placeBall(p, position, seconds)
+	local ball = detachFromHand(p)
 	if not ball then
 		return
 	end
-	local state = balls[ball]
-	state.holder = to -- 날아오는 동안 다른 사람이 줍지 못하게 미리 찜
-	state.handingTo = to
-	ball.Anchored = true
-	ball.CanCollide = false
-	local start = ball.Position
-	local startTime = os.clock()
-	task.spawn(function()
-		while ball.Parent and state.handingTo == to and os.clock() - startTime < seconds do
-			local hand = Participants.getHand(to)
-			if not hand then
-				break
-			end
-			local t = (os.clock() - startTime) / seconds
-			local arc = Vector3.new(0, arcHeight * 4 * t * (1 - t), 0) -- 가운데에서 가장 높이 휜다
-			ball.CFrame = CFrame.new(start:Lerp(hand.Position, t) + arc)
-			RunService.Heartbeat:Wait()
-		end
-		if not ball.Parent or state.handingTo ~= to then
-			return -- 그 사이 판이 끝나 공이 다시 놓였다
-		end
-		state.handingTo = nil
-		ball.Anchored = false
-		ball.CanCollide = true
-		state.holder = nil
-		if not holding[to] and to.state.status == "Alive" and Participants.hasBody(to) then
-			attachToHand(to, ball)
-			SoundFx.playAt("Catch", ball)
-		end
-	end)
+	ball.CFrame = CFrame.new(position)
+	ball.AssemblyLinearVelocity = Vector3.zero
+	ball.AssemblyAngularVelocity = Vector3.zero
+	pickupBlockedUntil[p] = os.clock() + seconds
 end
 
 -- 참가자가 공을 들고 있는지 알려준다.
@@ -288,6 +257,7 @@ end
 function BallService.forget(p)
 	BallService.dropBall(p)
 	lastThrowTime[p] = nil
+	pickupBlockedUntil[p] = nil
 	for ball, state in balls do
 		if state.thrower == p then
 			makeDead(ball)
@@ -602,7 +572,7 @@ local function tryPickups()
 	for _, p in Participants.all() do
 		local root = Participants.getRoot(p)
 		local canPlay = p.inRound or not roundActive
-		local cooledDown = now - (lastThrowTime[p] or 0) >= B.PickupCooldown
+		local cooledDown = now - (lastThrowTime[p] or 0) >= B.PickupCooldown and now >= (pickupBlockedUntil[p] or 0)
 		if root and canPlay and cooledDown and not holding[p] and p.state.status == "Alive" and Participants.hasBody(p) then
 			for ball, state in balls do
 				if isFree(state) and (ball.Position - root.Position).Magnitude <= B.PickupRadius then

@@ -164,13 +164,6 @@ local function say(model, text, force)
 	end)
 end
 
--- 능력(최면 등)이 NPC에게 꼭 한마디 하게 한다.
-function NpcService.say(p, text)
-	if p.character then
-		say(p.character, text, true)
-	end
-end
-
 -- 대사 목록을 고른다 : 조용해야 하는 경기장(도서관·박물관)에서는 오히려 시끄럽게 떠드는 대사.
 local function linesFor(kind)
 	if ArenaService.isQuiet() and N.LoudLines[kind] then
@@ -415,6 +408,59 @@ local function thinkEmptyHanded(p, brain, root, humanoid, now)
 	end
 end
 
+-- 최면을 풀고 보라색 빛을 끈다.
+local function endHypnosis(p, brain)
+	brain.hypnosis = nil
+	local glow = p.character and p.character:FindFirstChild("HypnosisEffect")
+	if glow then
+		glow:Destroy()
+	end
+end
+
+-- 최면 걸린 NPC : 공을 들고 최면 건 사람 앞으로 걸어가 내려놓고, 멀어지며 걸어간다.
+local function thinkHypnosis(p, brain, root, humanoid, now)
+	local H = Config.Abilities.Hypnosis
+	local master = brain.hypnosis.master
+	local masterRoot = Participants.getRoot(master)
+	if not BallService.isHolding(p) or not masterRoot or not master.inRound then
+		endHypnosis(p, brain)
+		return
+	end
+	local spot = CourtService.clampInside(masterRoot.Position + masterRoot.CFrame.LookVector * H.DropDistance, N.MoveMargin)
+	local gap = Vector3.new(spot.X - root.Position.X, 0, spot.Z - root.Position.Z)
+	if gap.Magnitude > H.ReachDistance and now < brain.hypnosis.untilTime then
+		walkTo(humanoid, spot) -- 아직 멀면 계속 걸어간다
+		return
+	end
+	BallService.placeBall(p, spot, H.NoPickupSeconds)
+	say(p.character, H.DropLine, true)
+	endHypnosis(p, brain)
+	local away = Vector3.new(root.Position.X - masterRoot.Position.X, 0, root.Position.Z - masterRoot.Position.Z)
+	if away.Magnitude > 1e-3 then
+		walkTo(humanoid, root.Position + away.Unit * H.LeaveDistance)
+	end
+	brain.leaveUntil = now + H.LeaveSeconds
+end
+
+-- 최면 능력 : NPC가 공을 들고 master 앞으로 와서 내려놓게 한다.
+function NpcService.hypnotize(p, master)
+	local brain = brains[p]
+	if not brain then
+		return
+	end
+	local H = Config.Abilities.Hypnosis
+	brain.hypnosis = { master = master, untilTime = os.clock() + H.WalkSeconds }
+	setAiming(p, nil)
+	if p.character and not p.character:FindFirstChild("HypnosisEffect") then
+		local glow = Instance.new("Highlight")
+		glow.Name = "HypnosisEffect"
+		glow.FillColor = H.Color
+		glow.OutlineColor = H.Color
+		glow.Parent = p.character
+	end
+	say(p.character, H.Line, true)
+end
+
 -- NPC 한 명이 다음에 할 일을 고른다.
 local function think(p, brain, now)
 	local root = Participants.getRoot(p)
@@ -425,7 +471,17 @@ local function think(p, brain, now)
 	if p.state.status ~= "Alive" then
 		setAiming(p, nil)
 		humanoid:MoveTo(root.Position) -- 아웃되면 걷던 것을 멈추고 그 자리에 앉아 있는다
+		if brain.hypnosis then
+			endHypnosis(p, brain)
+		end
 		return
+	end
+	if brain.hypnosis then
+		thinkHypnosis(p, brain, root, humanoid, now)
+		return
+	end
+	if brain.leaveUntil and now < brain.leaveUntil then
+		return -- 공을 내려놓고 멀어지는 중
 	end
 	-- 능력은 아주 가끔만 하나씩 쓴다 (20-40초에 한 번)
 	if #p.state.abilities == 0 then
