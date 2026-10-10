@@ -372,6 +372,50 @@ local function addJersey(folder, upperTorso, persona, catalogBody)
 	label.Parent = gui
 end
 
+-- 카탈로그 몸을 이름 색 옷으로 칠한다 : 몸에 붙어 있던 무늬(텍스처)와 옷을 지우고 부위마다 색을 칠한다.
+-- 윗몸·윗팔 = 윗옷 색(반팔), 아랫팔·손 = 피부, 아랫몸·허벅지 = 바지, 종아리 = 바지(반바지면 피부), 발 = 신발.
+local function paintCatalogBody(model, persona)
+	local shin = if persona.legs == "shorts" then persona.skin else persona.pants
+	local colors = {
+		UpperTorso = persona.shirt,
+		LowerTorso = persona.pants,
+		LeftUpperArm = persona.shirt,
+		RightUpperArm = persona.shirt,
+		LeftLowerArm = persona.skin,
+		RightLowerArm = persona.skin,
+		LeftHand = persona.skin,
+		RightHand = persona.skin,
+		LeftUpperLeg = persona.pants,
+		RightUpperLeg = persona.pants,
+		LeftLowerLeg = shin,
+		RightLowerLeg = shin,
+		LeftFoot = persona.shoes,
+		RightFoot = persona.shoes,
+	}
+	-- 몸 색 고정과 옷(셔츠·바지 그림)을 치운다 (그대로 두면 직접 칠한 색을 덮는다)
+	for _, child in model:GetChildren() do
+		if child:IsA("BodyColors") or child:IsA("Clothing") or child:IsA("ShirtGraphic") then
+			child:Destroy()
+		end
+	end
+	for name, color in colors do
+		local part = model:FindFirstChild(name)
+		if part then
+			if part:IsA("MeshPart") then
+				pcall(function()
+					part.TextureID = "" -- 몸에 그려진 무늬를 지운다
+				end)
+			end
+			for _, child in part:GetChildren() do
+				if child:IsA("SurfaceAppearance") then
+					child:Destroy()
+				end
+			end
+			part.Color = color
+		end
+	end
+end
+
 -- 카탈로그 번들 차림에서 몸 부위(몸통·팔·다리)나 머리(다이내믹 헤드·표정)를 옮겨 온다.
 local BODY_FIELDS = { "Torso", "LeftArm", "RightArm", "LeftLeg", "RightLeg" }
 local HEAD_FIELDS = { "Head", "Face", "MoodAnimation" }
@@ -432,7 +476,9 @@ function NpcLooks.dress(model, persona, used)
 	local folder = Instance.new("Folder")
 	folder.Name = "Looks"
 	folder.Parent = model
-	if not used.body then
+	if used.body then
+		paintCatalogBody(model, persona)
+	else
 		-- 몸 색 고정을 치운다 (둥근 몸에 직접 칠한 색을 쓴다)
 		local bodyColors = model:FindFirstChildOfClass("BodyColors")
 		if bodyColors then

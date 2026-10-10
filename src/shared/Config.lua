@@ -22,10 +22,10 @@ Config.Round = {
 -- 코트 (설계서 4장)
 Config.Court = {
 	Center = Vector3.new(0, 0, 0), -- 코트 한가운데 (바닥 높이)
-	StartRadius = 42, -- 처음 코트 반지름 (스터드, 6명 기준)
+	StartRadius = 55, -- 처음 코트 반지름 (스터드)
 	ShrinkInterval = 90, -- 이 시간마다 코트가 줄어든다 (초)
-	ShrinkStep = 8, -- 한 번에 줄어드는 반지름
-	MinRadius = 18, -- 이보다 작아지지는 않는다
+	ShrinkStep = 10, -- 한 번에 줄어드는 반지름
+	MinRadius = 24, -- 이보다 작아지지는 않는다
 	ShrinkTweenSeconds = 2, -- 줄어드는 모습이 보이는 시간
 	Thickness = 1, -- 코트 바닥 두께
 	RaiseHeight = 0.1, -- 바닥판 위로 살짝 띄우는 높이 (겹쳐서 깜빡이지 않게)
@@ -45,8 +45,7 @@ Config.Court = {
 Config.Ball = {
 	Diameter = 2, -- 공 지름
 	Color = Color3.fromRGB(230, 60, 60), -- 공 색
-	MinCount = 2, -- 공은 최소 2개
-	PlayersPerBall = 2, -- 참가자 2명당 공 1개
+	Count = 1, -- 공은 딱 하나 ("공 두 개" 능력을 쓸 때만 잠깐 하나 더)
 	PickupRadius = 4, -- 이 거리 안의 죽은 공은 자동으로 줍는다
 	PickupCooldown = 0.5, -- 던진 직후 이 시간 동안은 다시 줍지 않는다
 	HitPadding = 0.6, -- 맞았는지 볼 때 공 둘레에 더하는 여유
@@ -69,8 +68,8 @@ Config.Throw = {
 	HandHeight = 1.5, -- 공이 출발하는 높이 (몸 중심에서 위로)
 	ForwardOffset = 3, -- 공이 출발하는 거리 (몸 중심에서 앞으로)
 	AimDistance = 1000, -- 마우스가 하늘을 가리킬 때 조준점 거리
-	TouchAimDistance = 45, -- 모바일 던지기 버튼 : 보는 방향으로 이만큼 앞을 조준
-	AssistMaxDistance = 90, -- 이 거리 안의 조준점은 떨어지는 만큼 위로 보정 (코트 끝에서 끝까지)
+	TouchAimDistance = 55, -- 모바일 던지기 버튼 : 보는 방향으로 이만큼 앞을 조준
+	AssistMaxDistance = 115, -- 이 거리 안의 조준점은 떨어지는 만큼 위로 보정 (코트 끝에서 끝까지)
 }
 
 -- 캐치 (설계서 1.4장)
@@ -144,7 +143,7 @@ Config.Npc = {
 	ThinkInterval = 0.25, -- NPC가 다음 행동을 고르는 간격
 	AimDelayMin = 0.6, -- 공을 들고 던지기까지 최소 시간
 	AimDelayMax = 1.6, -- 공을 들고 던지기까지 최대 시간
-	ThrowRange = 50, -- 이 거리 안의 상대를 노린다
+	ThrowRange = 65, -- 이 거리 안의 상대를 노린다
 	FocusMemorySeconds = 20, -- 이 시간 동안 NPC 공을 많이 받은 상대는 덜 노린다 (한 사람만 집중 공격하지 않게)
 	SameTargetPenalty = 2, -- 방금 던진 상대를 또 노리지 않게 하는 정도 (공 2번 받은 것으로 친다)
 	AimError = 4, -- 조준이 빗나가는 정도 (스터드)
@@ -290,7 +289,7 @@ Config.Tutorial = {
 	TargetTotal = 3, -- 튜토리얼 판 참가자 수 (나 + NPC 2명)
 	AimDelayScale = 2, -- NPC가 공을 들고 던지기까지 이 배수만큼 더 기다린다
 	CatchChance = 0, -- 튜토리얼 NPC는 캐치를 안 한다 (맞히는 재미를 먼저)
-	CourtRadius = 30, -- 튜토리얼 판 코트 반지름 (3명이라 더 작게)
+	CourtRadius = 38, -- 튜토리얼 판 코트 반지름 (3명이라 더 작게)
 	-- 캐치 시범 : 판이 시작되면 NPC 둘이 "공을 잡히면 던진 사람이 아웃"을 보여준다
 	DemoGap = 14, -- 시범하는 NPC 둘 사이 거리
 	DemoViewDistance = 16, -- 구경하는 사람이 시범 한가운데에서 떨어져 서는 거리
@@ -378,6 +377,7 @@ local M = Enum.Material
 -- 경기장 공통
 Config.Arena = {
 	TutorialArena = "gym", -- 튜토리얼 판 장소
+	LayoutScale = 1.3, -- 경기장 넓이 배 : 방 크기와 가구 놓는 자리를 이만큼 넓힌다 (가구 크기는 그대로)
 	FirstArena = "playground", -- 서버를 켰을 때 로비 장소
 	WallThickness = 2, -- 벽·바닥·천장 두께
 	FloorLift = 0.05, -- 방 바닥 높이 (코트 테두리보다 조금 낮게)
@@ -925,6 +925,24 @@ Config.Animation = {
 	Sit = "rbxassetid://2506281703",
 	WalkThreshold = 0.5, -- 이보다 빠르면 걷는 동작
 	FadeSeconds = 0.2, -- 동작이 바뀔 때 부드럽게 섞는 시간
+}
+
+-- 소리 (server/SoundFx.lua) : 효과음은 로블록스 기본 소리, 배경 음악은 목록의 곡을 차례로 시도
+Config.Sounds = {
+	Effects = {
+		Throw = { id = "rbxasset://sounds/swoosh.wav", volume = 0.7 }, -- 던질 때 휙
+		Hit = { id = "rbxasset://sounds/uuhhh.mp3", volume = 0.9 }, -- 맞아서 아웃 (oof!)
+		Catch = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.8 }, -- 캐치 띵
+		Ability = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.7, pitch = 1.6 }, -- 능력 쓰기
+		Box = { id = "rbxasset://sounds/clickfast.wav", volume = 0.8 }, -- 능력 상자 줍기
+		Beep = { id = "rbxasset://sounds/button.wav", volume = 0.7 }, -- 카운트다운 삑
+		Start = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.9, pitch = 0.8 }, -- 시작!
+		Win = { id = "rbxasset://sounds/victory.wav", volume = 0.9 }, -- 승리
+	},
+	HearDistance = 150, -- 효과음이 들리는 거리
+	EffectLifetime = 5, -- 효과음을 치우기까지 시간 (초)
+	MusicIds = { "rbxassetid://1841461968", "rbxassetid://1843404009" }, -- 배경 음악 (앞의 곡이 안 되면 다음 곡)
+	MusicVolume = 0.3,
 }
 
 -- 화면 표시

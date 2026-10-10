@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Participants = require(script.Parent.Participants)
+local SoundFx = require(script.Parent.SoundFx)
 
 local PlayerStateService = {}
 
@@ -132,6 +133,9 @@ function PlayerStateService.knockOut(victim, by, how)
 		end
 	end
 	PlayerStateService.react(victim, "out")
+	if how == "hit" then
+		SoundFx.playAt("Hit", Participants.getRoot(victim)) -- oof!
+	end
 
 	local byName = by and by.name or "?"
 	if how == "catch" then
@@ -161,6 +165,7 @@ function PlayerStateService.catch(catcher, thrower)
 	end
 	PlayerStateService.notify(catcher, "캐치 성공!")
 	PlayerStateService.react(catcher, "catch")
+	SoundFx.playAt("Catch", Participants.getRoot(catcher))
 	if thrower and thrower ~= catcher then
 		PlayerStateService.knockOut(thrower, catcher, "catch")
 	end

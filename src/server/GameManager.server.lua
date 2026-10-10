@@ -21,6 +21,7 @@ local RevengeService = require(script.Parent.RevengeService)
 local Scenery = require(script.Parent.Scenery)
 local ArenaService = require(script.Parent.ArenaService)
 local AvatarCatalog = require(script.Parent.AvatarCatalog)
+local SoundFx = require(script.Parent.SoundFx)
 local NpcService = require(script.Parent.NpcService)
 
 local R = Config.Round
@@ -156,11 +157,15 @@ local function runCountdown()
 		total += 1
 	end
 
-	BallService.setBallCount(math.max(B.MinCount, math.floor(total / B.PlayersPerBall)))
+	BallService.setBallCount(B.Count)
 	BallService.resetAll()
 	gameState:SetAttribute("AliveCount", total)
 	setPhase("Countdown", R.CountdownSeconds) -- NPC 만드는 데 걸린 시간만큼 다시 맞춘다
-	task.wait(R.CountdownSeconds)
+	for _ = 1, R.CountdownSeconds do
+		SoundFx.playGlobal("Beep") -- 3, 2, 1 삑
+		task.wait(1)
+	end
+	SoundFx.playGlobal("Start")
 end
 
 -- 튜토리얼 캐치 시범 : NPC 둘이 "공을 잡히면 던진 사람이 아웃"을 보여준다.
@@ -182,6 +187,7 @@ local function runPlaying()
 		runDemo() -- 판정이 켜져 있어야 캐치가 되므로 판을 켠 뒤에 한다
 	end
 	setPhase("Playing", R.PlaySeconds)
+	SoundFx.setMusic(true)
 	local startTime = os.clock()
 	local nextShrink = startTime + C.ShrinkInterval
 	while true do
@@ -219,6 +225,8 @@ end
 local function runResult()
 	local winner = pickWinner()
 	gameState:SetAttribute("Winner", winner and winner.name or "")
+	SoundFx.setMusic(false)
+	SoundFx.playGlobal("Win")
 	setPhase("Result", R.ResultSeconds)
 	task.wait(R.ResultSeconds)
 end
@@ -235,7 +243,7 @@ local function cleanupRound()
 		PlayerStateService.resetForLobby(p)
 	end
 	CourtService.setRadius(C.StartRadius, true)
-	BallService.setBallCount(B.MinCount)
+	BallService.setBallCount(B.Count)
 	BallService.resetAll()
 	gameState:SetAttribute("Winner", "")
 	gameState:SetAttribute("Tutorial", false)
@@ -244,6 +252,7 @@ end
 -- 시작 : 서비스를 켜고 플레이어 이벤트를 연결한다.
 CourtService.start()
 Scenery.build()
+SoundFx.start()
 task.spawn(AvatarCatalog.prepare, Config.Npc.Personas) -- NPC 카탈로그 부품을 미리 확인 (로비 동안)
 ArenaService.build(Config.Arena.FirstArena)
 BallService.start()
@@ -252,7 +261,7 @@ AbilityBoxService.start()
 RevengeService.start()
 NpcService.start()
 CourtService.setRadius(C.StartRadius, false)
-BallService.setBallCount(B.MinCount)
+BallService.setBallCount(B.Count)
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 Players.PlayerRemoving:Connect(onPlayerRemoving)

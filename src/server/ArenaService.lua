@@ -129,12 +129,13 @@ end
 local function placements(item)
 	local list = {}
 	local baseRotation = CFrame.Angles(0, math.rad(item.rotY or 0), 0)
+	local spread = A.LayoutScale -- 경기장을 넓힌 만큼 놓는 자리도 넓힌다
 	local lift = Vector3.new(0, item.y or 0, 0) -- 식탁 위처럼 바닥에서 띄우기
 	if item.ring then
 		local R = item.ring
 		for i = 1, R.count do
 			local angle = math.rad(R.startDeg or 0) + (i - 1) / R.count * math.pi * 2
-			local position = C.Center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * R.radius + lift
+			local position = C.Center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * R.radius * spread + lift
 			-- 앞(-Z)이 코트 가운데를 보게 세운다
 			local facing = CFrame.lookAt(position, Vector3.new(C.Center.X, position.Y, C.Center.Z))
 			table.insert(list, facing * baseRotation)
@@ -143,7 +144,8 @@ local function placements(item)
 		local count = item.repeatCount or 1
 		local step = item.step or Vector3.zero
 		for i = 1, count do
-			table.insert(list, CFrame.new(C.Center + item.pos + lift + step * (i - 1)) * baseRotation)
+			local flat = (item.pos + step * (i - 1)) * Vector3.new(spread, 1, spread)
+			table.insert(list, CFrame.new(C.Center + flat + lift) * baseRotation)
 		end
 	end
 	return list
@@ -161,7 +163,7 @@ end
 
 -- 방 껍데기를 짓는다 : 바닥, 네 벽, 걸레받이, 천장, 천장 전등.
 local function buildRoom(room)
-	local half, height = room.half, room.height
+	local half, height = room.half * A.LayoutScale, room.height
 	local center = C.Center
 	local wall = A.WallThickness
 

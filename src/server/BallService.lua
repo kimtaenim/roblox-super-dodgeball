@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Participants = require(script.Parent.Participants)
+local SoundFx = require(script.Parent.SoundFx)
 local PlayerStateService = require(script.Parent.PlayerStateService)
 local CourtService = require(script.Parent.CourtService)
 
@@ -304,6 +305,7 @@ function BallService.throw(p, aimPoint, holdSeconds)
 
 	local ball = detachFromHand(p)
 	launch(ball, p, start, direction * speed, flags, lift)
+	SoundFx.playAt("Throw", ball)
 	if flags.fast then
 		local fire = Instance.new("Fire") -- 슈퍼강속구 불꽃 (죽은 공이 되면 꺼진다)
 		fire.Name = "SuperFire"

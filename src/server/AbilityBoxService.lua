@@ -10,6 +10,7 @@ local Abilities = require(ReplicatedStorage.Shared.Abilities)
 local Participants = require(script.Parent.Participants)
 local CourtService = require(script.Parent.CourtService)
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local SoundFx = require(script.Parent.SoundFx)
 
 local X = Config.AbilityBox
 
@@ -84,6 +85,7 @@ local function giveAbility(p)
 	local id = AbilityBoxService.randomId()
 	table.insert(p.state.abilities, id)
 	PlayerStateService.notify(p, "능력 상자! " .. Abilities.get(id).name)
+	SoundFx.playAt("Box", Participants.getRoot(p))
 	PlayerStateService.sync(p)
 end
 

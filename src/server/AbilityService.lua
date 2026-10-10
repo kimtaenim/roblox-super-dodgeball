@@ -7,6 +7,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Abilities = require(ReplicatedStorage.Shared.Abilities)
 local Participants = require(script.Parent.Participants)
 local PlayerStateService = require(script.Parent.PlayerStateService)
+local SoundFx = require(script.Parent.SoundFx)
 
 local AbilityService = {}
 
@@ -44,6 +45,7 @@ function AbilityService.use(p, slot)
 	PlayerStateService.sync(p)
 	PlayerStateService.notify(p, ability.name .. "!")
 	PlayerStateService.react(p, "ability")
+	SoundFx.playAt("Ability", Participants.getRoot(p))
 	return true
 end
 
